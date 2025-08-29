@@ -5,6 +5,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RestaurantSidebar } from "@/components/dashboard/RestaurantSidebar";
 import Index from "./pages/Index";
+import Recipes from "./pages/Recipes";
+import Checklists from "./pages/Checklists";
+import Manager from "./pages/Manager";
+import Communications from "./pages/Communications";
+import Reminders from "./pages/Reminders";
+import Calendar from "./pages/Calendar";
+import Orders from "./pages/Orders";
+import Documents from "./pages/Documents";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +29,15 @@ const App = () => (
           <main className="flex-1 overflow-auto">
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/recipes" element={<Recipes />} />
+              <Route path="/checklists" element={<Checklists />} />
+              <Route path="/manager" element={<Manager />} />
+              <Route path="/communications" element={<Communications />} />
+              <Route path="/reminders" element={<Reminders />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/documents" element={<Documents />} />
+              <Route path="/settings" element={<Settings />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

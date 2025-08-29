@@ -11,7 +11,8 @@ import {
   ShoppingCart,
   Settings,
   Menu,
-  X
+  X,
+  Calendar as CalendarIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ const navigationItems = [
   { title: "Manager Tools", url: "/manager", icon: Users },
   { title: "Communications", url: "/communications", icon: MessageSquare },
   { title: "Reminders", url: "/reminders", icon: Bell },
+  { title: "Calendar", url: "/calendar", icon: CalendarIcon },
   { title: "Orders", url: "/orders", icon: ShoppingCart },
   { title: "Documents", url: "/documents", icon: FileText },
   { title: "Settings", url: "/settings", icon: Settings },
@@ -45,7 +47,7 @@ export function RestaurantSidebar() {
         {!isCollapsed && (
           <div className="flex items-center gap-2">
             <ChefHat className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg text-foreground">RestaurantOS</span>
+            <span className="font-bold text-lg text-foreground">Chef Central</span>
           </div>
         )}
         <Button
