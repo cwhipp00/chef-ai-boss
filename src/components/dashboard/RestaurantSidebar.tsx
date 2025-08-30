@@ -12,7 +12,8 @@ import {
   Settings,
   Menu,
   X,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  DollarSign
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,10 @@ const navigationItems = [
   { title: "Calendar", url: "/calendar", icon: CalendarIcon },
   { title: "Orders", url: "/orders", icon: ShoppingCart },
   { title: "Documents", url: "/documents", icon: FileText },
+  { title: "Reservations", url: "/reservations", icon: CalendarIcon },
+  { title: "Staff Schedule", url: "/staff-schedule", icon: Users },
+  { title: "Finance", url: "/finance", icon: DollarSign },
+  { title: "Customers", url: "/customers", icon: Users },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
