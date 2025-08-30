@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIRecipeScaler } from '@/components/dashboard/AIRecipeScaler';
+import { RecipeDetailModal } from '@/components/recipes/RecipeDetailModal';
+import { PrepLists } from '@/components/recipes/PrepLists';
 
 const recipes = [
   {
@@ -85,9 +87,10 @@ export default function Recipes() {
       </div>
 
       <Tabs defaultValue="recipes" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="recipes">All Recipes</TabsTrigger>
           <TabsTrigger value="scaler">Recipe Scaler</TabsTrigger>
+          <TabsTrigger value="prep">Prep Lists</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
@@ -109,56 +112,62 @@ export default function Recipes() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRecipes.map((recipe) => (
-              <Card key={recipe.id} className="hover:shadow-medium transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{recipe.name}</CardTitle>
-                    <Badge variant="secondary">{recipe.category}</Badge>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Users className="h-3 w-3" />
-                      {recipe.servings}
+              <RecipeDetailModal key={recipe.id} recipe={recipe}>
+                <Card className="hover:shadow-medium transition-all cursor-pointer hover:scale-105">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-lg">{recipe.name}</CardTitle>
+                      <Badge variant="secondary">{recipe.category}</Badge>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {recipe.prepTime + recipe.cookTime}min
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {recipe.servings}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {recipe.prepTime + recipe.cookTime}min
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Scale className="h-3 w-3" />
+                        ${recipe.cost}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Scale className="h-3 w-3" />
-                      ${recipe.cost}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="font-medium mb-2">Ingredients:</h4>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        {recipe.ingredients.slice(0, 3).map((ingredient, index) => (
-                          <li key={index}>• {ingredient}</li>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="font-medium mb-2">Ingredients:</h4>
+                        <ul className="text-sm text-muted-foreground space-y-1">
+                          {recipe.ingredients.slice(0, 3).map((ingredient, index) => (
+                            <li key={index}>• {ingredient}</li>
+                          ))}
+                          {recipe.ingredients.length > 3 && (
+                            <li className="text-primary">+ {recipe.ingredients.length - 3} more</li>
+                          )}
+                        </ul>
+                      </div>
+                      <div className="flex gap-1 flex-wrap">
+                        {recipe.allergens.map((allergen) => (
+                          <Badge key={allergen} variant="outline" className="text-xs">
+                            {allergen}
+                          </Badge>
                         ))}
-                        {recipe.ingredients.length > 3 && (
-                          <li className="text-primary">+ {recipe.ingredients.length - 3} more</li>
-                        )}
-                      </ul>
+                      </div>
                     </div>
-                    <div className="flex gap-1 flex-wrap">
-                      {recipe.allergens.map((allergen) => (
-                        <Badge key={allergen} variant="outline" className="text-xs">
-                          {allergen}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </RecipeDetailModal>
             ))}
           </div>
         </TabsContent>
 
         <TabsContent value="scaler">
           <AIRecipeScaler />
+        </TabsContent>
+
+        <TabsContent value="prep">
+          <PrepLists />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
