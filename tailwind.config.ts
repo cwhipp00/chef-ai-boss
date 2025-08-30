@@ -53,6 +53,12 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				inventory: {
+					low: 'hsl(var(--inventory-low))',
+					medium: 'hsl(var(--inventory-medium))',
+					high: 'hsl(var(--inventory-high))',
+					category: 'hsl(var(--inventory-category))'
+				},
 				success: {
 					DEFAULT: 'hsl(var(--success))',
 					foreground: 'hsl(var(--success-foreground))'

@@ -56,6 +56,12 @@ All colors MUST be HSL.
     --info: 221 83% 53%;
     --info-foreground: 0 0% 100%;
 
+    /* Inventory status colors */
+    --inventory-low: 0 84% 60%;
+    --inventory-medium: 38 92% 50%;
+    --inventory-high: 142 76% 36%;
+    --inventory-category: 25 95% 53%;
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
     --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)));
