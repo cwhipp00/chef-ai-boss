@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Moon, Sun, Monitor, Bell, User, Shield, Database, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,8 @@ import { useTheme } from 'next-themes';
 export default function Settings() {
   const [selectedTab, setSelectedTab] = useState('general');
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
@@ -28,11 +30,21 @@ export default function Settings() {
     currency: 'USD'
   });
 
+  // Handle hydration issues with next-themes
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const themeOptions = [
     { value: 'light', label: 'Light', icon: Sun },
     { value: 'dark', label: 'Dark', icon: Moon },
     { value: 'system', label: 'System', icon: Monitor }
   ];
+
+  // Don't render theme buttons until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return <div className="p-6">Loading...</div>;
+  }
 
   return (
     <div className="p-6 space-y-6">
