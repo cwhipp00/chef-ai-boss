@@ -29,7 +29,17 @@ import {
   Cpu,
   Database,
   Settings,
-  Play
+  Play,
+  GraduationCap,
+  HelpCircle,
+  Shield,
+  UserCheck,
+  Clipboard,
+  BookOpen,
+  Award,
+  PhoneCall,
+  Search,
+  Wrench
 } from 'lucide-react';
 
 interface AITool {
@@ -40,6 +50,7 @@ interface AITool {
   icon: React.ReactNode;
   status: 'available' | 'processing' | 'completed';
   accuracy?: number;
+  type?: 'analysis' | 'assistant';
 }
 
 const aiTools: AITool[] = [
@@ -50,7 +61,8 @@ const aiTools: AITool[] = [
     category: 'Operations',
     icon: <ChefHat className="h-5 w-5" />,
     status: 'available',
-    accuracy: 94
+    accuracy: 94,
+    type: 'analysis'
   },
   {
     id: 'demand-forecasting',
@@ -59,7 +71,8 @@ const aiTools: AITool[] = [
     category: 'Analytics',
     icon: <TrendingUp className="h-5 w-5" />,
     status: 'available',
-    accuracy: 89
+    accuracy: 89,
+    type: 'analysis'
   },
   {
     id: 'staff-scheduler',
@@ -68,7 +81,8 @@ const aiTools: AITool[] = [
     category: 'Staff Management',
     icon: <Users className="h-5 w-5" />,
     status: 'available',
-    accuracy: 92
+    accuracy: 92,
+    type: 'analysis'
   },
   {
     id: 'cost-analyzer',
@@ -77,7 +91,8 @@ const aiTools: AITool[] = [
     category: 'Finance',
     icon: <DollarSign className="h-5 w-5" />,
     status: 'available',
-    accuracy: 96
+    accuracy: 96,
+    type: 'analysis'
   },
   {
     id: 'customer-sentiment',
@@ -86,7 +101,8 @@ const aiTools: AITool[] = [
     category: 'Customer Experience',
     icon: <MessageSquare className="h-5 w-5" />,
     status: 'available',
-    accuracy: 88
+    accuracy: 88,
+    type: 'analysis'
   },
   {
     id: 'recipe-analyzer',
@@ -95,7 +111,101 @@ const aiTools: AITool[] = [
     category: 'Operations',
     icon: <BarChart3 className="h-5 w-5" />,
     status: 'available',
-    accuracy: 91
+    accuracy: 91,
+    type: 'analysis'
+  }
+];
+
+const managerAssistants: AITool[] = [
+  {
+    id: 'training-coach',
+    name: 'Training & Learning Coach',
+    description: 'Get guidance on staff training, onboarding, and skill development',
+    category: 'Training',
+    icon: <GraduationCap className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
+  },
+  {
+    id: 'problem-solver',
+    name: 'Problem Solving Assistant',
+    description: 'Ask questions about operational challenges and get step-by-step solutions',
+    category: 'Operations',
+    icon: <HelpCircle className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
+  },
+  {
+    id: 'compliance-guide',
+    name: 'Compliance & Safety Guide',
+    description: 'Get help with health codes, safety protocols, and regulatory compliance',
+    category: 'Compliance',
+    icon: <Shield className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
+  },
+  {
+    id: 'leadership-mentor',
+    name: 'Leadership Mentor',
+    description: 'Learn management techniques, team building, and leadership skills',
+    category: 'Leadership',
+    icon: <UserCheck className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
+  },
+  {
+    id: 'procedure-builder',
+    name: 'Procedure Builder',
+    description: 'Create and optimize standard operating procedures and workflows',
+    category: 'Operations',
+    icon: <Clipboard className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
+  },
+  {
+    id: 'knowledge-base',
+    name: 'Restaurant Knowledge Base',
+    description: 'Search through restaurant best practices, industry standards, and guides',
+    category: 'Knowledge',
+    icon: <BookOpen className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
+  },
+  {
+    id: 'performance-coach',
+    name: 'Performance Coach',
+    description: 'Get advice on employee performance, feedback, and improvement plans',
+    category: 'HR',
+    icon: <Award className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
+  },
+  {
+    id: 'crisis-manager',
+    name: 'Crisis Management Assistant',
+    description: 'Handle difficult situations, customer complaints, and emergency protocols',
+    category: 'Crisis Management',
+    icon: <PhoneCall className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
+  },
+  {
+    id: 'research-assistant',
+    name: 'Industry Research Assistant',
+    description: 'Get current industry trends, competitor analysis, and market insights',
+    category: 'Research',
+    icon: <Search className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
+  },
+  {
+    id: 'troubleshooter',
+    name: 'Equipment & Systems Troubleshooter',
+    description: 'Get help with equipment issues, POS systems, and technical problems',
+    category: 'Technical',
+    icon: <Wrench className="h-5 w-5" />,
+    status: 'available',
+    type: 'assistant'
   }
 ];
 
@@ -104,6 +214,8 @@ export default function AIAgents() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [results, setResults] = useState<any>(null);
   const [inputText, setInputText] = useState('');
+  const [chatMessages, setChatMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
+  const [activeTab, setActiveTab] = useState('tools');
   const { toast } = useToast();
 
   const handleRunAnalysis = async (toolId: string) => {
@@ -127,6 +239,80 @@ export default function AIAgents() {
         description: "AI analysis completed successfully with actionable insights",
       });
     }, 3000);
+  };
+
+  const handleAssistantChat = async () => {
+    if (!inputText.trim()) return;
+
+    const userMessage = inputText.trim();
+    setInputText('');
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setIsProcessing(true);
+
+    // Simulate AI processing
+    setTimeout(() => {
+      const response = generateAssistantResponse(selectedTool!, userMessage);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      setIsProcessing(false);
+    }, 1500);
+  };
+
+  const generateAssistantResponse = (assistantId: string, question: string) => {
+    const responses: Record<string, string[]> = {
+      'training-coach': [
+        "For new server training, I recommend a 3-day structured program: Day 1 covers menu knowledge and POS basics, Day 2 focuses on service standards and customer interaction, and Day 3 includes shadowing experienced staff. Always include a practical assessment before they work independently.",
+        "When training staff on food safety, use visual aids and hands-on demonstrations. Cover the 4 key areas: personal hygiene, cross-contamination prevention, proper temperatures, and cleaning procedures. Schedule refresher training every 6 months.",
+        "Create a training checklist for each position with clear objectives. Use role-playing exercises for customer service scenarios and provide immediate feedback. Document all training completion for compliance records."
+      ],
+      'problem-solver': [
+        "For long wait times during peak hours, implement these solutions: 1) Cross-train staff for multiple positions, 2) Optimize your prep work schedule, 3) Consider a host/hostess system for better table management, 4) Use a kitchen display system to improve order flow.",
+        "When dealing with inventory discrepancies, start with a systematic approach: Check receiving logs, review portion control standards, audit waste tracking, and implement daily counting procedures for high-value items.",
+        "For customer complaints about food quality, follow the LEARN method: Listen actively, Empathize with their concern, Ask clarifying questions, Respond with a solution, and Note the feedback for kitchen improvement."
+      ],
+      'compliance-guide': [
+        "For health department inspections, maintain these standards daily: Keep temperature logs current, ensure all staff have valid food handler certificates, maintain proper cleaning schedules, and keep pest control documentation updated. Post required certifications visibly.",
+        "OSHA compliance requires: Proper storage of cleaning chemicals with SDS sheets accessible, slip-resistant mats in work areas, first aid kit maintained and accessible, and all equipment properly grounded and maintained.",
+        "For liquor license compliance, ensure: All staff serving alcohol are properly certified, valid ID checking procedures are followed, no service to intoxicated customers, and all required licenses are current and displayed."
+      ],
+      'leadership-mentor': [
+        "Effective team management starts with clear communication. Hold brief daily meetings to set expectations, provide regular feedback (both positive and constructive), and create opportunities for staff input on operational improvements.",
+        "When dealing with staff conflicts, address issues immediately and privately. Use active listening, remain neutral, focus on behaviors not personalities, and work together to find mutually acceptable solutions.",
+        "To improve employee retention, focus on: Fair scheduling practices, competitive compensation, recognition programs, clear career advancement paths, and creating a positive work environment where staff feel valued."
+      ],
+      'procedure-builder': [
+        "For opening procedures, create a checklist including: Equipment safety checks, temperature verification, cash register setup, prep work review, cleanliness inspection, and staff briefing. Assign specific responsibilities to team members.",
+        "Standard closing procedures should cover: Food storage and labeling, equipment cleaning and sanitizing, cash reconciliation, security checks, and next-day prep notes. Use a sign-off system for accountability.",
+        "Create SOPs that are clear, concise, and include step-by-step instructions with photos when helpful. Review and update procedures quarterly based on staff feedback and operational changes."
+      ],
+      'knowledge-base': [
+        "Industry best practices for food cost control: Target 28-32% food cost percentage, implement portion control standards, use recipe costing cards, conduct regular inventory counts, and negotiate with suppliers for better pricing.",
+        "Customer service excellence requires: Greeting within 60 seconds, order accuracy above 95%, average service time under 20 minutes for casual dining, and proactive problem resolution. Train staff to anticipate customer needs.",
+        "Revenue optimization strategies include: Dynamic pricing for peak hours, upselling training for staff, menu engineering to highlight profitable items, and loyalty programs to increase repeat visits."
+      ],
+      'performance-coach': [
+        "When addressing performance issues, use the DESC method: Describe the specific behavior, Express how it impacts the team/customers, Specify what needs to change, and describe the Consequences of continued issues. Document all conversations.",
+        "For positive reinforcement, provide specific praise immediately after good performance. Use the SBI model: Situation, Behavior, Impact. This helps employees understand exactly what they did well and encourages repetition.",
+        "Create performance improvement plans with: Clear measurable goals, specific timelines, regular check-ins, additional training resources, and consequences for not meeting expectations. Always focus on behaviors that can be changed."
+      ],
+      'crisis-manager': [
+        "For customer complaints, use the BLAST method: Believe the customer, Listen actively, Apologize sincerely, Satisfy with a solution, and Thank them for their feedback. Always follow up to ensure satisfaction.",
+        "In case of food poisoning allegations: Document everything, preserve suspect food samples, contact your insurance company immediately, cooperate with health department investigations, and communicate transparently with affected customers.",
+        "For equipment failures during peak service: Have backup plans ready, cross-train staff on manual procedures, maintain emergency contact lists for repair services, and communicate delays honestly to customers with compensation offers."
+      ],
+      'research-assistant': [
+        "Current restaurant industry trends show: Increased demand for plant-based options (23% growth), contactless ordering/payment systems, ghost kitchens for delivery, sustainable practices, and personalized dining experiences through technology.",
+        "Labor shortage solutions being implemented: Increased wages (15-20% average increase), flexible scheduling, employee referral bonuses, automation for repetitive tasks, and enhanced benefits packages including health insurance.",
+        "Technology adoption in restaurants: 67% now use mobile ordering, 45% have implemented AI for inventory management, QR code menus remain popular post-pandemic, and customer data analytics for personalized marketing."
+      ],
+      'troubleshooter': [
+        "For POS system issues: First check internet connectivity, restart the terminal, verify printer connections, and check for software updates. Keep printed backup order forms available for emergencies.",
+        "Common refrigeration problems: Check door seals for proper closure, clean condenser coils monthly, monitor temperature logs, and ensure proper air circulation around units. Call for service if temperatures fluctuate.",
+        "For ice machine maintenance: Clean weekly with sanitizer solution, replace water filters every 6 months, check for proper drainage, and descale quarterly. Poor ice quality often indicates filter or cleaning issues."
+      ]
+    };
+
+    const assistantResponses = responses[assistantId] || ["I can help you with that! Let me provide some guidance based on restaurant industry best practices."];
+    return assistantResponses[Math.floor(Math.random() * assistantResponses.length)];
   };
 
   const generateMockResults = (toolId: string) => {
@@ -206,8 +392,9 @@ export default function AIAgents() {
       </div>
 
       <Tabs defaultValue="tools" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-lg">
+        <TabsList className="grid w-full grid-cols-5 max-w-2xl">
           <TabsTrigger value="tools">AI Tools</TabsTrigger>
+          <TabsTrigger value="assistants">Manager Assistants</TabsTrigger>
           <TabsTrigger value="insights">Insights</TabsTrigger>
           <TabsTrigger value="automation">Automation</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -398,6 +585,149 @@ export default function AIAgents() {
                         </div>
                       )}
                     </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="assistants" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Manager Assistants Grid */}
+            <div className="lg:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {managerAssistants.map((assistant) => (
+                  <Card 
+                    key={assistant.id} 
+                    className={`hover-lift cursor-pointer transition-all ${
+                      selectedTool === assistant.id ? 'ring-2 ring-primary' : ''
+                    }`}
+                    onClick={() => setSelectedTool(assistant.id)}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2">
+                          {assistant.icon}
+                          <CardTitle className="text-base">{assistant.name}</CardTitle>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {assistant.category}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{assistant.description}</p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          <span className="text-xs text-muted-foreground">
+                            Available
+                          </span>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          Interactive
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Chat Interface for Manager Assistants */}
+            <div className="space-y-4">
+              {selectedTool && managerAssistants.find(a => a.id === selectedTool) ? (
+                <Card className="glass-card">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      {managerAssistants.find(a => a.id === selectedTool)?.icon}
+                      <CardTitle className="text-lg">
+                        {managerAssistants.find(a => a.id === selectedTool)?.name}
+                      </CardTitle>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Ask me anything about {managerAssistants.find(a => a.id === selectedTool)?.category.toLowerCase()}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Chat Messages */}
+                    <div className="max-h-60 overflow-y-auto space-y-3 p-3 bg-muted/20 rounded-lg">
+                      {chatMessages.length === 0 ? (
+                        <div className="text-center text-muted-foreground text-sm py-4">
+                          <MessageSquare className="h-8 w-8 mx-auto mb-2" />
+                          Start a conversation by asking a question below
+                        </div>
+                      ) : (
+                        chatMessages.map((message, index) => (
+                          <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[80%] p-2 rounded-lg text-sm ${
+                              message.role === 'user' 
+                                ? 'bg-primary text-primary-foreground' 
+                                : 'bg-background border'
+                            }`}>
+                              {message.content}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Chat Input */}
+                    <div className="space-y-3">
+                      <Textarea
+                        placeholder="Ask your question here... (e.g., 'How do I handle a difficult customer complaint?')"
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        className="min-h-[80px]"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleAssistantChat();
+                          }
+                        }}
+                      />
+                      <Button 
+                        onClick={handleAssistantChat}
+                        className="w-full"
+                        disabled={!inputText.trim() || isProcessing}
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Brain className="h-4 w-4 mr-2 animate-pulse" />
+                            Thinking...
+                          </>
+                        ) : (
+                          <>
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Ask Question
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                      💡 Try asking: "What's the best way to train new servers?" or "How do I handle food safety violations?"
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : selectedTool && aiTools.find(t => t.id === selectedTool) ? (
+                // Show existing tool interface for analysis tools
+                <Card className="glass-card">
+                  <CardContent className="flex flex-col items-center justify-center py-8">
+                    <Brain className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-sm text-muted-foreground text-center">
+                      This is an analysis tool. Switch to the AI Tools tab to use it.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="glass-card">
+                  <CardContent className="flex flex-col items-center justify-center py-8">
+                    <GraduationCap className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-sm text-muted-foreground text-center">
+                      Select a manager assistant to start getting help with your questions
+                    </p>
                   </CardContent>
                 </Card>
               )}
