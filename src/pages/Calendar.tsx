@@ -174,30 +174,30 @@ export default function CalendarPage() {
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'meeting': return 'bg-blue-500';
-      case 'private_event': return 'bg-purple-500';
-      case 'maintenance': return 'bg-orange-500';
-      case 'supplier': return 'bg-green-500';
-      case 'training': return 'bg-indigo-500';
-      default: return 'bg-gray-500';
+      case 'meeting': return 'bg-info text-info-foreground';
+      case 'private_event': return 'bg-primary text-primary-foreground';
+      case 'maintenance': return 'bg-warning text-warning-foreground';
+      case 'supplier': return 'bg-success text-success-foreground';
+      case 'training': return 'bg-accent text-accent-foreground';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'text-red-600';
-      case 'medium': return 'text-yellow-600';
-      case 'low': return 'text-green-600';
-      default: return 'text-gray-600';
+      case 'high': return 'text-destructive';
+      case 'medium': return 'text-warning';
+      case 'low': return 'text-success';
+      default: return 'text-muted-foreground';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'confirmed': return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-      case 'pending': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      case 'scheduled': return <Clock className="h-4 w-4 text-blue-600" />;
-      default: return <Clock className="h-4 w-4 text-gray-600" />;
+      case 'confirmed': return <CheckCircle2 className="h-4 w-4 text-success" />;
+      case 'pending': return <AlertTriangle className="h-4 w-4 text-warning" />;
+      case 'scheduled': return <Clock className="h-4 w-4 text-info" />;
+      default: return <Clock className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -221,7 +221,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -229,13 +229,13 @@ export default function CalendarPage() {
           <p className="text-muted-foreground">Manage restaurant events and scheduling with AI assistance</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => handleAutoReschedule(0)}>
+          <Button variant="outline" onClick={() => handleAutoReschedule(0)} className="hover-scale">
             <Zap className="h-4 w-4 mr-2" />
             AI Optimize
           </Button>
           <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" className="bg-gradient-primary">
+              <Button size="lg" className="bg-gradient-primary hover-scale">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Event
               </Button>
@@ -353,111 +353,116 @@ export default function CalendarPage() {
         </TabsList>
 
         <TabsContent value="month" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
             {/* Calendar */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
+            <Card className="xl:col-span-3 glass-card">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <CalendarDays className="h-5 w-5 text-primary" />
                     {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="icon" onClick={() => navigateMonth('prev')}>
+                    <Button variant="outline" size="icon" onClick={() => navigateMonth('prev')} className="hover-scale">
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="icon" onClick={() => navigateMonth('next')}>
+                    <Button variant="outline" size="icon" onClick={() => navigateMonth('next')} className="hover-scale">
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <Calendar
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   month={currentMonth}
                   onMonthChange={setCurrentMonth}
-                  className="rounded-md border"
+                  className="w-full mx-auto pointer-events-auto shadow-soft rounded-lg border-0 bg-card"
                 />
               </CardContent>
             </Card>
 
             {/* Events Summary */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Today's Schedule */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Today's Schedule</CardTitle>
+              <Card className="glass-card">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    Today's Schedule
+                  </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     {formatDate("2024-03-18")}
                   </p>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {todayEvents.length === 0 ? (
+                <CardContent className="space-y-3">
+                  {todayEvents.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                       <p className="text-sm text-muted-foreground">No events scheduled for today</p>
-                    ) : (
-                      todayEvents.map((event) => (
-                        <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors cursor-pointer">
-                          <div className="flex-shrink-0">
-                            {getStatusIcon(event.status)}
+                    </div>
+                  ) : (
+                    todayEvents.map((event) => (
+                      <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200 cursor-pointer hover-lift border border-border/50">
+                        <div className="flex-shrink-0 mt-0.5">
+                          {getStatusIcon(event.status)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-sm truncate">{event.title}</h4>
+                            <Badge className={`${getEventTypeColor(event.type)} text-xs shrink-0`}>
+                              {event.type.replace('_', ' ')}
+                            </Badge>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-medium text-sm truncate">{event.title}</h4>
-                              <Badge className={`${getEventTypeColor(event.type)} text-xs`}>
-                                {event.type.replace('_', ' ')}
-                              </Badge>
+                          <div className="flex items-center gap-3 mb-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {formatTime(event.time)} - {formatTime(event.endTime)}
                             </div>
-                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {formatTime(event.time)} - {formatTime(event.endTime)}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3" />
-                                {event.location}
-                              </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              <span className="truncate">{event.location}</span>
                             </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Users className="h-3 w-3" />
-                                {event.attendees}
-                              </div>
-                              <span className={`text-xs ${getPriorityColor(event.priority)}`}>
-                                {event.priority} priority
-                              </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs">
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Users className="h-3 w-3" />
+                              {event.attendees}
                             </div>
+                            <span className={`font-medium ${getPriorityColor(event.priority)}`}>
+                              {event.priority} priority
+                            </span>
                           </div>
                         </div>
-                      ))
-                    )}
-                  </div>
+                      </div>
+                    ))
+                  )}
                 </CardContent>
               </Card>
 
               {/* Upcoming Events */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Upcoming Events</CardTitle>
+              <Card className="glass-card">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4 text-primary" />
+                    Upcoming Events
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {upcomingEvents.map((event) => (
-                      <div key={event.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-                        <Badge className={getEventTypeColor(event.type)} />
-                        <div className="flex-1">
-                          <h4 className="font-medium text-sm">{event.title}</h4>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span>{formatDate(event.date)}</span>
-                            <span>•</span>
-                            <span>{formatTime(event.time)}</span>
-                          </div>
+                <CardContent className="space-y-2">
+                  {upcomingEvents.map((event) => (
+                    <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/30 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-primary">
+                      <Badge className={`${getEventTypeColor(event.type)} shrink-0`} />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">{event.title}</h4>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                          <span className="truncate">{formatDate(event.date)}</span>
+                          <span>•</span>
+                          <span>{formatTime(event.time)}</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             </div>
@@ -465,10 +470,10 @@ export default function CalendarPage() {
         </TabsContent>
 
         <TabsContent value="conflicts" className="space-y-6">
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-orange-500" />
+                <AlertTriangle className="h-5 w-5 text-warning" />
                 Scheduling Conflicts
               </CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -478,23 +483,23 @@ export default function CalendarPage() {
             <CardContent>
               <div className="space-y-4">
                 {conflictingEvents.map((event) => (
-                  <div key={event.id} className="border border-orange-200 rounded-lg p-4 bg-orange-50 dark:bg-orange-950/20">
+                  <div key={event.id} className="border border-warning/20 rounded-lg p-4 bg-warning/5 hover:bg-warning/10 transition-colors">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-medium text-sm">{event.title}</h3>
                         <p className="text-xs text-muted-foreground mt-1">
                           {formatDate(event.date)} at {formatTime(event.time)} - {formatTime(event.endTime)}
                         </p>
-                        <p className="text-xs text-orange-600 mt-1">
+                        <p className="text-xs text-warning mt-1 font-medium">
                           Conflict: Overlaps with kitchen maintenance schedule
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => handleAutoReschedule(event.id)}>
+                        <Button size="sm" variant="outline" onClick={() => handleAutoReschedule(event.id)} className="hover-scale">
                           <Zap className="h-3 w-3 mr-1" />
                           Auto-Fix
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" className="hover-scale">
                           Manual
                         </Button>
                       </div>
@@ -502,8 +507,9 @@ export default function CalendarPage() {
                   </div>
                 ))}
                 {conflictingEvents.length === 0 && (
-                  <div className="text-center py-8">
-                    <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                  <div className="text-center py-12">
+                    <CheckCircle2 className="h-16 w-16 text-success mx-auto mb-4" />
+                    <h3 className="font-medium text-lg mb-2">All Clear!</h3>
                     <p className="text-sm text-muted-foreground">No scheduling conflicts detected</p>
                   </div>
                 )}
