@@ -23,6 +23,7 @@ import StaffSchedule from "./pages/StaffSchedule";
 import FinanceDashboard from "./pages/FinanceDashboard";
 import CustomerManagement from "./pages/CustomerManagement";
 import AIAgents from "./pages/AIAgents";
+import Training from "./pages/Training";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ function App() {
                     <Route path="/finance" element={<FinanceDashboard />} />
                     <Route path="/customers" element={<CustomerManagement />} />
                     <Route path="/ai-agents" element={<AIAgents />} />
+                    <Route path="/training" element={<Training />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>

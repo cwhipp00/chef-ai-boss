@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Users, TrendingUp, DollarSign, Clock, Target, AlertCircle, CheckCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, TrendingUp, DollarSign, Clock, Target, AlertCircle, CheckCircle, GraduationCap, AlertTriangle, Trophy, User } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -142,11 +142,12 @@ export default function Manager() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="staff">Staff Management</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="issues">Issues & Alerts</TabsTrigger>
+          <TabsTrigger value="training-results">Training Results</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -337,6 +338,108 @@ export default function Manager() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="training-results" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5" />
+                Employee Training & Quiz Results
+              </CardTitle>
+              <CardDescription>
+                Monitor staff training progress and quiz performance across all modules
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-4">
+                  <Card className="p-4">
+                    <div className="text-2xl font-bold text-green-600">85%</div>
+                    <p className="text-xs text-muted-foreground">Overall Completion Rate</p>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-2xl font-bold text-blue-600">23</div>
+                    <p className="text-xs text-muted-foreground">Active Training Modules</p>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-2xl font-bold text-purple-600">92%</div>
+                    <p className="text-xs text-muted-foreground">Average Quiz Score</p>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-2xl font-bold text-orange-600">7</div>
+                    <p className="text-xs text-muted-foreground">Pending Certifications</p>
+                  </Card>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Individual Employee Results</h3>
+                  <div className="space-y-3">
+                    {staffData.map((staff) => (
+                      <Card key={staff.id} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
+                              <User className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{staff.name}</p>
+                              <p className="text-sm text-muted-foreground">{staff.role}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6">
+                            <div className="text-right">
+                              <p className="text-sm font-medium">Training Progress</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Progress value={Math.floor(Math.random() * 40) + 60} className="w-24" />
+                                <span className="text-xs text-muted-foreground">
+                                  {Math.floor(Math.random() * 40) + 60}%
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-medium">Quiz Average</p>
+                              <div className="flex items-center gap-1 mt-1">
+                                <Trophy className="h-4 w-4 text-yellow-500" />
+                                <span className="text-sm font-bold">
+                                  {Math.floor(Math.random() * 20) + 80}%
+                                </span>
+                              </div>
+                            </div>
+                            <Badge 
+                              variant={Math.random() > 0.3 ? "default" : "secondary"}
+                              className="flex items-center gap-1"
+                            >
+                              <CheckCircle className="h-3 w-3" />
+                              {Math.random() > 0.3 ? "Certified" : "In Progress"}
+                            </Badge>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border rounded-lg p-6 bg-muted/50">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                    Supabase Integration Required
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    The training results and quiz management system requires a database backend to store and track employee progress. 
+                    Connect to Supabase to unlock full functionality including:
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                    <li>• Real-time quiz result tracking</li>
+                    <li>• Employee training assignment management</li>
+                    <li>• Automated compliance reporting</li>
+                    <li>• Performance analytics and insights</li>
+                    <li>• Certification management and renewals</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

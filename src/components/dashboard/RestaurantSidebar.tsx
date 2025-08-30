@@ -17,7 +17,8 @@ import {
   Brain,
   TableProperties,
   Clock,
-  BarChart3
+  BarChart3,
+  GraduationCap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ const navigationItems = [
   { title: "Staff Schedule", url: "/staff-schedule", icon: Clock },
   { title: "Finance", url: "/finance", icon: DollarSign },
   { title: "Customers", url: "/customers", icon: BarChart3 },
+  { title: "Training", url: "/training", icon: GraduationCap },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
