@@ -32,7 +32,7 @@ const navigationSections = [
     items: [
       { titleKey: "nav.dashboard", url: "/", icon: LayoutDashboard },
       { titleKey: "nav.recipes", url: "/recipes", icon: ChefHat },
-      { titleKey: "nav.checklists", url: "/checklists", icon: ClipboardList },
+      { titleKey: "nav.forms", url: "/forms", icon: ClipboardList },
       { titleKey: "nav.calendar", url: "/calendar", icon: CalendarIcon },
       { titleKey: "nav.communications", url: "/communications", icon: MessageSquare },
       { titleKey: "nav.reminders", url: "/reminders", icon: Bell },
@@ -42,7 +42,6 @@ const navigationSections = [
     title: "section.management",
     items: [
       { titleKey: "nav.ai-agents", url: "/ai-agents", icon: Brain, managerOnly: true },
-      { titleKey: "nav.orders", url: "/orders", icon: ShoppingCart, managerOnly: true },
       { titleKey: "nav.manager", url: "/manager", icon: Users, managerOnly: true },
       { titleKey: "nav.staff-schedule", url: "/staff-schedule", icon: Clock },
       { titleKey: "nav.training", url: "/training", icon: GraduationCap },

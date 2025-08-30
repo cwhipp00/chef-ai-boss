@@ -13,7 +13,7 @@ const translations = {
     // Navigation
     'nav.dashboard': 'Dashboard',
     'nav.recipes': 'Recipes',
-    'nav.checklists': 'Checklists',
+    'nav.forms': 'Forms',
     'nav.calendar': 'Calendar',
     'nav.communications': 'Communications',
     'nav.reminders': 'Reminders',
@@ -26,7 +26,6 @@ const translations = {
     
     // Manager Only
     'nav.ai-agents': 'AI Agents',
-    'nav.orders': 'Orders',
     'nav.manager': 'Manager Tools',
     'nav.finance': 'Finance',
     
@@ -44,7 +43,7 @@ const translations = {
     // Navigation
     'nav.dashboard': 'Panel de Control',
     'nav.recipes': 'Recetas',
-    'nav.checklists': 'Listas de Verificación',
+    'nav.forms': 'Formularios',
     'nav.calendar': 'Calendario',
     'nav.communications': 'Comunicaciones',
     'nav.reminders': 'Recordatorios',
@@ -57,7 +56,6 @@ const translations = {
     
     // Manager Only
     'nav.ai-agents': 'Agentes IA',
-    'nav.orders': 'Pedidos',
     'nav.manager': 'Herramientas de Gestión',
     'nav.finance': 'Finanzas',
     
@@ -75,7 +73,7 @@ const translations = {
     // Navigation
     'nav.dashboard': 'Tableau de Bord',
     'nav.recipes': 'Recettes',
-    'nav.checklists': 'Listes de Contrôle',
+    'nav.forms': 'Formulaires',
     'nav.calendar': 'Calendrier',
     'nav.communications': 'Communications',
     'nav.reminders': 'Rappels',
@@ -88,7 +86,6 @@ const translations = {
     
     // Manager Only
     'nav.ai-agents': 'Agents IA',
-    'nav.orders': 'Commandes',
     'nav.manager': 'Outils de Gestion',
     'nav.finance': 'Finance',
     

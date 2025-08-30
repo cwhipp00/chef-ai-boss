@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, FileText, ChefHat, Utensils } from 'lucide-react';
+import { CalendarDays, FileText, ChefHat, Utensils, Plus, Minus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 // Define the prep list data structure
@@ -214,103 +214,117 @@ export function PrepLists() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <ChefHat className="h-8 w-8 text-prep-header" />
-            <h1 className="text-3xl font-bold text-prep-header">Kitchen Prep Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button onClick={generateReport} className="bg-prep-header hover:bg-prep-header/90">
-              <FileText className="h-4 w-4 mr-2" />
-              Generate Report
-            </Button>
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Kitchen Prep Dashboard</h2>
+          <p className="text-muted-foreground">Manage daily preparation tasks and quantities</p>
         </div>
+        <Button onClick={generateReport} size="lg" className="bg-gradient-primary">
+          <FileText className="h-4 w-4 mr-2" />
+          Generate Report
+        </Button>
+      </div>
 
-        {/* Day Selection */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5" />
-              Select Days for Report
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {daysOfWeek.map(day => (
-                <Button
-                  key={day}
-                  variant={selectedDays.includes(day) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleDay(day)}
-                  className={selectedDays.includes(day) ? "bg-prep-header hover:bg-prep-header/90" : ""}
-                >
-                  {day}
-                </Button>
-              ))}
-              {selectedDays.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedDays([])}
-                  className="text-muted-foreground"
-                >
-                  Clear All
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Day Selection */}
+      <Card className="hover-lift transition-all">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-primary" />
+            Select Days for Report
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {daysOfWeek.map(day => (
+              <Button
+                key={day}
+                variant={selectedDays.includes(day) ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleDay(day)}
+                className={selectedDays.includes(day) ? "bg-gradient-primary" : "hover:bg-muted"}
+              >
+                {day}
+              </Button>
+            ))}
+            {selectedDays.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedDays([])}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Clear All
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Prep Grid */}
-        <div className="grid gap-6">
-          {Object.entries(prepCategories).map(([category, items]) => (
-            <Card key={category} className="overflow-hidden">
-              <CardHeader className="bg-prep-category">
-                <CardTitle className="flex items-center gap-2 text-prep-header">
-                  <Utensils className="h-5 w-5" />
-                  {category}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b bg-prep-grid">
-                        <th className="text-left p-3 font-semibold">Item</th>
+      {/* Prep Grid */}
+      <div className="space-y-6">
+        {Object.entries(prepCategories).map(([category, items]) => (
+          <Card key={category} className="overflow-hidden hover-lift transition-all">
+            <CardHeader className="bg-gradient-card">
+              <CardTitle className="flex items-center gap-2 text-primary">
+                <Utensils className="h-5 w-5" />
+                {category}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="text-left p-3 font-semibold text-foreground">Item</th>
+                      {daysOfWeek.map(day => (
+                        <th key={day} className="text-center p-3 font-semibold min-w-32 text-foreground">{day}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {prepData[category]?.map((item, itemIndex) => (
+                      <tr key={itemIndex} className="border-b hover:bg-muted/30 transition-colors">
+                        <td className="p-3 font-medium text-foreground">{item.name}</td>
                         {daysOfWeek.map(day => (
-                          <th key={day} className="text-center p-3 font-semibold min-w-20">{day}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {prepData[category]?.map((item, itemIndex) => (
-                        <tr key={itemIndex} className="border-b hover:bg-muted/50">
-                          <td className="p-3 font-medium">{item.name}</td>
-                          {daysOfWeek.map(day => (
-                            <td key={day} className="p-2 text-center">
+                          <td key={day} className="p-2 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateQuantity(category, itemIndex, day, Math.max(0, item.quantities[day] - 1))}
+                                className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
                               <Input
                                 type="number"
                                 min="0"
                                 value={item.quantities[day] || ''}
                                 onChange={(e) => updateQuantity(category, itemIndex, day, parseInt(e.target.value) || 0)}
-                                className="w-16 h-8 text-center"
+                                className="w-12 h-6 text-center text-xs border-0 bg-transparent focus:bg-background focus:border"
                                 placeholder="0"
                               />
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateQuantity(category, itemIndex, day, item.quantities[day] + 1)}
+                                className="h-6 w-6 p-0 hover:bg-success hover:text-success-foreground"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

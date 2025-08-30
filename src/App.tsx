@@ -11,12 +11,11 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Recipes from "./pages/Recipes";
-import Checklists from "./pages/Checklists";
+import Forms from "./pages/Forms";
 import Manager from "./pages/Manager";
 import Communications from "./pages/Communications";
 import Reminders from "./pages/Reminders";
 import CalendarPage from "./pages/Calendar";
-import Orders from "./pages/Orders";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 import Reservations from "./pages/Reservations";
@@ -45,12 +44,11 @@ function App() {
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/recipes" element={<Recipes />} />
-                      <Route path="/checklists" element={<Checklists />} />
+                      <Route path="/forms" element={<Forms />} />
                       <Route path="/manager" element={<Manager />} />
                       <Route path="/communications" element={<Communications />} />
                       <Route path="/reminders" element={<Reminders />} />
                       <Route path="/calendar" element={<CalendarPage />} />
-                      <Route path="/orders" element={<Orders />} />
                       <Route path="/documents" element={<Documents />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="/reservations" element={<Reservations />} />
