@@ -8,6 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIRecipeScaler } from '@/components/dashboard/AIRecipeScaler';
 import { RecipeDetailModal } from '@/components/recipes/RecipeDetailModal';
 import { PrepLists } from '@/components/recipes/PrepLists';
+import { FileRecipeUpload } from '@/components/recipes/FileRecipeUpload';
+import { AIRecipeGenerator } from '@/components/recipes/AIRecipeGenerator';
+import { ImageRecipeCreator } from '@/components/recipes/ImageRecipeCreator';
 
 const recipes = [
   {
@@ -67,6 +70,22 @@ const recipes = [
 export default function Recipes() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [extractedRecipes, setExtractedRecipes] = useState<any[]>([]);
+
+  const handleRecipesExtracted = (newRecipes: any[]) => {
+    setExtractedRecipes(prev => [...prev, ...newRecipes]);
+    // Here you could also save to your backend/database
+  };
+
+  const handleRecipeGenerated = (recipe: any) => {
+    setExtractedRecipes(prev => [...prev, recipe]);
+    // Here you could also save to your backend/database
+  };
+
+  const handleImageRecipeCreated = (recipe: any) => {
+    setExtractedRecipes(prev => [...prev, recipe]);
+    // Here you could also save to your backend/database
+  };
 
   const filteredRecipes = recipes.filter(recipe =>
     recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -87,8 +106,11 @@ export default function Recipes() {
       </div>
 
       <Tabs defaultValue="recipes" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="recipes">All Recipes</TabsTrigger>
+          <TabsTrigger value="upload">Upload Files</TabsTrigger>
+          <TabsTrigger value="ai-generator">AI Generator</TabsTrigger>
+          <TabsTrigger value="image-creator">From Image</TabsTrigger>
           <TabsTrigger value="scaler">Recipe Scaler</TabsTrigger>
           <TabsTrigger value="prep">Prep Lists</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -160,6 +182,18 @@ export default function Recipes() {
               </RecipeDetailModal>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="upload">
+          <FileRecipeUpload onRecipesExtracted={handleRecipesExtracted} />
+        </TabsContent>
+
+        <TabsContent value="ai-generator">
+          <AIRecipeGenerator onRecipeGenerated={handleRecipeGenerated} />
+        </TabsContent>
+
+        <TabsContent value="image-creator">
+          <ImageRecipeCreator onRecipeCreated={handleImageRecipeCreated} />
         </TabsContent>
 
         <TabsContent value="scaler">
