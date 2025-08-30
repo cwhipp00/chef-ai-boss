@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Calendar, Clock, Users, Phone, Mail, Plus, Search, Filter } from 'lucide-react';
+import { Calendar, Clock, Users, Phone, Mail, Plus, Search, Filter, LayoutGrid, List, Settings2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import FloorPlanEditor from '@/components/table-management/FloorPlanEditor';
+import ReservationManager from '@/components/table-management/ReservationManager';
 
 const reservations = [
   {
@@ -57,6 +59,7 @@ const tables = [
 export default function Reservations() {
   const [selectedTab, setSelectedTab] = useState('reservations');
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'floor' | 'list'>('floor');
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -98,96 +101,49 @@ export default function Reservations() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="reservations">Reservations</TabsTrigger>
+          <TabsTrigger value="floor-plan">Floor Plan</TabsTrigger>
           <TabsTrigger value="tables">Table Management</TabsTrigger>
           <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
         </TabsList>
 
         <TabsContent value="reservations" className="space-y-6">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search reservations..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <ReservationManager />
+        </TabsContent>
+
+        <TabsContent value="floor-plan" className="space-y-6 h-[calc(100vh-200px)]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h3 className="text-lg font-semibold">Interactive Floor Plan</h3>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={viewMode === 'floor' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('floor')}
+                  className="gap-2"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                  Floor View
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="gap-2"
+                >
+                  <List className="h-4 w-4" />
+                  List View
+                </Button>
+              </div>
             </div>
-            <Select defaultValue="today">
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="icon">
-              <Filter className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="gap-2">
+              <Settings2 className="h-4 w-4" />
+              Layout Settings
             </Button>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredReservations.map((reservation) => (
-              <Card key={reservation.id} className="hover:shadow-medium transition-all duration-200 hover-scale">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{reservation.customerName}</CardTitle>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {reservation.partySize} guests
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(reservation.date).toLocaleDateString()}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {reservation.time}
-                        </div>
-                      </div>
-                    </div>
-                    {getStatusBadge(reservation.status)}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-3 w-3 text-muted-foreground" />
-                      <span>{reservation.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-3 w-3 text-muted-foreground" />
-                      <span>{reservation.phone}</span>
-                    </div>
-                    {reservation.tableNumber && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="font-medium">Table {reservation.tableNumber}</span>
-                      </div>
-                    )}
-                  </div>
-                  {reservation.specialRequests && (
-                    <div className="p-2 bg-muted rounded text-sm">
-                      <span className="font-medium">Special Requests: </span>
-                      {reservation.specialRequests}
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Edit
-                    </Button>
-                    <Button size="sm" className="flex-1">
-                      Check In
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="h-full border rounded-lg bg-background">
+            <FloorPlanEditor />
           </div>
         </TabsContent>
 
