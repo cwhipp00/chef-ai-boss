@@ -158,36 +158,43 @@ All colors MUST be HSL.
 
   /* Enhanced UI Components */
   .glass-card {
-    @apply backdrop-blur-sm bg-white/80 dark:bg-gray-900/80 border border-white/20 dark:border-gray-700/50;
+    @apply backdrop-blur-md bg-gradient-to-br from-card/95 to-card/80 border border-white/30 shadow-medium hover:shadow-strong transition-all duration-300;
   }
 
   .hover-lift {
-    @apply transition-all duration-200 hover:shadow-medium hover:-translate-y-1;
+    @apply transition-all duration-300 hover:shadow-strong hover:-translate-y-2 hover:scale-[1.02];
   }
 
   .glow-on-hover {
-    @apply transition-all duration-300 hover:shadow-[0_0_20px_rgba(var(--primary)/0.3)];
+    @apply transition-all duration-300 hover:shadow-[0_0_30px_rgba(var(--primary-glow)_/_0.4)] hover:border-primary/30;
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent;
   }
 
-  /* Improved scrollbars */
+  .bg-gradient-primary {
+    @apply bg-gradient-to-br from-primary to-primary-glow hover:from-primary/90 hover:to-primary shadow-soft;
+  }
+
+  /* Enhanced scrollbars */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
 
   ::-webkit-scrollbar-track {
     background: hsl(var(--muted));
+    border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--muted-foreground));
-    border-radius: 3px;
+    border-radius: 4px;
+    transition: all 0.2s;
   }
 
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--primary));
+    box-shadow: 0 0 6px hsl(var(--primary) / 0.3);
   }
 }

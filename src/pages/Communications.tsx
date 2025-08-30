@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Users, MessageSquare, Bell, Search, Filter, Plus } from 'lucide-react';
+import { Send, Users, MessageSquare, Bell, Search, Filter, Plus, Megaphone, Clock, CheckCircle, AlertTriangle, Radio, UserCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 const messages = [
   {
@@ -73,10 +77,47 @@ const announcements = [
   }
 ];
 
+const teamBroadcasts = [
+  {
+    id: 1,
+    message: "🎉 Great work everyone! We exceeded our sales target this week by 15%. Keep up the excellent teamwork!",
+    sender: "Mike Rodriguez",
+    role: "General Manager",
+    timestamp: "1 hour ago",
+    type: "celebration",
+    readBy: 8,
+    totalStaff: 12
+  },
+  {
+    id: 2,
+    message: "⚠️ Reminder: Health inspector visit scheduled for tomorrow at 2 PM. Please ensure all stations are clean and organized.",
+    sender: "Sarah Johnson",
+    role: "Head Chef",
+    timestamp: "4 hours ago",
+    type: "urgent",
+    readBy: 12,
+    totalStaff: 12
+  },
+  {
+    id: 3,
+    message: "📋 New safety protocols are now in effect. Please review the updated guidelines in your employee portal.",
+    sender: "Lisa Wong",
+    role: "HR Manager",
+    timestamp: "1 day ago",
+    type: "policy",
+    readBy: 10,
+    totalStaff: 12
+  }
+];
+
 export default function Communications() {
   const [selectedChannel, setSelectedChannel] = useState('general');
   const [newMessage, setNewMessage] = useState('');
   const [selectedTab, setSelectedTab] = useState('messages');
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [broadcastType, setBroadcastType] = useState('general');
+  const [isAnnouncementOpen, setIsAnnouncementOpen] = useState(false);
+  const { toast } = useToast();
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -100,113 +141,355 @@ export default function Communications() {
     return name.split(' ').map(n => n[0]).join('');
   };
 
+  const getBroadcastTypeIcon = (type: string) => {
+    switch (type) {
+      case 'celebration': return '🎉';
+      case 'urgent': return '⚠️';
+      case 'policy': return '📋';
+      case 'general': return '💬';
+      default: return '💬';
+    }
+  };
+
+  const getBroadcastTypeColor = (type: string) => {
+    switch (type) {
+      case 'celebration': return 'border-l-success bg-success/5';
+      case 'urgent': return 'border-l-destructive bg-destructive/5';
+      case 'policy': return 'border-l-accent bg-accent/5';
+      case 'general': return 'border-l-primary bg-primary/5';
+      default: return 'border-l-muted bg-muted/5';
+    }
+  };
+
+  const handleSendBroadcast = () => {
+    if (!broadcastMessage.trim()) return;
+    
+    toast({
+      title: "Broadcast Sent",
+      description: `Message sent to all ${12} team members`,
+    });
+    setBroadcastMessage('');
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Communications</h1>
-          <p className="text-muted-foreground">Team messaging and announcements</p>
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Communications Hub
+          </h1>
+          <p className="text-lg text-muted-foreground">Keep your team connected and informed</p>
         </div>
-        <Button size="lg" className="bg-gradient-primary">
-          <Plus className="h-4 w-4 mr-2" />
-          New Announcement
-        </Button>
+        <div className="flex gap-3">
+          <Dialog open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" variant="outline" className="hover-lift">
+                <Megaphone className="h-4 w-4 mr-2" />
+                Broadcast
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Radio className="h-5 w-5 text-primary" />
+                  Send Team Broadcast
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="broadcast-type">Message Type</Label>
+                  <Select value={broadcastType} onValueChange={setBroadcastType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General Update</SelectItem>
+                      <SelectItem value="urgent">Urgent Notice</SelectItem>
+                      <SelectItem value="celebration">Celebration</SelectItem>
+                      <SelectItem value="policy">Policy Update</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="broadcast-message">Message</Label>
+                  <Textarea
+                    id="broadcast-message"
+                    placeholder="Type your team-wide message here..."
+                    value={broadcastMessage}
+                    onChange={(e) => setBroadcastMessage(e.target.value)}
+                    className="min-h-[120px]"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Users className="h-4 w-4" />
+                  <span>This message will be sent to all 12 team members</span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsAnnouncementOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSendBroadcast} className="bg-gradient-primary">
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Broadcast
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button size="lg" className="bg-gradient-primary hover-scale glow-on-hover">
+            <Plus className="h-4 w-4 mr-2" />
+            New Announcement
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="messages">Messages</TabsTrigger>
-          <TabsTrigger value="channels">Channels</TabsTrigger>
-          <TabsTrigger value="announcements">Announcements</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-8">
+        <TabsList className="grid w-full grid-cols-5 max-w-2xl mx-auto glass-card h-14">
+          <TabsTrigger value="messages" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Messages
+          </TabsTrigger>
+          <TabsTrigger value="team" className="flex items-center gap-2">
+            <Radio className="h-4 w-4" />
+            Team
+          </TabsTrigger>
+          <TabsTrigger value="channels" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Channels
+          </TabsTrigger>
+          <TabsTrigger value="announcements" className="flex items-center gap-2">
+            <Megaphone className="h-4 w-4" />
+            Announcements
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Notifications
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="messages" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-1">
-              <CardHeader>
+        <TabsContent value="messages" className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <Card className="lg:col-span-1 glass-card hover-lift">
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
+                  <Users className="h-5 w-5 text-primary" />
                   Active Channels
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
+              <CardContent className="p-0">
+                <div className="space-y-1">
                   {channels.map((channel) => (
                     <div
                       key={channel.id}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                      className={`p-4 cursor-pointer transition-all duration-200 hover-lift ${
                         selectedChannel === channel.name.toLowerCase()
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-muted'
+                          ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg'
+                          : 'hover:bg-muted/60 border-b border-border/50'
                       }`}
                       onClick={() => setSelectedChannel(channel.name.toLowerCase())}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${channel.active ? 'bg-success' : 'bg-muted-foreground'}`} />
-                          <span className="font-medium">{channel.name}</span>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-3 h-3 rounded-full shadow-sm ${channel.active ? 'bg-success animate-pulse' : 'bg-muted-foreground'}`} />
+                          <span className="font-semibold">{channel.name}</span>
                         </div>
                         {channel.unread > 0 && (
-                          <Badge variant="destructive" className="text-xs">
+                          <Badge variant="destructive" className="animate-bounce shadow-sm">
                             {channel.unread}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">{channel.members} members</p>
+                      <p className="text-xs opacity-75 mt-2">{channel.members} members online</p>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="lg:col-span-2">
-              <CardHeader>
+            <Card className="lg:col-span-3 glass-card">
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="capitalize">#{selectedChannel}</CardTitle>
+                  <CardTitle className="capitalize flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-primary" />
+                    #{selectedChannel}
+                  </CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" className="hover-scale">
                       <Search className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" className="hover-scale">
                       <Filter className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="h-96 overflow-y-auto space-y-4 border rounded-lg p-4">
+              <CardContent className="space-y-6">
+                <div className="h-[500px] overflow-y-auto space-y-4 border rounded-xl p-6 bg-gradient-to-b from-card to-muted/20">
                   {messages.filter(m => m.channel === selectedChannel).map((message) => (
-                    <div key={message.id} className={`p-3 border-l-4 rounded ${getPriorityColor(message.priority)}`}>
-                      <div className="flex items-start gap-3">
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback className="text-xs">
+                    <div key={message.id} className={`p-4 border-l-4 rounded-xl shadow-sm hover-lift ${getPriorityColor(message.priority)}`}>
+                      <div className="flex items-start gap-4">
+                        <Avatar className="w-10 h-10 ring-2 ring-primary/20">
+                          <AvatarFallback className="text-sm font-semibold bg-gradient-to-br from-primary to-accent text-white">
                             {getInitials(message.sender)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">{message.sender}</span>
-                            <span className="text-xs text-muted-foreground">{message.role}</span>
-                            <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="font-semibold">{message.sender}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {message.role}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {message.timestamp}
+                            </span>
                             {getPriorityBadge(message.priority)}
                           </div>
-                          <p className="text-sm">{message.message}</p>
+                          <p className="text-sm leading-relaxed">{message.message}</p>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Textarea
-                    placeholder="Type your message..."
+                    placeholder="Type your message to the team..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    className="min-h-[60px]"
+                    className="min-h-[80px] border-2 focus:border-primary/30"
                   />
-                  <Button size="lg" className="bg-gradient-primary">
-                    <Send className="h-4 w-4" />
+                  <Button size="lg" className="bg-gradient-primary hover-scale glow-on-hover px-6">
+                    <Send className="h-5 w-5" />
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="team" className="space-y-8">
+          <div className="space-y-6">
+            {/* Team Broadcast Section */}
+            <Card className="glass-card hover-lift">
+              <CardHeader className="bg-gradient-to-r from-accent/10 to-primary/10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Radio className="h-5 w-5 text-accent" />
+                      Team Broadcast Center
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Send messages to all team members instantly
+                    </p>
+                  </div>
+                  <Badge className="bg-success/10 text-success border-success/20">
+                    12 members online
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Quick Broadcast</Label>
+                      <Select value={broadcastType} onValueChange={setBroadcastType}>
+                        <SelectTrigger className="border-2 hover:border-primary/30">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="general">💬 General Update</SelectItem>
+                          <SelectItem value="urgent">⚠️ Urgent Notice</SelectItem>
+                          <SelectItem value="celebration">🎉 Celebration</SelectItem>
+                          <SelectItem value="policy">📋 Policy Update</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Textarea
+                        placeholder="Type your team-wide message..."
+                        value={broadcastMessage}
+                        onChange={(e) => setBroadcastMessage(e.target.value)}
+                        className="min-h-[120px] border-2 focus:border-primary/30"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleSendBroadcast} 
+                      className="w-full bg-gradient-primary hover-scale glow-on-hover"
+                      size="lg"
+                    >
+                      <Megaphone className="h-4 w-4 mr-2" />
+                      Broadcast to All Staff
+                    </Button>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm">Quick Actions</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      <Button variant="outline" className="justify-start hover-lift">
+                        <Clock className="h-4 w-4 mr-2 text-accent" />
+                        Schedule Shift Changes
+                      </Button>
+                      <Button variant="outline" className="justify-start hover-lift">
+                        <AlertTriangle className="h-4 w-4 mr-2 text-warning" />
+                        Emergency Alert
+                      </Button>
+                      <Button variant="outline" className="justify-start hover-lift">
+                        <CheckCircle className="h-4 w-4 mr-2 text-success" />
+                        Daily Checklist Reminder
+                      </Button>
+                      <Button variant="outline" className="justify-start hover-lift">
+                        <UserCheck className="h-4 w-4 mr-2 text-primary" />
+                        Staff Recognition
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Team Messages */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-primary" />
+                  Recent Team Messages
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {teamBroadcasts.map((broadcast) => (
+                    <div key={broadcast.id} className={`p-6 border-l-4 rounded-xl hover-lift ${getBroadcastTypeColor(broadcast.type)}`}>
+                      <div className="flex items-start gap-4">
+                        <div className="text-2xl">{getBroadcastTypeIcon(broadcast.type)}</div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="font-semibold">{broadcast.sender}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {broadcast.role}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {broadcast.timestamp}
+                            </span>
+                          </div>
+                          <p className="text-sm leading-relaxed mb-3">{broadcast.message}</p>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <CheckCircle className="h-3 w-3 text-success" />
+                              <span>Read by {broadcast.readBy}/{broadcast.totalStaff} staff members</span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="w-full bg-muted rounded-full h-1.5">
+                                <div 
+                                  className="bg-success h-1.5 rounded-full transition-all duration-500"
+                                  style={{ width: `${(broadcast.readBy / broadcast.totalStaff) * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>

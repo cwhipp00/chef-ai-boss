@@ -221,22 +221,24 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 space-y-8 animate-fade-in">
+      {/* Enhanced Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Calendar & Events</h1>
-          <p className="text-muted-foreground">Manage restaurant events and scheduling with AI assistance</p>
+        <div className="space-y-2">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            Calendar & Events
+          </h1>
+          <p className="text-lg text-muted-foreground">Manage restaurant events and scheduling with AI assistance</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => handleAutoReschedule(0)} className="hover-scale">
-            <Zap className="h-4 w-4 mr-2" />
+        <div className="flex gap-4">
+          <Button variant="outline" onClick={() => handleAutoReschedule(0)} className="hover-scale glow-on-hover" size="lg">
+            <Zap className="h-5 w-5 mr-2" />
             AI Optimize
           </Button>
           <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" className="bg-gradient-primary hover-scale">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button size="lg" className="bg-gradient-primary hover-scale glow-on-hover px-8">
+                <Plus className="h-5 w-5 mr-2" />
                 Add Event
               </Button>
             </DialogTrigger>
@@ -353,38 +355,40 @@ export default function CalendarPage() {
         </TabsList>
 
         <TabsContent value="month" className="space-y-6">
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-            {/* Calendar */}
-            <Card className="xl:col-span-3 glass-card">
-              <CardHeader className="pb-4">
+          <div className="grid grid-cols-1 2xl:grid-cols-5 gap-8">
+            {/* Enhanced Full-Width Calendar */}
+            <Card className="2xl:col-span-4 glass-card hover-lift min-h-[700px]">
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <CalendarDays className="h-5 w-5 text-primary" />
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <CalendarDays className="h-7 w-7 text-primary" />
                     {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </CardTitle>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="icon" onClick={() => navigateMonth('prev')} className="hover-scale">
-                      <ChevronLeft className="h-4 w-4" />
+                  <div className="flex gap-3">
+                    <Button variant="outline" size="lg" onClick={() => navigateMonth('prev')} className="hover-scale glow-on-hover">
+                      <ChevronLeft className="h-5 w-5" />
                     </Button>
-                    <Button variant="outline" size="icon" onClick={() => navigateMonth('next')} className="hover-scale">
-                      <ChevronRight className="h-4 w-4" />
+                    <Button variant="outline" size="lg" onClick={() => navigateMonth('next')} className="hover-scale glow-on-hover">
+                      <ChevronRight className="h-5 w-5" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-6">
-                <Calendar
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  month={currentMonth}
-                  onMonthChange={setCurrentMonth}
-                  className="w-full mx-auto pointer-events-auto shadow-soft rounded-lg border-0 bg-card"
-                />
+              <CardContent className="p-8">
+                <div className="w-full h-full flex items-center justify-center">
+                  <Calendar
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    month={currentMonth}
+                    onMonthChange={setCurrentMonth}
+                    className="w-full h-full mx-auto pointer-events-auto shadow-lg rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-card to-muted/20 text-lg [&_table]:w-full [&_td]:h-16 [&_button]:h-14 [&_button]:w-14 [&_button]:text-base [&_th]:h-12 [&_th]:text-base"
+                  />
+                </div>
               </CardContent>
             </Card>
 
-            {/* Events Summary */}
-            <div className="space-y-4">
+            {/* Events Summary - Sidebar */}
+            <div className="space-y-6 2xl:col-span-1">
               {/* Today's Schedule */}
               <Card className="glass-card">
                 <CardHeader className="pb-3">
