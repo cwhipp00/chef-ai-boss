@@ -7,6 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { RestaurantSidebar } from "@/components/dashboard/RestaurantSidebar";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Recipes from "./pages/Recipes";
@@ -33,38 +34,40 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="restaurant-theme">
-        <TooltipProvider>
-          <Toaster />
-          <BrowserRouter>
-            <SidebarProvider>
-              <div className="flex min-h-screen w-full">
-                <RestaurantSidebar onOpenSearch={() => setIsSearchOpen(true)} />
-                <main className="flex-1">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/recipes" element={<Recipes />} />
-                    <Route path="/checklists" element={<Checklists />} />
-                    <Route path="/manager" element={<Manager />} />
-                    <Route path="/communications" element={<Communications />} />
-                    <Route path="/reminders" element={<Reminders />} />
-                    <Route path="/calendar" element={<CalendarPage />} />
-                    <Route path="/orders" element={<Orders />} />
-                    <Route path="/documents" element={<Documents />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/reservations" element={<Reservations />} />
-                    <Route path="/staff-schedule" element={<StaffSchedule />} />
-                    <Route path="/finance" element={<FinanceDashboard />} />
-                    <Route path="/customers" element={<CustomerManagement />} />
-                    <Route path="/ai-agents" element={<AIAgents />} />
-                    <Route path="/training" element={<Training />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-                <GlobalSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} />
-              </div>
-            </SidebarProvider>
-          </BrowserRouter>
-        </TooltipProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <BrowserRouter>
+              <SidebarProvider>
+                <div className="flex min-h-screen w-full">
+                  <RestaurantSidebar onOpenSearch={() => setIsSearchOpen(true)} />
+                  <main className="flex-1">
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/recipes" element={<Recipes />} />
+                      <Route path="/checklists" element={<Checklists />} />
+                      <Route path="/manager" element={<Manager />} />
+                      <Route path="/communications" element={<Communications />} />
+                      <Route path="/reminders" element={<Reminders />} />
+                      <Route path="/calendar" element={<CalendarPage />} />
+                      <Route path="/orders" element={<Orders />} />
+                      <Route path="/documents" element={<Documents />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="/reservations" element={<Reservations />} />
+                      <Route path="/staff-schedule" element={<StaffSchedule />} />
+                      <Route path="/finance" element={<FinanceDashboard />} />
+                      <Route path="/customers" element={<CustomerManagement />} />
+                      <Route path="/ai-agents" element={<AIAgents />} />
+                      <Route path="/training" element={<Training />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                  <GlobalSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} />
+                </div>
+              </SidebarProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
