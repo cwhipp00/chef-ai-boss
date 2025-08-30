@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { StepByStepInstructions } from './StepByStepInstructions';
 import { 
   Clock, 
   Users, 
@@ -12,7 +14,8 @@ import {
   ChefHat, 
   CheckCircle2,
   Circle,
-  Timer
+  Timer,
+  Play
 } from 'lucide-react';
 
 interface Recipe {
@@ -38,6 +41,7 @@ export function RecipeDetailModal({ recipe, children }: RecipeDetailModalProps) 
   const [servingScale, setServingScale] = useState([recipe.servings]);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [activeStep, setActiveStep] = useState(0);
+  const [cookingMode, setCookingMode] = useState<'overview' | 'step-by-step'>('overview');
 
   const scaleFactor = servingScale[0] / recipe.servings;
 
@@ -165,58 +169,84 @@ export function RecipeDetailModal({ recipe, children }: RecipeDetailModalProps) 
             {/* Instructions */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Instructions</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Click to mark steps as complete
-                </p>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Instructions</CardTitle>
+                  <Button
+                    onClick={() => setCookingMode('step-by-step')}
+                    size="sm"
+                    className="bg-gradient-primary"
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Cook Mode
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {recipe.instructions.map((instruction, index) => (
-                    <div key={index} className="space-y-2">
-                      <div 
-                        className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                          activeStep === index 
-                            ? 'bg-primary/10 border-l-4 border-primary' 
-                            : completedSteps.has(index)
-                            ? 'bg-green-50 dark:bg-green-950/20'
-                            : 'bg-muted/50 hover:bg-muted'
-                        }`}
-                        onClick={() => toggleStepCompletion(index)}
-                      >
-                        <div className="flex-shrink-0 mt-1">
-                          {completedSteps.has(index) ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <Circle className="h-5 w-5 text-muted-foreground" />
+                <Tabs value={cookingMode} onValueChange={(value) => setCookingMode(value as 'overview' | 'step-by-step')}>
+                  <TabsList className="grid w-full grid-cols-2 mb-4">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="step-by-step">Step-by-Step</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="overview">
+                    <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Click to mark steps as complete
+                      </p>
+                      {recipe.instructions.map((instruction, index) => (
+                        <div key={index} className="space-y-2">
+                          <div 
+                            className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                              activeStep === index 
+                                ? 'bg-primary/10 border-l-4 border-primary' 
+                                : completedSteps.has(index)
+                                ? 'bg-green-50 dark:bg-green-950/20'
+                                : 'bg-muted/50 hover:bg-muted'
+                            }`}
+                            onClick={() => toggleStepCompletion(index)}
+                          >
+                            <div className="flex-shrink-0 mt-1">
+                              {completedSteps.has(index) ? (
+                                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <Circle className="h-5 w-5 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-medium text-primary">
+                                  Step {index + 1}
+                                </span>
+                                {activeStep === index && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Current
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className={`text-sm ${
+                                completedSteps.has(index) 
+                                  ? 'line-through text-muted-foreground' 
+                                  : 'text-foreground'
+                              }`}>
+                                {instruction}
+                              </p>
+                            </div>
+                          </div>
+                          {index < recipe.instructions.length - 1 && (
+                            <Separator className="ml-8" />
                           )}
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-medium text-primary">
-                              Step {index + 1}
-                            </span>
-                            {activeStep === index && (
-                              <Badge variant="secondary" className="text-xs">
-                                Current
-                              </Badge>
-                            )}
-                          </div>
-                          <p className={`text-sm ${
-                            completedSteps.has(index) 
-                              ? 'line-through text-muted-foreground' 
-                              : 'text-foreground'
-                          }`}>
-                            {instruction}
-                          </p>
-                        </div>
-                      </div>
-                      {index < recipe.instructions.length - 1 && (
-                        <Separator className="ml-8" />
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </TabsContent>
+
+                  <TabsContent value="step-by-step">
+                    <StepByStepInstructions 
+                      instructions={recipe.instructions}
+                      onClose={() => setCookingMode('overview')}
+                    />
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </div>
