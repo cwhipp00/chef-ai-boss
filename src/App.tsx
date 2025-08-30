@@ -33,7 +33,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="restaurant-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="restaurant-theme">
         <LanguageProvider>
           <TooltipProvider>
             <Toaster />

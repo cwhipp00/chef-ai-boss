@@ -39,7 +39,7 @@ export default function Settings() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted-foreground">Manage your Chef Central preferences</p>
+          <p className="text-muted-foreground">Manage your Chef AI preferences</p>
         </div>
       </div>
 
@@ -161,7 +161,7 @@ export default function Settings() {
               <div className="space-y-4">
                 <Label className="text-base font-medium">Application Name</Label>
                 <div className="flex items-center gap-4">
-                  <Input value="Chef Central" readOnly className="max-w-sm" />
+                  <Input value="Chef AI" readOnly className="max-w-sm" />
                   <p className="text-sm text-muted-foreground">
                     Your restaurant management system
                   </p>
