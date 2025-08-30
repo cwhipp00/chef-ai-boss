@@ -5,6 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { WeeklyScheduleView } from '@/components/schedule/WeeklyScheduleView';
+import { 
+  TimeOffRequestModal, 
+  ShiftSwapModal, 
+  CoverageModal 
+} from '@/components/schedule/ShiftActionModals';
+import type { Shift } from '@/components/schedule/ShiftCard';
+import type { DropResult } from 'react-beautiful-dnd';
 
 const staff = [
   { id: 1, name: "Sarah Johnson", role: "Head Chef", hourlyRate: 28, maxHours: 40 },
@@ -15,13 +24,97 @@ const staff = [
   { id: 6, name: "James Wilson", role: "Dishwasher", hourlyRate: 14, maxHours: 35 }
 ];
 
-const shifts = [
-  { id: 1, staffId: 1, date: "2024-01-15", startTime: "08:00", endTime: "16:00", role: "Head Chef", break: 60 },
-  { id: 2, staffId: 2, date: "2024-01-15", startTime: "10:00", endTime: "18:00", role: "Sous Chef", break: 30 },
-  { id: 3, staffId: 3, date: "2024-01-15", startTime: "11:00", endTime: "19:00", role: "Server", break: 30 },
-  { id: 4, staffId: 4, date: "2024-01-15", startTime: "09:00", endTime: "17:00", role: "Line Cook", break: 60 },
-  { id: 5, staffId: 5, date: "2024-01-15", startTime: "17:00", endTime: "23:00", role: "Server", break: 30 },
-  { id: 6, staffId: 1, date: "2024-01-16", startTime: "08:00", endTime: "16:00", role: "Head Chef", break: 60 }
+const enhancedShifts: Shift[] = [
+  { 
+    id: '1', 
+    staffId: 1, 
+    staffName: "Sarah Johnson", 
+    date: "2024-01-15", 
+    startTime: "08:00", 
+    endTime: "16:00", 
+    role: "Head Chef", 
+    break: 60, 
+    status: 'scheduled' 
+  },
+  { 
+    id: '2', 
+    staffId: 2, 
+    staffName: "Mike Rodriguez", 
+    date: "2024-01-15", 
+    startTime: "10:00", 
+    endTime: "18:00", 
+    role: "Sous Chef", 
+    break: 30, 
+    status: 'needs_coverage' 
+  },
+  { 
+    id: '3', 
+    staffId: 3, 
+    staffName: "Emily Chen", 
+    date: "2024-01-15", 
+    startTime: "11:00", 
+    endTime: "19:00", 
+    role: "Server", 
+    break: 30, 
+    status: 'time_off_requested',
+    timeOffReason: 'Doctor appointment'
+  },
+  { 
+    id: '4', 
+    staffId: 4, 
+    staffName: "David Park", 
+    date: "2024-01-15", 
+    startTime: "09:00", 
+    endTime: "17:00", 
+    role: "Line Cook", 
+    break: 60, 
+    status: 'covered',
+    coverageOfferedBy: 6 
+  },
+  { 
+    id: '5', 
+    staffId: 5, 
+    staffName: "Lisa Wong", 
+    date: "2024-01-15", 
+    startTime: "17:00", 
+    endTime: "23:00", 
+    role: "Server", 
+    break: 30, 
+    status: 'scheduled' 
+  },
+  { 
+    id: '6', 
+    staffId: 1, 
+    staffName: "Sarah Johnson", 
+    date: "2024-01-16", 
+    startTime: "08:00", 
+    endTime: "16:00", 
+    role: "Head Chef", 
+    break: 60, 
+    status: 'scheduled' 
+  },
+  { 
+    id: '7', 
+    staffId: 6, 
+    staffName: "James Wilson", 
+    date: "2024-01-16", 
+    startTime: "14:00", 
+    endTime: "22:00", 
+    role: "Dishwasher", 
+    break: 30, 
+    status: 'open' 
+  },
+  { 
+    id: '8', 
+    staffId: 3, 
+    staffName: "Emily Chen", 
+    date: "2024-01-17", 
+    startTime: "12:00", 
+    endTime: "20:00", 
+    role: "Server", 
+    break: 30, 
+    status: 'scheduled' 
+  }
 ];
 
 const timeSlots = [
@@ -35,6 +128,13 @@ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sat
 export default function StaffSchedule() {
   const [selectedTab, setSelectedTab] = useState('schedule');
   const [selectedWeek, setSelectedWeek] = useState(new Date());
+  const [shifts, setShifts] = useState<Shift[]>(enhancedShifts);
+  const [timeOffModalOpen, setTimeOffModalOpen] = useState(false);
+  const [swapModalOpen, setSwapModalOpen] = useState(false);
+  const [coverageModalOpen, setCoverageModalOpen] = useState(false);
+  const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
+  const [coverageType, setCoverageType] = useState<'offer' | 'take'>('offer');
+  const { toast } = useToast();
 
   const getStaffName = (staffId: number) => {
     const person = staff.find(s => s.id === staffId);
@@ -59,6 +159,122 @@ export default function StaffSchedule() {
     }
   };
 
+  const handleShiftMove = (result: DropResult) => {
+    if (!result.destination) return;
+    
+    const { draggableId, source, destination } = result;
+    
+    // Update shift timing based on drop location
+    setShifts(prev => prev.map(shift => {
+      if (shift.id === draggableId) {
+        const [day, time] = destination.droppableId.split('-');
+        // In a real app, you'd calculate the new date and time
+        toast({
+          title: "Shift Moved",
+          description: `${shift.staffName}'s shift moved to ${day} at ${time}`,
+        });
+        return { ...shift, startTime: time };
+      }
+      return shift;
+    }));
+  };
+
+  const handleOfferCoverage = (shiftId: string) => {
+    const shift = shifts.find(s => s.id === shiftId);
+    if (shift) {
+      setSelectedShift(shift);
+      setCoverageType('offer');
+      setCoverageModalOpen(true);
+    }
+  };
+
+  const handleTakeCoverage = (shiftId: string) => {
+    const shift = shifts.find(s => s.id === shiftId);
+    if (shift) {
+      setSelectedShift(shift);
+      setCoverageType('take');
+      setCoverageModalOpen(true);
+    }
+  };
+
+  const handleRequestTimeOff = (shiftId: string) => {
+    const shift = shifts.find(s => s.id === shiftId);
+    if (shift) {
+      setSelectedShift(shift);
+      setTimeOffModalOpen(true);
+    }
+  };
+
+  const handleSwapRequest = (shiftId: string) => {
+    const shift = shifts.find(s => s.id === shiftId);
+    if (shift) {
+      setSelectedShift(shift);
+      setSwapModalOpen(true);
+    }
+  };
+
+  const handleEditShift = (shiftId: string) => {
+    toast({
+      title: "Edit Shift",
+      description: "Shift editing functionality would open here",
+    });
+  };
+
+  const confirmCoverage = () => {
+    if (!selectedShift) return;
+
+    setShifts(prev => prev.map(shift => {
+      if (shift.id === selectedShift.id) {
+        if (coverageType === 'offer') {
+          return { ...shift, status: 'needs_coverage' };
+        } else {
+          return { ...shift, status: 'covered', coverageOfferedBy: 1 }; // Current user ID
+        }
+      }
+      return shift;
+    }));
+
+    toast({
+      title: coverageType === 'offer' ? "Coverage Offered" : "Shift Taken",
+      description: coverageType === 'offer' 
+        ? "Your shift is now available for coverage"
+        : "You've successfully taken this shift",
+    });
+
+    setCoverageModalOpen(false);
+    setSelectedShift(null);
+  };
+
+  const submitTimeOffRequest = (reason: string) => {
+    if (!selectedShift) return;
+
+    setShifts(prev => prev.map(shift => {
+      if (shift.id === selectedShift.id) {
+        return { 
+          ...shift, 
+          status: 'time_off_requested',
+          timeOffReason: reason 
+        };
+      }
+      return shift;
+    }));
+
+    toast({
+      title: "Time Off Requested",
+      description: "Your time off request has been submitted for approval",
+    });
+
+    setSelectedShift(null);
+  };
+
+  const submitSwapRequest = (targetShiftId: string, message: string) => {
+    toast({
+      title: "Swap Request Sent",
+      description: "Your shift swap request has been sent to your colleague",
+    });
+    setSelectedShift(null);
+  };
+
   const calculateWeeklyStats = () => {
     const totalHours = shifts.reduce((sum, shift) => 
       sum + getShiftDuration(shift.startTime, shift.endTime, shift.break), 0
@@ -76,7 +292,7 @@ export default function StaffSchedule() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Staff Schedule</h1>
-          <p className="text-muted-foreground">Manage employee schedules and time tracking</p>
+          <p className="text-muted-foreground">Manage employee schedules with drag & drop, shift coverage, and time-off requests</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
@@ -92,9 +308,9 @@ export default function StaffSchedule() {
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="schedule">Weekly Schedule</TabsTrigger>
+          <TabsTrigger value="schedule">Interactive Schedule</TabsTrigger>
           <TabsTrigger value="staff">Staff Management</TabsTrigger>
-          <TabsTrigger value="timecard">Time Cards</TabsTrigger>
+          <TabsTrigger value="requests">Coverage & Requests</TabsTrigger>
           <TabsTrigger value="analytics">Labor Analytics</TabsTrigger>
         </TabsList>
 
@@ -128,84 +344,105 @@ export default function StaffSchedule() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <WeeklyScheduleView
+            shifts={shifts}
+            onShiftMove={handleShiftMove}
+            onOfferCoverage={handleOfferCoverage}
+            onTakeCoverage={handleTakeCoverage}
+            onRequestTimeOff={handleRequestTimeOff}
+            onSwapRequest={handleSwapRequest}
+            onEditShift={handleEditShift}
+            currentUserId={1}
+          />
+        </TabsContent>
+
+        <TabsContent value="requests" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Total Hours</CardTitle>
+              <CardHeader>
+                <CardTitle className="text-base">Shifts Needing Coverage</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalHours.toFixed(1)}h</div>
+              <CardContent className="space-y-3">
+                {shifts.filter(s => s.status === 'needs_coverage').map(shift => (
+                  <div key={shift.id} className="p-3 border rounded-lg">
+                    <div className="font-medium text-sm">{shift.staffName}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(shift.date).toLocaleDateString()} • {shift.startTime}-{shift.endTime}
+                    </div>
+                    <div className="text-xs text-warning mt-1">{shift.role}</div>
+                    <Button 
+                      size="sm" 
+                      className="w-full mt-2"
+                      onClick={() => handleTakeCoverage(shift.id)}
+                    >
+                      Take Shift
+                    </Button>
+                  </div>
+                ))}
+                {shifts.filter(s => s.status === 'needs_coverage').length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No shifts need coverage
+                  </p>
+                )}
               </CardContent>
             </Card>
+
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Staff Scheduled</CardTitle>
+              <CardHeader>
+                <CardTitle className="text-base">Time Off Requests</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.uniqueStaff}</div>
+              <CardContent className="space-y-3">
+                {shifts.filter(s => s.status === 'time_off_requested').map(shift => (
+                  <div key={shift.id} className="p-3 border rounded-lg border-destructive/20">
+                    <div className="font-medium text-sm">{shift.staffName}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(shift.date).toLocaleDateString()} • {shift.startTime}-{shift.endTime}
+                    </div>
+                    <div className="text-xs text-destructive mt-1">
+                      Reason: {shift.timeOffReason}
+                    </div>
+                    <div className="flex gap-1 mt-2">
+                      <Button size="sm" variant="outline" className="flex-1">
+                        Approve
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1">
+                        Deny
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {shifts.filter(s => s.status === 'time_off_requested').length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No time off requests
+                  </p>
+                )}
               </CardContent>
             </Card>
+
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Avg Hours/Person</CardTitle>
+              <CardHeader>
+                <CardTitle className="text-base">Recently Covered</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.avgHours.toFixed(1)}h</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Labor Cost</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$2,340</div>
+              <CardContent className="space-y-3">
+                {shifts.filter(s => s.status === 'covered').map(shift => (
+                  <div key={shift.id} className="p-3 border rounded-lg border-success/20">
+                    <div className="font-medium text-sm">{shift.staffName}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(shift.date).toLocaleDateString()} • {shift.startTime}-{shift.endTime}
+                    </div>
+                    <div className="text-xs text-success mt-1">
+                      Covered by Staff ID: {shift.coverageOfferedBy}
+                    </div>
+                  </div>
+                ))}
+                {shifts.filter(s => s.status === 'covered').length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No recently covered shifts
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Schedule Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <div className="grid grid-cols-8 gap-2 min-w-[800px] text-sm">
-                  <div className="font-medium p-2">Time</div>
-                  {daysOfWeek.map(day => (
-                    <div key={day} className="font-medium p-2 text-center">{day}</div>
-                  ))}
-                  
-                  {timeSlots.map(time => (
-                    <div key={time} className="contents">
-                      <div className="p-2 font-mono text-xs text-muted-foreground">
-                        {time}
-                      </div>
-                      {daysOfWeek.map((day, dayIndex) => {
-                        const dayShifts = shifts.filter(shift => {
-                          const shiftTime = parseInt(shift.startTime.split(':')[0]);
-                          const currentTime = parseInt(time.split(':')[0]);
-                          const endTime = parseInt(shift.endTime.split(':')[0]);
-                          return shiftTime <= currentTime && currentTime < endTime;
-                        });
-
-                        return (
-                          <div key={`${day}-${time}`} className="p-1 min-h-[40px] border-r border-b">
-                            {dayShifts.map(shift => (
-                              <div key={shift.id} className="mb-1">
-                                <Badge className={`text-xs ${getRoleColor(shift.role)} block truncate`}>
-                                  {getStaffName(shift.staffId).split(' ')[0]}
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="staff" className="space-y-6">
@@ -249,43 +486,6 @@ export default function StaffSchedule() {
                     <Button size="sm" className="flex-1">
                       Add Shift
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="timecard" className="space-y-6">
-          <div className="space-y-4">
-            {shifts.map((shift) => (
-              <Card key={shift.id} className="hover:shadow-medium transition-all duration-200">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                        <span className="text-sm font-medium text-primary-foreground">
-                          {getStaffName(shift.staffId).split(' ').map(n => n[0]).join('')}
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">{getStaffName(shift.staffId)}</h4>
-                        <p className="text-sm text-muted-foreground">{shift.role}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-muted-foreground" />
-                        {new Date(shift.date).toLocaleDateString()}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3 text-muted-foreground" />
-                        {shift.startTime} - {shift.endTime}
-                      </div>
-                      <div className="font-medium">
-                        {getShiftDuration(shift.startTime, shift.endTime, shift.break).toFixed(1)}h
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -390,6 +590,39 @@ export default function StaffSchedule() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Modals */}
+      <TimeOffRequestModal
+        isOpen={timeOffModalOpen}
+        onClose={() => {
+          setTimeOffModalOpen(false);
+          setSelectedShift(null);
+        }}
+        onSubmit={submitTimeOffRequest}
+        shift={selectedShift}
+      />
+
+      <ShiftSwapModal
+        isOpen={swapModalOpen}
+        onClose={() => {
+          setSwapModalOpen(false);
+          setSelectedShift(null);
+        }}
+        onSubmit={submitSwapRequest}
+        shift={selectedShift}
+        availableShifts={shifts.filter(s => s.status === 'scheduled' && s.id !== selectedShift?.id)}
+      />
+
+      <CoverageModal
+        isOpen={coverageModalOpen}
+        onClose={() => {
+          setCoverageModalOpen(false);
+          setSelectedShift(null);
+        }}
+        onConfirm={confirmCoverage}
+        shift={selectedShift}
+        type={coverageType}
+      />
     </div>
   );
 }
