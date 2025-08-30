@@ -1,11 +1,29 @@
 import { useState } from 'react';
-import { Plus, Upload, Search, Filter, Package, Clock, DollarSign, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { OrderAnalyzer } from '@/components/ai/OrderAnalyzer';
+import { AutomationHub } from '@/components/automation/AutomationHub';
+import { 
+  ShoppingCart, 
+  Plus, 
+  Search, 
+  Filter, 
+  Clock, 
+  CheckCircle, 
+  AlertTriangle,
+  Brain,
+  Zap,
+  TrendingUp,
+  Users,
+  Package,
+  Upload,
+  DollarSign
+} from 'lucide-react';
 
 const orders = [
   {
@@ -58,38 +76,12 @@ const vendors = [
   { id: 4, name: "Dairy Direct", category: "Dairy Products", rating: 4.6, orders: 38 }
 ];
 
-const orderTemplates = [
-  {
-    id: 1,
-    name: "Weekly Produce Order",
-    vendor: "Fresh Farm Supplies",
-    estimatedCost: "$450",
-    items: 12,
-    frequency: "Weekly"
-  },
-  {
-    id: 2,
-    name: "Meat & Poultry Restock",
-    vendor: "Premium Meats Co.",
-    estimatedCost: "$800",
-    items: 8,
-    frequency: "Bi-weekly"
-  },
-  {
-    id: 3,
-    name: "Seafood Special Order",
-    vendor: "Ocean Fresh Seafood",
-    estimatedCost: "$600",
-    items: 6,
-    frequency: "As needed"
-  }
-];
-
 export default function Orders() {
-  const [selectedTab, setSelectedTab] = useState('active');
+  const [selectedTab, setSelectedTab] = useState('orders');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVendor, setSelectedVendor] = useState('all');
   const [uploadingDocument, setUploadingDocument] = useState(false);
+  const { toast } = useToast();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -113,9 +105,17 @@ export default function Orders() {
 
   const handleDocumentUpload = () => {
     setUploadingDocument(true);
-    // Simulate document parsing and order creation
+    toast({
+      title: "Document Upload",
+      description: "Processing invoice and creating order automatically...",
+    });
+    
     setTimeout(() => {
       setUploadingDocument(false);
+      toast({
+        title: "Order Created",
+        description: "AI has parsed the invoice and created a new order automatically",
+      });
     }, 2000);
   };
 
@@ -131,7 +131,7 @@ export default function Orders() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Orders Management</h1>
-          <p className="text-muted-foreground">Manage supplier orders and inventory requests</p>
+          <p className="text-muted-foreground">AI-powered order management with automation and analytics</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -151,13 +151,13 @@ export default function Orders() {
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="active">Active Orders</TabsTrigger>
-          <TabsTrigger value="vendors">Vendors</TabsTrigger>
-          <TabsTrigger value="templates">Order Templates</TabsTrigger>
+          <TabsTrigger value="orders">Active Orders</TabsTrigger>
+          <TabsTrigger value="ai-analysis">AI Analysis</TabsTrigger>
+          <TabsTrigger value="automation">Automation</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="space-y-6">
+        <TabsContent value="orders" className="space-y-6">
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -188,7 +188,7 @@ export default function Orders() {
 
           <div className="space-y-4">
             {filteredOrders.map((order) => (
-              <Card key={order.id} className="hover:shadow-medium transition-shadow">
+              <Card key={order.id} className="hover-lift transition-all cursor-pointer">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
@@ -200,13 +200,13 @@ export default function Orders() {
                       <p className="text-muted-foreground">{order.vendor}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold">${order.total.toFixed(2)}</p>
+                      <p className="text-2xl font-bold text-primary">${order.total.toFixed(2)}</p>
                       <p className="text-sm text-muted-foreground">{order.items.length} items</p>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <h4 className="font-medium mb-2">Order Items:</h4>
@@ -235,10 +235,24 @@ export default function Orders() {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* AI Insights for each order */}
+                    <div className="p-3 bg-primary/5 rounded-lg border-l-2 border-primary/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Brain className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium text-primary">AI Insights</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p>• Price 8% lower than last order - great deal!</p>
+                        <p>• Delivery timing aligns with weekend rush</p>
+                        <p>• Vendor performance: 98% on-time delivery</p>
+                      </div>
+                    </div>
+
                     <div className="flex gap-2 pt-2">
                       <Button variant="outline" size="sm">View Details</Button>
                       <Button variant="outline" size="sm">Track Order</Button>
-                      <Button size="sm">Reorder</Button>
+                      <Button size="sm" className="bg-gradient-primary">Reorder</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -247,132 +261,87 @@ export default function Orders() {
           </div>
         </TabsContent>
 
-        <TabsContent value="vendors" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {vendors.map((vendor) => (
-              <Card key={vendor.id}>
-                <CardHeader>
-                  <CardTitle>{vendor.name}</CardTitle>
-                  <p className="text-muted-foreground">{vendor.category}</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span>Rating:</span>
-                    <span className="font-medium">{vendor.rating}/5.0</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Total Orders:</span>
-                    <span className="font-medium">{vendor.orders}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      View Details
-                    </Button>
-                    <Button size="sm" className="flex-1">
-                      New Order
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        <TabsContent value="ai-analysis">
+          <OrderAnalyzer />
         </TabsContent>
 
-        <TabsContent value="templates" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {orderTemplates.map((template) => (
-              <Card key={template.id}>
-                <CardHeader>
-                  <CardTitle>{template.name}</CardTitle>
-                  <p className="text-muted-foreground">{template.vendor}</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Estimated Cost:</span>
-                      <span className="font-medium">{template.estimatedCost}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Items:</span>
-                      <span className="font-medium">{template.items}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Frequency:</span>
-                      <span className="font-medium">{template.frequency}</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Edit Template
-                    </Button>
-                    <Button size="sm" className="flex-1">
-                      Use Template
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        <TabsContent value="automation">
+          <AutomationHub />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
+            <Card className="hover-lift">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Monthly Spend</CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$12,450</div>
+                <div className="text-2xl font-bold text-primary">$12,450</div>
                 <p className="text-xs text-success">+8.2% from last month</p>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  🤖 AI suggests bulk ordering to save $340
+                </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover-lift">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
                 <Package className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">24</div>
+                <div className="text-2xl font-bold text-primary">24</div>
                 <p className="text-xs text-warning">3 pending delivery</p>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  🤖 2 orders may arrive late
+                </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover-lift">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Avg Delivery Time</CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">2.3 days</div>
+                <div className="text-2xl font-bold text-primary">2.3 days</div>
                 <p className="text-xs text-success">-0.5 days from last month</p>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  🤖 Switch vendors to save 0.8 days
+                </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover-lift">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Cost Savings</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$890</div>
+                <div className="text-2xl font-bold text-primary">$890</div>
                 <p className="text-xs text-success">Through bulk ordering</p>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  🤖 Potential $1,200 more savings
+                </div>
               </CardContent>
             </Card>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
+            <Card className="hover-lift">
               <CardHeader>
-                <CardTitle>Top Vendors by Spend</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-primary" />
+                  AI Vendor Recommendations
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {vendors.map((vendor, index) => (
-                    <div key={vendor.id} className="flex items-center justify-between">
+                    <div key={vendor.id} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
                           <span className="text-xs font-medium text-primary-foreground">
                             {index + 1}
                           </span>
@@ -382,36 +351,38 @@ export default function Orders() {
                           <p className="text-xs text-muted-foreground">{vendor.category}</p>
                         </div>
                       </div>
-                      <span className="font-medium">${(3000 - index * 500).toLocaleString()}</span>
+                      <div className="text-right">
+                        <span className="font-medium">${(3000 - index * 500).toLocaleString()}</span>
+                        <p className="text-xs text-green-600">Save ${index * 50}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover-lift">
               <CardHeader>
-                <CardTitle>Order Categories</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-primary" />
+                  Smart Order Predictions
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {[
-                    { category: 'Produce', amount: '$4,200', percentage: 34 },
-                    { category: 'Meat & Poultry', amount: '$3,800', percentage: 31 },
-                    { category: 'Seafood', amount: '$2,450', percentage: 20 },
-                    { category: 'Dairy & Eggs', amount: '$2,000', percentage: 15 }
+                    { category: 'Produce', prediction: 'Order in 2 days', confidence: '94%', savings: '$120' },
+                    { category: 'Meat & Poultry', prediction: 'Order next week', confidence: '87%', savings: '$85' },
+                    { category: 'Seafood', prediction: 'Stock sufficient', confidence: '92%', savings: '$0' },
+                    { category: 'Dairy & Eggs', prediction: 'Order tomorrow', confidence: '98%', savings: '$45' }
                   ].map((item) => (
-                    <div key={item.category} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>{item.category}</span>
-                        <span className="font-medium">{item.amount}</span>
+                    <div key={item.category} className="space-y-2 p-3 border rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">{item.category}</span>
+                        <Badge variant="outline">{item.confidence} confident</Badge>
                       </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full"
-                          style={{ width: `${item.percentage}%` }}
-                        />
-                      </div>
+                      <p className="text-xs text-muted-foreground">{item.prediction}</p>
+                      <p className="text-xs text-green-600">Potential savings: {item.savings}</p>
                     </div>
                   ))}
                 </div>

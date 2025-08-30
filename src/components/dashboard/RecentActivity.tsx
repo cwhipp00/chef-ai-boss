@@ -1,12 +1,16 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { 
   Clock, 
   ChefHat, 
   CheckCircle, 
   MessageSquare, 
-  AlertCircle 
+  AlertCircle,
+  ExternalLink,
+  Eye
 } from "lucide-react";
 
 const activities = [
@@ -19,7 +23,9 @@ const activities = [
     userInitials: "AI",
     time: "2 minutes ago",
     status: "success",
-    icon: ChefHat
+    icon: ChefHat,
+    route: "/recipes",
+    details: "AI automatically scaled recipe based on predicted demand increase"
   },
   {
     id: 2,
@@ -30,7 +36,9 @@ const activities = [
     userInitials: "MR",
     time: "15 minutes ago",
     status: "success",
-    icon: CheckCircle
+    icon: CheckCircle,
+    route: "/checklists",
+    details: "Completed 5 minutes faster than average with AI task optimization"
   },
   {
     id: 3,
@@ -41,7 +49,9 @@ const activities = [
     userInitials: "JD",
     time: "32 minutes ago",
     status: "info",
-    icon: MessageSquare
+    icon: MessageSquare,
+    route: "/communications",
+    details: "Broadcast to 12 team members - 8 acknowledged"
   },
   {
     id: 4,
@@ -52,7 +62,9 @@ const activities = [
     userInitials: "SY",
     time: "1 hour ago",
     status: "warning",
-    icon: AlertCircle
+    icon: AlertCircle,
+    route: "/orders",
+    details: "AI detected 2-day supply remaining, suggested reorder quantity: 50 lbs"
   },
   {
     id: 5,
@@ -63,7 +75,9 @@ const activities = [
     userInitials: "KC",
     time: "2 hours ago",
     status: "pending",
-    icon: Clock
+    icon: Clock,
+    route: "/checklists",
+    details: "4 of 8 closing tasks completed"
   }
 ];
 
@@ -75,6 +89,12 @@ const statusColors = {
 };
 
 export function RecentActivity() {
+  const navigate = useNavigate();
+
+  const handleActivityClick = (route: string) => {
+    navigate(route);
+  };
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -86,9 +106,13 @@ export function RecentActivity() {
           Real-time updates from your restaurant operations
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {activities.map((activity) => (
-          <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+          <div 
+            key={activity.id} 
+            className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-all cursor-pointer group hover-lift"
+            onClick={() => handleActivityClick(activity.route)}
+          >
             <div className="flex-shrink-0">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <activity.icon className="h-4 w-4 text-primary" />
@@ -96,8 +120,9 @@ export function RecentActivity() {
             </div>
             <div className="flex-1 min-w-0 space-y-1">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium text-foreground truncate">
+                <h4 className="text-sm font-medium text-foreground truncate flex items-center gap-2">
                   {activity.title}
+                  <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </h4>
                 <Badge 
                   variant="secondary" 
@@ -109,15 +134,24 @@ export function RecentActivity() {
               <p className="text-xs text-muted-foreground">
                 {activity.description}
               </p>
-              <div className="flex items-center space-x-2">
-                <Avatar className="h-4 w-4">
-                  <AvatarFallback className="text-xs bg-secondary">
-                    {activity.userInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-muted-foreground">
-                  {activity.user} • {activity.time}
-                </span>
+              <div className="text-xs text-primary bg-primary/5 p-2 rounded border-l-2 border-primary/20">
+                ℹ️ {activity.details}
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Avatar className="h-4 w-4">
+                    <AvatarFallback className="text-xs bg-secondary">
+                      {activity.userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs text-muted-foreground">
+                    {activity.user} • {activity.time}
+                  </span>
+                </div>
+                <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
               </div>
             </div>
           </div>

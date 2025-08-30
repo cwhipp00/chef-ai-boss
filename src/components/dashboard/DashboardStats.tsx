@@ -1,12 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import { 
   TrendingUp, 
   TrendingDown, 
   Clock, 
   CheckCircle, 
   AlertTriangle,
-  DollarSign
+  DollarSign,
+  ExternalLink
 } from "lucide-react";
 
 const stats = [
@@ -16,7 +18,9 @@ const stats = [
     change: "+12.5%",
     trend: "up",
     icon: DollarSign,
-    description: "Compared to yesterday"
+    description: "Compared to yesterday",
+    link: "/finance",
+    aiInsight: "AI predicts 15% growth by month-end"
   },
   {
     title: "Orders Completed",
@@ -24,7 +28,9 @@ const stats = [
     change: "+8.2%",
     trend: "up",
     icon: CheckCircle,
-    description: "Today's completed orders"
+    description: "Today's completed orders",
+    link: "/orders",
+    aiInsight: "Peak hours: 12-2pm, 6-8pm"
   },
   {
     title: "Avg. Prep Time",
@@ -32,7 +38,9 @@ const stats = [
     change: "-2.1%",
     trend: "down",
     icon: Clock,
-    description: "Kitchen efficiency improved"
+    description: "Kitchen efficiency improved",
+    link: "/recipes",
+    aiInsight: "Optimization saved 18 mins today"
   },
   {
     title: "Tasks Pending",
@@ -40,22 +48,37 @@ const stats = [
     change: "-3",
     trend: "down",
     icon: AlertTriangle,
-    description: "Daily checklist items"
+    description: "Daily checklist items",
+    link: "/checklists",
+    aiInsight: "Auto-scheduling reduces pending by 40%"
   }
 ];
 
 export function DashboardStats() {
+  const navigate = useNavigate();
+
+  const handleStatClick = (link: string) => {
+    navigate(link);
+  };
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat, index) => (
-        <Card key={index} className="hover:shadow-medium transition-shadow">
+        <Card 
+          key={index} 
+          className="hover-lift cursor-pointer glow-on-hover transition-all group" 
+          onClick={() => handleStatClick(stat.link)}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {stat.title}
             </CardTitle>
-            <stat.icon className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2">
+              <stat.icon className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
             <div className="text-2xl font-bold text-foreground">{stat.value}</div>
             <div className="flex items-center space-x-2 text-xs">
               <Badge 
@@ -70,6 +93,9 @@ export function DashboardStats() {
                 {stat.change}
               </Badge>
               <span className="text-muted-foreground">{stat.description}</span>
+            </div>
+            <div className="text-xs text-primary bg-primary/10 p-2 rounded border-l-2 border-primary">
+              🤖 {stat.aiInsight}
             </div>
           </CardContent>
         </Card>

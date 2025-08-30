@@ -1,12 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { 
   Plus, 
   Calendar, 
   MessageCircle, 
   FileCheck, 
   Zap,
-  Brain
+  Brain,
+  ChefHat,
+  ShoppingCart
 } from "lucide-react";
 
 const actions = [
@@ -15,46 +18,52 @@ const actions = [
     description: "Create and scale recipes with AI assistance",
     icon: Plus,
     variant: "glow" as const,
-    action: () => console.log("Add recipe")
+    route: "/recipes"
   },
   {
     title: "Schedule Staff",
     description: "Manage today's shift schedule",
     icon: Calendar,
     variant: "default" as const,
-    action: () => console.log("Schedule staff")
+    route: "/staff-schedule"
   },
   {
     title: "Team Chat",
     description: "Send updates to your team",
     icon: MessageCircle,
     variant: "info" as const,
-    action: () => console.log("Open chat")
+    route: "/communications"
   },
   {
     title: "AI Assistant",
     description: "Get intelligent recommendations",
     icon: Brain,
     variant: "success" as const,
-    action: () => console.log("Open AI assistant")
+    route: "/ai-agents"
   },
   {
     title: "Daily Checklist",
     description: "Complete opening procedures",
     icon: FileCheck,
     variant: "warning" as const,
-    action: () => console.log("Open checklist")
+    route: "/checklists"
   },
   {
     title: "Quick Order",
     description: "Place urgent supply order",
-    icon: Zap,
+    icon: ShoppingCart,
     variant: "secondary" as const,
-    action: () => console.log("Quick order")
+    route: "/orders"
   }
 ];
 
 export function QuickActions() {
+  const navigate = useNavigate();
+
+  const handleActionClick = (route: string) => {
+    navigate(route);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -71,8 +80,8 @@ export function QuickActions() {
           <Button
             key={index}
             variant={action.variant}
-            className="h-auto p-4 flex-col items-start text-left gap-2 hover:scale-105 transition-transform"
-            onClick={action.action}
+            className="h-auto p-4 flex-col items-start text-left gap-2 hover-lift transition-all"
+            onClick={() => handleActionClick(action.route)}
           >
             <div className="flex items-center gap-2 w-full">
               <action.icon className="h-4 w-4" />
