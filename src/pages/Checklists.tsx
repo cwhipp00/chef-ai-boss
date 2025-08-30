@@ -6,8 +6,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
 
-const checklists = [
+interface ChecklistItem {
+  id: number;
+  task: string;
+  completed: boolean;
+  priority: string;
+}
+
+interface Checklist {
+  id: number;
+  title: string;
+  type: string;
+  priority: string;
+  progress: number;
+  dueTime: string;
+  items: ChecklistItem[];
+}
+
+const initialChecklists: Checklist[] = [
   {
     id: 1,
     title: "Opening Checklist",
@@ -61,12 +79,41 @@ const checklists = [
 export default function Checklists() {
   const [selectedTab, setSelectedTab] = useState('active');
   const [uploadingDocument, setUploadingDocument] = useState(false);
+  const [checklists, setChecklists] = useState<Checklist[]>(initialChecklists);
+  const { toast } = useToast();
+
+  const toggleChecklistItem = (checklistId: number, itemId: number) => {
+    setChecklists(prev => prev.map(checklist => {
+      if (checklist.id === checklistId) {
+        const updatedItems = checklist.items.map(item =>
+          item.id === itemId ? { ...item, completed: !item.completed } : item
+        );
+        const completedCount = updatedItems.filter(item => item.completed).length;
+        const newProgress = Math.round((completedCount / updatedItems.length) * 100);
+        
+        const item = checklist.items.find(i => i.id === itemId);
+        if (item && !item.completed) {
+          toast({
+            title: "Task Completed",
+            description: `"${item.task}" has been marked as complete`,
+          });
+        }
+        
+        return { ...checklist, items: updatedItems, progress: newProgress };
+      }
+      return checklist;
+    }));
+  };
 
   const handleDocumentUpload = () => {
     setUploadingDocument(true);
     // Simulate document parsing and checklist creation
     setTimeout(() => {
       setUploadingDocument(false);
+      toast({
+        title: "Document Processed",
+        description: "New checklist created from uploaded document",
+      });
     }, 2000);
   };
 
@@ -150,6 +197,7 @@ export default function Checklists() {
                       <div key={item.id} className="flex items-center space-x-2">
                         <Checkbox 
                           checked={item.completed}
+                          onCheckedChange={() => toggleChecklistItem(checklist.id, item.id)}
                           className="data-[state=checked]:bg-success data-[state=checked]:border-success"
                         />
                         <span className={`text-sm flex-1 ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
@@ -182,7 +230,10 @@ export default function Checklists() {
                   <div className="space-y-2">
                     {checklist.items.map((item) => (
                       <div key={item.id} className="flex items-center space-x-2">
-                        <Checkbox checked={item.completed} />
+                        <Checkbox 
+                          checked={item.completed}
+                          onCheckedChange={() => toggleChecklistItem(checklist.id, item.id)}
+                        />
                         <span className={`text-sm flex-1 ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
                           {item.task}
                         </span>
@@ -207,7 +258,10 @@ export default function Checklists() {
                   <div className="space-y-2">
                     {checklist.items.map((item) => (
                       <div key={item.id} className="flex items-center space-x-2">
-                        <Checkbox checked={item.completed} />
+                        <Checkbox 
+                          checked={item.completed}
+                          onCheckedChange={() => toggleChecklistItem(checklist.id, item.id)}
+                        />
                         <span className={`text-sm flex-1 ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
                           {item.task}
                         </span>
