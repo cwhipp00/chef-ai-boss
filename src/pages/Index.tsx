@@ -25,17 +25,38 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative h-32 overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${restaurantHeroImage})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
-        </div>
-        <div className="relative flex h-full items-center px-6">
-          <div className="text-white">
-            <h2 className="text-xl font-bold">AI-Powered Restaurant Management</h2>
-            <p className="text-sm opacity-90">Streamline operations with intelligent automation</p>
+      <section className="relative h-40 overflow-hidden bg-gradient-to-br from-background via-primary/10 to-accent/20">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-background to-background" />
+        <div className="absolute inset-0 bg-grid-white/5" />
+        
+        <div className="relative flex h-full items-center justify-between px-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">🍳</span>
+                </div>
+                <div className="absolute -top-1 -right-1 h-3 w-3 bg-accent rounded-full animate-pulse" />
+              </div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                Chef AI Command Center
+              </h2>
+            </div>
+            <p className="text-muted-foreground text-sm flex items-center gap-2">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              All systems operational • Next-gen culinary intelligence
+            </p>
+          </div>
+          
+          <div className="hidden md:flex items-center gap-4">
+            <div className="glass-card p-3 rounded-xl">
+              <div className="text-xs text-muted-foreground mb-1">Active Sessions</div>
+              <div className="text-lg font-bold text-foreground">12</div>
+            </div>
+            <div className="glass-card p-3 rounded-xl">
+              <div className="text-xs text-muted-foreground mb-1">AI Efficiency</div>
+              <div className="text-lg font-bold text-primary">98%</div>
+            </div>
           </div>
         </div>
       </section>
