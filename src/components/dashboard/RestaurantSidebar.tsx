@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
 import { 
   LayoutDashboard, 
   ChefHat, 
@@ -74,12 +73,12 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
-  const { user } = useUser();
   const { t } = useLanguage();
 
   const isActive = (path: string) => currentPath === path;
   
-  const isManager = user?.publicMetadata?.role === 'manager' || user?.emailAddresses?.[0]?.emailAddress?.includes('manager');
+  // For now, assume all users are managers until Clerk is fully set up
+  const isManager = true;
 
   return (
     <div className={cn(
@@ -163,9 +162,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {user?.firstName} {user?.lastName}
-              </p>
+              <p className="text-sm font-medium text-foreground truncate">John Doe</p>
               <p className="text-xs text-muted-foreground truncate">
                 {isManager ? t('common.manager') : 'Staff'}
               </p>
