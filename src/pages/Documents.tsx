@@ -1,202 +1,193 @@
 import { useState } from 'react';
-import { Upload, FileText, Download, Search, Filter, Folder, Plus, Eye } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Upload, FileText, Search, Filter, Download, Eye, FolderOpen, Calendar, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 const documents = [
   {
     id: 1,
-    name: "Food Safety Manual 2024",
+    name: "Food Safety Manual",
     type: "PDF",
-    category: "Safety",
     size: "2.4 MB",
-    uploadDate: "2024-01-10",
-    description: "Complete food safety guidelines and procedures",
-    tags: ["safety", "manual", "compliance"]
+    lastModified: "2024-03-15",
+    category: "Safety",
+    author: "Head Chef",
+    tags: ["haccp", "safety", "procedures", "training"],
+    content: "Complete guide to food safety procedures including HACCP protocols, temperature control, cross-contamination prevention, and staff training requirements."
   },
   {
     id: 2,
-    name: "Equipment Maintenance Schedule",
-    type: "Excel",
-    category: "Maintenance",
-    size: "856 KB",
-    uploadDate: "2024-01-08",
-    description: "Detailed maintenance schedule for all kitchen equipment",
-    tags: ["maintenance", "schedule", "equipment"]
+    name: "Employee Handbook",
+    type: "PDF",
+    size: "1.8 MB",
+    lastModified: "2024-03-12",
+    category: "HR",
+    author: "HR Manager",
+    tags: ["policies", "procedures", "employee", "benefits"],
+    content: "Comprehensive employee handbook covering company policies, procedures, benefits, dress code, and workplace conduct guidelines."
   },
   {
     id: 3,
-    name: "Staff Training Handbook",
-    type: "PDF",
-    category: "Training",
-    size: "4.1 MB",
-    uploadDate: "2024-01-05",
-    description: "Comprehensive training materials for new employees",
-    tags: ["training", "staff", "handbook"]
+    name: "Supplier Contracts",
+    type: "DOCX",
+    size: "3.2 MB",
+    lastModified: "2024-03-10",
+    category: "Legal",
+    author: "Operations Manager",
+    tags: ["contracts", "suppliers", "agreements", "terms"],
+    content: "Collection of supplier contracts and agreements for produce, meat, dairy, and beverage suppliers including terms and conditions."
   },
   {
     id: 4,
-    name: "Menu Pricing Analysis Q1",
+    name: "Health Department Certificates",
     type: "PDF",
-    category: "Finance",
-    size: "1.8 MB",
-    uploadDate: "2024-01-03",
-    description: "Quarterly analysis of menu pricing and profitability",
-    tags: ["pricing", "analysis", "finance"]
+    size: "1.1 MB",
+    lastModified: "2024-03-08",
+    category: "Compliance",
+    author: "Manager",
+    tags: ["certificates", "compliance", "health", "permits"],
+    content: "Current health department certificates, permits, and compliance documentation required for restaurant operation."
   },
   {
     id: 5,
-    name: "Supplier Contracts 2024",
-    type: "Word",
-    category: "Legal",
-    size: "3.2 MB",
-    uploadDate: "2023-12-28",
-    description: "Active supplier contracts and agreements",
-    tags: ["contracts", "suppliers", "legal"]
+    name: "Menu Engineering Analysis",
+    type: "XLSX",
+    size: "0.8 MB",
+    lastModified: "2024-03-14",
+    category: "Operations",
+    author: "Chef Manager",
+    tags: ["menu", "analysis", "profitability", "costs"],
+    content: "Detailed menu engineering analysis including item profitability, food costs, pricing strategies, and menu optimization recommendations."
   },
   {
     id: 6,
-    name: "Health Inspection Report",
+    name: "Staff Training Protocols",
     type: "PDF",
-    category: "Compliance",
-    size: "1.1 MB",
-    uploadDate: "2023-12-20",
-    description: "Latest health department inspection results",
-    tags: ["health", "inspection", "compliance"]
-  }
-];
-
-const categories = [
-  { name: "Safety", count: 8, color: "bg-destructive" },
-  { name: "Training", count: 12, color: "bg-primary" },
-  { name: "Maintenance", count: 6, color: "bg-warning" },
-  { name: "Finance", count: 15, color: "bg-success" },
-  { name: "Legal", count: 4, color: "bg-info" },
-  { name: "Compliance", count: 7, color: "bg-secondary" }
-];
-
-const recentActivity = [
-  {
-    id: 1,
-    action: "uploaded",
-    document: "Food Safety Manual 2024",
-    user: "Sarah Johnson",
-    timestamp: "2 hours ago"
+    size: "1.5 MB",
+    lastModified: "2024-03-11",
+    category: "Training",
+    author: "Training Coordinator",
+    tags: ["training", "protocols", "onboarding", "skills"],
+    content: "Standard operating procedures for staff training including onboarding process, skill development, and ongoing education programs."
   },
   {
-    id: 2,
-    action: "downloaded",
-    document: "Staff Training Handbook",
-    user: "Mike Rodriguez",
-    timestamp: "4 hours ago"
+    id: 7,
+    name: "Financial Reports Q1 2024",
+    type: "PDF",
+    size: "2.1 MB",
+    lastModified: "2024-03-09",
+    category: "Finance",
+    author: "Accountant",
+    tags: ["financial", "reports", "quarterly", "revenue"],
+    content: "Quarterly financial reports including profit and loss statements, cash flow analysis, and budget variance reports for Q1 2024."
   },
   {
-    id: 3,
-    action: "viewed",
-    document: "Equipment Maintenance Schedule",
-    user: "Emily Chen",
-    timestamp: "6 hours ago"
+    id: 8,
+    name: "Emergency Procedures",
+    type: "PDF",
+    size: "0.9 MB",
+    lastModified: "2024-03-07",
+    category: "Safety",
+    author: "Safety Officer",
+    tags: ["emergency", "procedures", "safety", "protocols"],
+    content: "Emergency response procedures including fire safety, medical emergencies, evacuation plans, and emergency contact information."
   }
 ];
 
 export default function Documents() {
-  const [selectedTab, setSelectedTab] = useState('library');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const { toast } = useToast();
 
-  const getFileTypeIcon = (type: string) => {
-    return <FileText className="h-4 w-4" />;
-  };
-
-  const getFileTypeColor = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'pdf': return 'text-destructive';
-      case 'excel': return 'text-success';
-      case 'word': return 'text-primary';
-      default: return 'text-muted-foreground';
-    }
-  };
-
-  const getCategoryBadge = (category: string) => {
-    const categoryData = categories.find(c => c.name === category);
-    return (
-      <Badge className={`${categoryData?.color} text-white`}>
-        {category}
-      </Badge>
-    );
-  };
-
-  const handleBulkUpload = () => {
-    setUploadingFiles(true);
-    // Simulate bulk file upload
-    setTimeout(() => {
-      setUploadingFiles(false);
-    }, 3000);
-  };
+  const categories = ['All', 'Safety', 'HR', 'Legal', 'Compliance', 'Operations', 'Training', 'Finance'];
 
   const filteredDocuments = documents.filter(doc => {
-    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doc.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
+    const matchesSearch = searchQuery.toLowerCase() === '' || 
+      doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      doc.author.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = selectedCategory === 'All' || doc.category === selectedCategory;
+    
     return matchesSearch && matchesCategory;
   });
+
+  const handleFileUpload = async () => {
+    setIsUploading(true);
+    
+    // Simulate file upload
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setIsUploading(false);
+    toast({
+      title: "Files Uploaded",
+      description: "Documents have been successfully uploaded to the library",
+    });
+  };
+
+  const getFileIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'pdf': return '📄';
+      case 'docx': return '📝';
+      case 'xlsx': return '📊';
+      default: return '📄';
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Document Library</h1>
-          <p className="text-muted-foreground">Manage company documents and files</p>
+          <p className="text-muted-foreground">Searchable document management and organization</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleBulkUpload}
-            disabled={uploadingFiles}
-          >
+          <Button variant="outline" onClick={handleFileUpload} disabled={isUploading}>
             <Upload className="h-4 w-4 mr-2" />
-            {uploadingFiles ? 'Uploading...' : 'Bulk Upload'}
+            {isUploading ? "Uploading..." : "Bulk Upload"}
           </Button>
           <Button size="lg" className="bg-gradient-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Document
+            <Upload className="h-4 w-4 mr-2" />
+            Upload Document
           </Button>
         </div>
       </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="library" className="space-y-6">
+        <TabsList>
           <TabsTrigger value="library">Document Library</TabsTrigger>
+          <TabsTrigger value="search">Advanced Search</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="activity">Recent Activity</TabsTrigger>
         </TabsList>
 
         <TabsContent value="library" className="space-y-6">
+          {/* Search and Filter Bar */}
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search documents..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search documents, content, tags, or authors..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Categories" />
+                <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.name} value={category.name}>
-                    {category.name}
+                {categories.map(category => (
+                  <SelectItem key={category} value={category}>
+                    {category}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -206,150 +197,172 @@ export default function Documents() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDocuments.map((document) => (
-              <Card key={document.id} className="hover:shadow-medium transition-shadow">
-                <CardHeader>
+          {/* Search Results Summary */}
+          {searchQuery && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Search className="h-4 w-4" />
+              <span>Found {filteredDocuments.length} documents matching "{searchQuery}"</span>
+            </div>
+          )}
+
+          {/* Documents Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredDocuments.map((doc) => (
+              <Card 
+                key={doc.id} 
+                className="hover-lift cursor-pointer transition-all"
+                onClick={() => setSelectedDocument(doc)}
+              >
+                <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded ${getFileTypeColor(document.type)}`}>
-                        {getFileTypeIcon(document.type)}
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{getFileIcon(doc.type)}</span>
+                      <div className="text-xs text-muted-foreground">{doc.type}</div>
+                    </div>
+                    <Badge variant="secondary">{doc.category}</Badge>
+                  </div>
+                  <CardTitle className="text-base leading-tight">{doc.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {/* Document Meta */}
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        <span>{doc.author}</span>
                       </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-base line-clamp-2">
-                          {document.name}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          {document.type} • {document.size}
-                        </p>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        <span>{doc.lastModified}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FolderOpen className="h-3 w-3" />
+                        <span>{doc.size}</span>
                       </div>
                     </div>
-                    {getCategoryBadge(document.category)}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {document.description}
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {document.tags.slice(0, 3).map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex justify-between items-center text-xs text-muted-foreground">
-                    <span>Uploaded: {new Date(document.uploadDate).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Eye className="h-3 w-3 mr-1" />
-                      View
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Download className="h-3 w-3 mr-1" />
-                      Download
-                    </Button>
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1">
+                      {doc.tags.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} variant="outline" className="text-xs px-1 py-0">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {doc.tags.length > 3 && (
+                        <Badge variant="outline" className="text-xs px-1 py-0">
+                          +{doc.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Content Preview */}
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {doc.content}
+                    </p>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 mt-4">
+                      <Button size="sm" variant="outline" className="flex-1">
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1">
+                        <Download className="h-3 w-3 mr-1" />
+                        Download
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
+
+          {filteredDocuments.length === 0 && (
+            <div className="text-center py-12">
+              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                {searchQuery ? 'No documents found matching your search.' : 'No documents found.'}
+              </p>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="search" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Advanced Document Search</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Use advanced filters to find exactly what you're looking for
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Full Text Search</label>
+                  <Input placeholder="Search within document content..." />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Author</label>
+                  <Input placeholder="Search by author..." />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Date Range</label>
+                  <div className="flex gap-2">
+                    <Input type="date" className="flex-1" />
+                    <Input type="date" className="flex-1" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">File Size</label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Any size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Under 1MB</SelectItem>
+                      <SelectItem value="medium">1MB - 5MB</SelectItem>
+                      <SelectItem value="large">Over 5MB</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button className="w-full">
+                <Search className="h-4 w-4 mr-2" />
+                Search Documents
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="categories" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((category) => (
-              <Card key={category.name} className="hover:shadow-medium transition-shadow cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg ${category.color} flex items-center justify-center`}>
-                      <Folder className="h-5 w-5 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {categories.slice(1).map((category) => {
+              const categoryDocs = documents.filter(doc => doc.category === category);
+              return (
+                <Card key={category} className="hover-lift cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>{category}</span>
+                      <Badge variant="secondary">{categoryDocs.length}</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {categoryDocs.slice(0, 3).map((doc) => (
+                        <div key={doc.id} className="text-sm text-muted-foreground">
+                          • {doc.name}
+                        </div>
+                      ))}
+                      {categoryDocs.length > 3 && (
+                        <div className="text-sm text-primary">
+                          + {categoryDocs.length - 3} more documents
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <CardTitle>{category.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {category.count} documents
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Last updated:</span>
-                      <span>2 days ago</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Total size:</span>
-                      <span>{(Math.random() * 50 + 10).toFixed(1)} MB</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="activity" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Document Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                      <FileText className="h-4 w-4 text-primary-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm">
-                        <span className="font-medium">{activity.user}</span>
-                        {' '}{activity.action}{' '}
-                        <span className="font-medium">"{activity.document}"</span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Storage Usage</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">47.3 GB</div>
-                <p className="text-xs text-muted-foreground">of 100 GB used</p>
-                <div className="w-full bg-muted rounded-full h-2 mt-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: '47%' }} />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Total Documents</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{documents.length}</div>
-                <p className="text-xs text-success">+3 this week</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Downloads</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">142</div>
-                <p className="text-xs text-muted-foreground">this month</p>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </TabsContent>
       </Tabs>

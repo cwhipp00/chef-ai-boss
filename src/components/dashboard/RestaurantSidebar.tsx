@@ -13,13 +13,19 @@ import {
   Menu,
   X,
   Calendar as CalendarIcon,
-  DollarSign
+  DollarSign,
+  Brain,
+  TableProperties,
+  Clock,
+  BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { SearchTrigger } from "@/components/search/GlobalSearch";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "AI Agents", url: "/ai-agents", icon: Brain },
   { title: "Recipes", url: "/recipes", icon: ChefHat },
   { title: "Checklists", url: "/checklists", icon: ClipboardList },
   { title: "Manager Tools", url: "/manager", icon: Users },
@@ -28,14 +34,18 @@ const navigationItems = [
   { title: "Calendar", url: "/calendar", icon: CalendarIcon },
   { title: "Orders", url: "/orders", icon: ShoppingCart },
   { title: "Documents", url: "/documents", icon: FileText },
-  { title: "Reservations", url: "/reservations", icon: CalendarIcon },
-  { title: "Staff Schedule", url: "/staff-schedule", icon: Users },
+  { title: "Reservations", url: "/reservations", icon: TableProperties },
+  { title: "Staff Schedule", url: "/staff-schedule", icon: Clock },
   { title: "Finance", url: "/finance", icon: DollarSign },
-  { title: "Customers", url: "/customers", icon: Users },
+  { title: "Customers", url: "/customers", icon: BarChart3 },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
-export function RestaurantSidebar() {
+interface RestaurantSidebarProps {
+  onOpenSearch?: () => void;
+}
+
+export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
@@ -65,6 +75,13 @@ export function RestaurantSidebar() {
         </Button>
       </div>
 
+      {/* Search */}
+      {!isCollapsed && (
+        <div className="px-4 py-2">
+          <SearchTrigger onOpenSearch={() => onOpenSearch?.()} />
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex-1 p-2">
         <ul className="space-y-1">
@@ -75,9 +92,9 @@ export function RestaurantSidebar() {
                 end
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors group",
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors group hover-lift",
                     isActive
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground glow-on-hover"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )
                 }
@@ -93,10 +110,10 @@ export function RestaurantSidebar() {
       {/* User Section */}
       <div className="p-4 border-t border-border">
         <div className={cn(
-          "flex items-center gap-3 p-2 rounded-lg bg-muted",
+          "flex items-center gap-3 p-2 rounded-lg bg-muted hover-lift",
           isCollapsed && "justify-center"
         )}>
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
             <span className="text-sm font-medium text-primary-foreground">JD</span>
           </div>
           {!isCollapsed && (
