@@ -18,13 +18,15 @@ import {
   TableProperties,
   Clock,
   BarChart3,
-  GraduationCap
+  GraduationCap,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SearchTrigger } from "@/components/search/GlobalSearch";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navigationSections = [
   {
@@ -73,6 +75,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
   const location = useLocation();
   const currentPath = location.pathname;
   const { t } = useLanguage();
+  const { user, signOut } = useAuth();
 
   const isActive = (path: string) => currentPath === path;
   
@@ -157,17 +160,32 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
           isCollapsed && "justify-center"
         )}>
           <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
-            <span className="text-sm font-medium text-primary-foreground">JD</span>
+            <span className="text-sm font-medium text-primary-foreground">
+              {user?.email?.charAt(0).toUpperCase() || 'U'}
+            </span>
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">John Doe</p>
+              <p className="text-sm font-medium text-foreground truncate">
+                {user?.email || 'User'}
+              </p>
               <p className="text-xs text-muted-foreground truncate">
                 {isManager ? t('common.manager') : 'Staff'}
               </p>
             </div>
           )}
         </div>
+        {!isCollapsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className="w-full mt-2 text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
+        )}
       </div>
     </div>
   );

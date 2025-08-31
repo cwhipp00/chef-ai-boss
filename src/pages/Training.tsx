@@ -1,560 +1,558 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Play, Book, Trophy, Clock, Users, ExternalLink, FileText } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { 
+  BookOpen, 
+  Star, 
+  Clock, 
+  Users, 
+  Award, 
+  Search, 
+  Filter,
+  Play,
+  CheckCircle,
+  TrendingUp,
+  Calendar,
+  Target,
+  ChefHat,
+  Flame,
+  Trophy
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
-export default function Training() {
-  const { toast } = useToast();
-  const [selectedPOS, setSelectedPOS] = useState("toast");
-  const [quizProgress, setQuizProgress] = useState<{[key: string]: number}>({});
-  const [completedTrainings, setCompletedTrainings] = useState<string[]>([]);
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  instructor_name: string;
+  difficulty_level: string;
+  duration_hours: number;
+  thumbnail_url?: string;
+  category: string;
+  tags: string[];
+  is_featured: boolean;
+}
 
-  const posProviders = [
-    { value: "toast", label: "Toast POS" },
-    { value: "square", label: "Square" },
-    { value: "clover", label: "Clover" },
-    { value: "lightspeed", label: "Lightspeed" },
-    { value: "revel", label: "Revel Systems" },
-    { value: "touchbistro", label: "TouchBistro" }
-  ];
+interface UserEnrollment {
+  id: string;
+  course_id: string;
+  enrolled_at: string;
+  completed_at?: string;
+  progress_percent: number;
+}
 
-  const generalTrainingPoints = [
-    {
-      id: "customer-service",
-      title: "Customer Service Excellence",
-      description: "Master the art of creating memorable guest experiences through active listening, problem-solving, and genuine hospitality.",
-      duration: "45 minutes",
-      topics: ["Active listening techniques", "Handling complaints gracefully", "Upselling strategies", "Creating personal connections"],
-      completed: false
-    },
-    {
-      id: "food-safety",
-      title: "Food Safety & Sanitation",
-      description: "Essential food handling practices, temperature control, and sanitation protocols to ensure guest safety.",
-      duration: "60 minutes",
-      topics: ["Temperature control", "Cross-contamination prevention", "Hand hygiene", "Cleaning protocols"],
-      completed: false
-    },
-    {
-      id: "menu-knowledge",
-      title: "Menu Knowledge & Allergens",
-      description: "Comprehensive understanding of menu items, ingredients, preparation methods, and allergen awareness.",
-      duration: "90 minutes",
-      topics: ["Ingredient knowledge", "Preparation methods", "Common allergens", "Dietary restrictions"],
-      completed: false
-    },
-    {
-      id: "wine-beverage",
-      title: "Wine & Beverage Service",
-      description: "Professional beverage service techniques, wine pairing basics, and proper glassware handling.",
-      duration: "75 minutes",
-      topics: ["Wine service protocol", "Beer knowledge", "Cocktail basics", "Glassware selection"],
-      completed: false
-    },
-    {
-      id: "pos-basics",
-      title: "POS System Fundamentals",
-      description: "Master your point-of-sale system operations, order entry, payment processing, and troubleshooting.",
-      duration: "120 minutes",
-      topics: ["Order entry", "Payment processing", "Table management", "System troubleshooting"],
-      completed: false
-    },
-    {
-      id: "teamwork",
-      title: "Teamwork & Communication",
-      description: "Effective communication strategies, conflict resolution, and collaborative service delivery.",
-      duration: "50 minutes",
-      topics: ["Clear communication", "Team coordination", "Conflict resolution", "Shift handovers"],
-      completed: false
-    },
-    {
-      id: "sales-techniques",
-      title: "Sales Techniques & Upselling",
-      description: "Ethical sales approaches, suggestive selling, and techniques to increase average check size.",
-      duration: "40 minutes",
-      topics: ["Suggestive selling", "Reading customer cues", "Product knowledge", "Closing techniques"],
-      completed: false
-    },
-    {
-      id: "time-management",
-      title: "Time Management & Efficiency",
-      description: "Optimize service flow, prioritize tasks, and manage multiple tables effectively during peak hours.",
-      duration: "35 minutes",
-      topics: ["Task prioritization", "Multi-table management", "Rush hour strategies", "Workflow optimization"],
-      completed: false
-    },
-    {
-      id: "crisis-management",
-      title: "Crisis Management & Emergency Procedures",
-      description: "Handle emergencies, difficult situations, and maintain composure under pressure.",
-      duration: "30 minutes",
-      topics: ["Emergency protocols", "Difficult customer situations", "Medical emergencies", "Security procedures"],
-      completed: false
-    },
-    {
-      id: "hospitality-standards",
-      title: "Hospitality Standards & Etiquette",
-      description: "Professional service standards, proper etiquette, and creating an exceptional dining atmosphere.",
-      duration: "55 minutes",
-      topics: ["Service standards", "Professional appearance", "Greeting protocols", "Table etiquette"],
-      completed: false
+const Training = () => {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [enrollments, setEnrollments] = useState<UserEnrollment[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    fetchCourses();
+    if (user) {
+      fetchEnrollments();
     }
-  ];
+  }, [user]);
 
-  const toastTrainingMaterials = [
-    {
-      id: "toast-basic-operations",
-      title: "Toast POS Basic Operations",
-      description: "Learn the fundamentals of navigating the Toast POS system",
-      videoUrl: "https://share.vidyard.com/watch/C7ai3JLFdwM6YiuRy76bH7",
-      duration: "11 minutes",
-      level: "Beginner"
-    },
-    {
-      id: "order-entry",
-      title: "Order Entry & Modifications",
-      description: "Master taking orders, making modifications, and special requests",
-      duration: "15 minutes",
-      level: "Beginner"
-    },
-    {
-      id: "table-management",
-      title: "Table Management & Seating",
-      description: "Efficiently manage tables, transfers, and seating arrangements",
-      duration: "12 minutes",
-      level: "Intermediate"
-    },
-    {
-      id: "payment-processing",
-      title: "Payment Processing & Splitting Bills",
-      description: "Handle various payment methods and split check scenarios",
-      duration: "18 minutes",
-      level: "Beginner"
-    },
-    {
-      id: "menu-modifications",
-      title: "Menu Item Modifications",
-      description: "Add modifiers, special instructions, and customizations",
-      duration: "10 minutes",
-      level: "Beginner"
-    },
-    {
-      id: "discounts-comps",
-      title: "Applying Discounts & Comps",
-      description: "Learn when and how to apply discounts and complimentary items",
-      duration: "8 minutes",
-      level: "Intermediate"
-    },
-    {
-      id: "gift-cards",
-      title: "Gift Card Sales & Redemption",
-      description: "Process gift card transactions and handle redemptions",
-      duration: "6 minutes",
-      level: "Beginner"
-    },
-    {
-      id: "loyalty-programs",
-      title: "Loyalty Program Management",
-      description: "Enroll customers and apply loyalty rewards",
-      duration: "9 minutes",
-      level: "Intermediate"
-    },
-    {
-      id: "takeout-orders",
-      title: "Takeout & Delivery Orders",
-      description: "Process off-premise orders and coordinate with delivery services",
-      duration: "14 minutes",
-      level: "Intermediate"
-    },
-    {
-      id: "kitchen-communication",
-      title: "Kitchen Communication Features",
-      description: "Use kitchen display integration and order timing features",
-      duration: "7 minutes",
-      level: "Advanced"
-    },
-    {
-      id: "reporting-basics",
-      title: "Basic Reporting & End-of-Day",
-      description: "Generate reports and complete end-of-day procedures",
-      duration: "16 minutes",
-      level: "Advanced"
-    },
-    {
-      id: "cash-management",
-      title: "Cash Drawer & Till Management",
-      description: "Handle cash operations, drawer counts, and reconciliation",
-      duration: "13 minutes",
-      level: "Intermediate"
-    },
-    {
-      id: "customer-profiles",
-      title: "Customer Profile Management",
-      description: "Create and manage customer profiles and preferences",
-      duration: "5 minutes",
-      level: "Beginner"
-    },
-    {
-      id: "inventory-tracking",
-      title: "Basic Inventory Tracking",
-      description: "Understand how POS integrates with inventory management",
-      duration: "11 minutes",
-      level: "Advanced"
-    },
-    {
-      id: "staff-functions",
-      title: "Staff Functions & Permissions",
-      description: "Understand user roles and permission levels",
-      duration: "8 minutes",
-      level: "Advanced"
-    },
-    {
-      id: "troubleshooting",
-      title: "Common Troubleshooting",
-      description: "Resolve common POS issues and when to escalate",
-      duration: "20 minutes",
-      level: "Intermediate"
-    },
-    {
-      id: "mobile-app",
-      title: "Toast Go Mobile App",
-      description: "Use the mobile app for tableside ordering and payments",
-      duration: "12 minutes",
-      level: "Intermediate"
-    },
-    {
-      id: "reservations",
-      title: "Reservation Management",
-      description: "Handle reservations and waitlist management",
-      duration: "9 minutes",
-      level: "Intermediate"
-    },
-    {
-      id: "online-ordering",
-      title: "Online Ordering Integration",
-      description: "Manage online orders and coordinate with kitchen",
-      duration: "10 minutes",
-      level: "Advanced"
-    },
-    {
-      id: "analytics-insights",
-      title: "Using Analytics & Insights",
-      description: "Interpret basic sales data and performance metrics",
-      duration: "15 minutes",
-      level: "Advanced"
+  const fetchCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .order('is_featured', { ascending: false });
+      
+      if (error) throw error;
+      setCourses(data || []);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      toast.error('Failed to load courses');
+    } finally {
+      setLoading(false);
     }
-  ];
-
-  const quizQuestions = {
-    "customer-service": [
-      {
-        question: "What is the most important aspect of customer service?",
-        options: ["Speed", "Active listening", "Memorizing the menu", "Taking orders quickly"],
-        correct: 1
-      },
-      {
-        question: "When handling a complaint, you should:",
-        options: ["Argue with the customer", "Listen actively and empathize", "Ignore the complaint", "Pass it to management immediately"],
-        correct: 1
-      }
-    ],
-    "food-safety": [
-      {
-        question: "What is the safe internal temperature for chicken?",
-        options: ["145°F", "155°F", "165°F", "175°F"],
-        correct: 2
-      },
-      {
-        question: "How often should you wash your hands?",
-        options: ["Once per shift", "Before handling food", "Only when visibly dirty", "Every 2 hours"],
-        correct: 1
-      }
-    ]
   };
 
-  const handleStartTraining = (trainingId: string) => {
-    setCompletedTrainings([...completedTrainings, trainingId]);
-    toast({
-      title: "Training Started",
-      description: "Training module has been marked as completed.",
-    });
+  const fetchEnrollments = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_enrollments')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      setEnrollments(data || []);
+    } catch (error) {
+      console.error('Error fetching enrollments:', error);
+    }
   };
 
-  const handleQuizStart = (moduleId: string) => {
-    setQuizProgress({ ...quizProgress, [moduleId]: 50 });
-    toast({
-      title: "Quiz Started",
-      description: "Quiz progress will be tracked for management review.",
-    });
+  const handleEnroll = async (courseId: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_enrollments')
+        .insert({
+          user_id: user.id,
+          course_id: courseId,
+          progress_percent: 0
+        });
+      
+      if (error) throw error;
+      
+      toast.success('Successfully enrolled in course!');
+      fetchEnrollments();
+    } catch (error) {
+      console.error('Error enrolling:', error);
+      toast.error('Failed to enroll in course');
+    }
+  };
+
+  const isEnrolled = (courseId: string) => {
+    return enrollments.some(enrollment => enrollment.course_id === courseId);
+  };
+
+  const getEnrollmentProgress = (courseId: string) => {
+    const enrollment = enrollments.find(e => e.course_id === courseId);
+    return enrollment?.progress_percent || 0;
+  };
+
+  const getDifficultyColor = (level: string) => {
+    switch (level) {
+      case 'beginner': return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'intermediate': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+      case 'advanced': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      default: return 'bg-muted/10 text-muted-foreground border-muted/20';
+    }
+  };
+
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         course.instructor_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDifficulty = selectedDifficulty === 'all' || course.difficulty_level === selectedDifficulty;
+    const matchesCategory = selectedCategory === 'all' || course.category === selectedCategory;
+    
+    return matchesSearch && matchesDifficulty && matchesCategory;
+  });
+
+  const featuredCourses = filteredCourses.filter(course => course.is_featured);
+  const enrolledCourses = filteredCourses.filter(course => isEnrolled(course.id));
+  const completedCourses = enrolledCourses.filter(course => getEnrollmentProgress(course.id) === 100);
+  
+  const categories = [...new Set(courses.map(course => course.category))];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-r from-primary/20 via-primary/10 to-transparent">
+        <div className="absolute inset-0 bg-grid-white/10 bg-grid-16 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        <div className="relative px-6 py-12 mx-auto max-w-7xl">
+          <div className="flex items-center justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/20">
+                  <ChefHat className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold tracking-tight">ChefAI University</h1>
+                  <p className="text-lg text-muted-foreground">Master the culinary arts with world-class instruction</p>
+                </div>
+              </div>
+              
+              {user && (
+                <div className="flex items-center space-x-6 mt-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">{enrolledCourses.length}</div>
+                    <div className="text-sm text-muted-foreground">Enrolled</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-500">{completedCourses.length}</div>
+                    <div className="text-sm text-muted-foreground">Completed</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-500">
+                      {Math.round(enrolledCourses.reduce((acc, course) => acc + getEnrollmentProgress(course.id), 0) / (enrolledCourses.length || 1))}%
+                    </div>
+                    <div className="text-sm text-muted-foreground">Avg Progress</div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="hidden lg:block">
+              <div className="flex items-center space-x-4">
+                <Trophy className="w-16 h-16 text-yellow-500 animate-pulse" />
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground">Next Achievement</div>
+                  <div className="font-semibold">Complete 3 courses</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="px-6 mx-auto max-w-7xl">
+        {/* Search and Filters */}
+        <div className="py-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search courses, instructors, or topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            
+            <div className="flex gap-2">
+              <select 
+                value={selectedDifficulty}
+                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                className="px-3 py-2 text-sm border rounded-md bg-background border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">All Levels</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+              
+              <select 
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-3 py-2 text-sm border rounded-md bg-background border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">All Categories</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <Tabs defaultValue="discover" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-4 lg:w-fit">
+            <TabsTrigger value="discover" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Discover
+            </TabsTrigger>
+            <TabsTrigger value="my-courses" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              My Courses
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="flex items-center gap-2">
+              <Award className="w-4 h-4" />
+              Achievements
+            </TabsTrigger>
+            <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Leaderboard
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="discover" className="space-y-8">
+            {/* Featured Courses */}
+            {featuredCourses.length > 0 && (
+              <section>
+                <div className="flex items-center gap-2 mb-6">
+                  <Flame className="w-5 h-5 text-orange-500" />
+                  <h2 className="text-2xl font-bold">Featured Courses</h2>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {featuredCourses.map((course) => (
+                    <CourseCard 
+                      key={course.id} 
+                      course={course} 
+                      isEnrolled={isEnrolled(course.id)}
+                      progress={getEnrollmentProgress(course.id)}
+                      onEnroll={handleEnroll}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* All Courses */}
+            <section>
+              <h2 className="text-2xl font-bold mb-6">All Courses</h2>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredCourses.map((course) => (
+                  <CourseCard 
+                    key={course.id} 
+                    course={course} 
+                    isEnrolled={isEnrolled(course.id)}
+                    progress={getEnrollmentProgress(course.id)}
+                    onEnroll={handleEnroll}
+                  />
+                ))}
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="my-courses" className="space-y-8">
+            {enrolledCourses.length === 0 ? (
+              <Card className="p-12 text-center">
+                <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-xl font-semibold mb-2">No courses yet</h3>
+                <p className="text-muted-foreground mb-4">Start your culinary journey by enrolling in a course</p>
+                <Button onClick={() => {
+                  const discoverTab = document.querySelector('[value="discover"]') as HTMLElement;
+                  if (discoverTab) discoverTab.click();
+                }}>
+                  Browse Courses
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {enrolledCourses.map((course) => (
+                  <CourseCard 
+                    key={course.id} 
+                    course={course} 
+                    isEnrolled={true}
+                    progress={getEnrollmentProgress(course.id)}
+                    onEnroll={handleEnroll}
+                    showProgress={true}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="achievements" className="space-y-8">
+            <AchievementsSection completedCourses={completedCourses.length} totalProgress={enrolledCourses.length} />
+          </TabsContent>
+
+          <TabsContent value="leaderboard" className="space-y-8">
+            <LeaderboardSection />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+// Course Card Component
+const CourseCard = ({ 
+  course, 
+  isEnrolled, 
+  progress, 
+  onEnroll, 
+  showProgress = false 
+}: {
+  course: Course;
+  isEnrolled: boolean;
+  progress: number;
+  onEnroll: (courseId: string) => void;
+  showProgress?: boolean;
+}) => {
+  const getDifficultyColor = (level: string) => {
+    switch (level) {
+      case 'beginner': return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'intermediate': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+      case 'advanced': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      default: return 'bg-muted/10 text-muted-foreground border-muted/20';
+    }
   };
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Training Center</h2>
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Trophy className="h-3 w-3" />
-            {completedTrainings.length} Completed
+    <Card className="group overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 border-primary/10">
+      <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/10 bg-grid-8" />
+        <div className="absolute top-4 left-4">
+          <Badge className={`${course.is_featured ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : getDifficultyColor(course.difficulty_level)} border`}>
+            {course.is_featured ? '⭐ Featured' : course.difficulty_level}
           </Badge>
         </div>
+        <div className="absolute bottom-4 right-4">
+          <Avatar className="h-8 w-8 border-2 border-white/20">
+            <AvatarFallback className="text-xs bg-primary/20">
+              {course.instructor_name.split(' ').map(n => n[0]).join('')}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+      </div>
+      
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
+            {course.title}
+          </CardTitle>
+          <Badge variant="outline" className="ml-2 text-xs">
+            {course.category}
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {course.description}
+        </p>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Clock className="w-4 h-4" />
+            {course.duration_hours}h
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="w-4 h-4" />
+            {course.instructor_name}
+          </div>
+        </div>
+
+        {showProgress && isEnrolled && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Progress</span>
+              <span>{progress}%</span>
+            </div>
+            <Progress value={progress} className="h-2" />
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          {course.tags.map((tag) => (
+            <Badge key={tag} variant="secondary" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+
+        {isEnrolled ? (
+          <Button className="w-full" size="sm">
+            <Play className="w-4 h-4 mr-2" />
+            Continue Learning
+          </Button>
+        ) : (
+          <Button 
+            className="w-full" 
+            variant="outline" 
+            size="sm"
+            onClick={() => onEnroll(course.id)}
+          >
+            Enroll Now
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+// Achievements Section
+const AchievementsSection = ({ completedCourses, totalProgress }: { completedCourses: number; totalProgress: number }) => {
+  const achievements = [
+    { id: 1, title: "First Steps", description: "Complete your first course", icon: "🎯", unlocked: completedCourses >= 1 },
+    { id: 2, title: "Knowledge Seeker", description: "Complete 3 courses", icon: "📚", unlocked: completedCourses >= 3 },
+    { id: 3, title: "Culinary Scholar", description: "Complete 5 courses", icon: "🎓", unlocked: completedCourses >= 5 },
+    { id: 4, title: "Master Chef", description: "Complete 10 courses", icon: "👨‍🍳", unlocked: completedCourses >= 10 },
+    { id: 5, title: "Dedicated Student", description: "Enroll in 5 courses", icon: "⭐", unlocked: totalProgress >= 5 },
+    { id: 6, title: "Speed Learner", description: "Complete a course in one day", icon: "⚡", unlocked: false },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center space-y-2">
+        <h2 className="text-3xl font-bold">Your Achievements</h2>
+        <p className="text-muted-foreground">Track your learning milestones</p>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="general">General Training</TabsTrigger>
-          <TabsTrigger value="pos">POS Training</TabsTrigger>
-          <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
-          <TabsTrigger value="progress">Progress</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="general" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Book className="h-5 w-5" />
-                Restaurant Operations Training
-              </CardTitle>
-              <CardDescription>
-                Essential training modules for all restaurant staff covering core competencies
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {generalTrainingPoints.map((training) => (
-                  <Card key={training.id} className="relative">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-lg">{training.title}</CardTitle>
-                        {completedTrainings.includes(training.id) && (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        )}
-                      </div>
-                      <CardDescription>{training.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-2">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          {training.duration}
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">Key Topics:</p>
-                          <ul className="text-xs text-muted-foreground space-y-1">
-                            {training.topics.map((topic, index) => (
-                              <li key={index}>• {topic}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <Button
-                          size="sm"
-                          className="w-full mt-2"
-                          onClick={() => handleStartTraining(training.id)}
-                          disabled={completedTrainings.includes(training.id)}
-                        >
-                          {completedTrainings.includes(training.id) ? "Completed" : "Start Training"}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="pos" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                POS System Training
-              </CardTitle>
-              <CardDescription>
-                Comprehensive training materials for your point-of-sale system
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4">
-                <label className="text-sm font-medium">Select Your POS Provider:</label>
-                <Select value={selectedPOS} onValueChange={setSelectedPOS}>
-                  <SelectTrigger className="w-full max-w-xs mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {posProviders.map((provider) => (
-                      <SelectItem key={provider.value} value={provider.value}>
-                        {provider.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {selectedPOS === "toast" && (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {toastTrainingMaterials.map((material) => (
-                    <Card key={material.id}>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">{material.title}</CardTitle>
-                        <CardDescription>{material.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {material.duration}
-                            </span>
-                            <Badge variant={material.level === "Beginner" ? "default" : material.level === "Intermediate" ? "secondary" : "destructive"}>
-                              {material.level}
-                            </Badge>
-                          </div>
-                          <Button
-                            size="sm"
-                            className="w-full"
-                            onClick={() => {
-                              if (material.videoUrl) {
-                                window.open(material.videoUrl, '_blank');
-                              }
-                              handleStartTraining(material.id);
-                            }}
-                          >
-                            <Play className="h-4 w-4 mr-1" />
-                            {material.videoUrl ? "Watch Video" : "Start Training"}
-                            {material.videoUrl && <ExternalLink className="h-3 w-3 ml-1" />}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-
-              {selectedPOS !== "toast" && (
-                <Card className="p-6 text-center">
-                  <h3 className="text-lg font-semibold mb-2">Training Materials Coming Soon</h3>
-                  <p className="text-muted-foreground mb-4">
-                    We're working on comprehensive training materials for {posProviders.find(p => p.value === selectedPOS)?.label}.
-                    In the meantime, check out our general restaurant training modules.
-                  </p>
-                  <Button variant="outline" onClick={() => setSelectedPOS("toast")}>
-                    View Toast POS Training
-                  </Button>
-                </Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {achievements.map((achievement) => (
+          <Card key={achievement.id} className={`transition-all duration-200 ${achievement.unlocked ? 'border-primary/20 bg-primary/5' : 'opacity-50'}`}>
+            <CardContent className="p-6 text-center space-y-2">
+              <div className="text-4xl mb-2">{achievement.icon}</div>
+              <h3 className="font-semibold">{achievement.title}</h3>
+              <p className="text-sm text-muted-foreground">{achievement.description}</p>
+              {achievement.unlocked && (
+                <Badge variant="default" className="mt-2">
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Unlocked
+                </Badge>
               )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="quizzes" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
-                Knowledge Assessment
-              </CardTitle>
-              <CardDescription>
-                Test your knowledge with interactive quizzes. Results are tracked for management review.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                {Object.entries(quizQuestions).map(([moduleId, questions]) => (
-                  <Card key={moduleId}>
-                    <CardHeader>
-                      <CardTitle className="capitalize">{moduleId.replace('-', ' ')} Quiz</CardTitle>
-                      <CardDescription>{questions.length} questions</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {quizProgress[moduleId] && (
-                        <div className="mb-4">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>Progress</span>
-                            <span>{quizProgress[moduleId]}%</span>
-                          </div>
-                          <Progress value={quizProgress[moduleId]} />
-                        </div>
-                      )}
-                      <Button
-                        className="w-full"
-                        onClick={() => handleQuizStart(moduleId)}
-                        disabled={!!quizProgress[moduleId]}
-                      >
-                        {quizProgress[moduleId] ? "Quiz In Progress" : "Start Quiz"}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <div className="mt-6 p-4 border rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Note:</strong> Quiz results and employee progress tracking requires database integration. 
-                  Connect to Supabase to enable full quiz management and reporting features.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="progress" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Training Progress Overview
-              </CardTitle>
-              <CardDescription>
-                Track training completion and quiz results across all staff members
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <Card className="p-4">
-                    <div className="text-2xl font-bold">{completedTrainings.length}</div>
-                    <p className="text-xs text-muted-foreground">Modules Completed</p>
-                  </Card>
-                  <Card className="p-4">
-                    <div className="text-2xl font-bold">{Object.keys(quizProgress).length}</div>
-                    <p className="text-xs text-muted-foreground">Quizzes Started</p>
-                  </Card>
-                  <Card className="p-4">
-                    <div className="text-2xl font-bold">
-                      {Math.round((completedTrainings.length / generalTrainingPoints.length) * 100)}%
-                    </div>
-                    <p className="text-xs text-muted-foreground">Overall Progress</p>
-                  </Card>
-                </div>
-
-                <div className="border rounded-lg p-6 bg-muted/50">
-                  <h3 className="font-semibold mb-2">Manager Tools - Quiz Results & Employee Tracking</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    To access comprehensive employee quiz results, training progress tracking, and management reporting tools, 
-                    you'll need to connect your project to Supabase for secure data storage and user management.
-                  </p>
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Available with Supabase Integration:</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                      <li>• Individual employee quiz scores and completion rates</li>
-                      <li>• Department-wide training progress analytics</li>
-                      <li>• Automated compliance tracking and reporting</li>
-                      <li>• Custom training schedules and assignments</li>
-                      <li>• Performance improvement identification</li>
-                      <li>• Certification management and renewals</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        ))}
+      </div>
     </div>
   );
-}
+};
+
+// Leaderboard Section
+const LeaderboardSection = () => {
+  const mockLeaderboard = [
+    { rank: 1, name: "Alex Chen", courses: 12, points: 2400 },
+    { rank: 2, name: "Sarah Johnson", courses: 10, points: 2100 },
+    { rank: 3, name: "Mike Rodriguez", courses: 8, points: 1800 },
+    { rank: 4, name: "Emma Davis", courses: 7, points: 1650 },
+    { rank: 5, name: "David Kim", courses: 6, points: 1400 },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center space-y-2">
+        <h2 className="text-3xl font-bold">Leaderboard</h2>
+        <p className="text-muted-foreground">See how you compare with other learners</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-yellow-500" />
+            Top Learners This Month
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {mockLeaderboard.map((user, index) => (
+              <div key={user.rank} className="flex items-center justify-between p-3 rounded-lg border">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                    index === 0 ? 'bg-yellow-500 text-white' :
+                    index === 1 ? 'bg-gray-400 text-white' :
+                    index === 2 ? 'bg-amber-600 text-white' :
+                    'bg-muted text-muted-foreground'
+                  }`}>
+                    {user.rank}
+                  </div>
+                  <div>
+                    <div className="font-semibold">{user.name}</div>
+                    <div className="text-sm text-muted-foreground">{user.courses} courses completed</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-primary">{user.points}</div>
+                  <div className="text-xs text-muted-foreground">points</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default Training;
