@@ -60,7 +60,7 @@ const Auth = () => {
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-2">
             <ChefHat className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">ChefAI</h1>
+            <h1 className="text-3xl font-bold text-foreground">Chef AI</h1>
           </div>
           <p className="text-muted-foreground">
             Your culinary journey starts here
