@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, ShoppingCart, ChefHat, Wine, Store } from 'lucide-react';
+import { ClipboardList, ShoppingCart, ChefHat, Wine, Store, Settings } from 'lucide-react';
 import { PrepLists } from '@/components/recipes/PrepLists';
 import ChecklistsContent from './Checklists';
 import OrdersContent from './Orders';
 import { InventoryDashboard } from '@/components/inventory';
 import { StoreListDashboard } from '@/components/store/StoreListDashboard';
+import { DynamicFormGenerator } from '@/components/forms/DynamicFormGenerator';
 
 export default function Forms() {
   const [selectedTab, setSelectedTab] = useState('prep-lists');
@@ -20,7 +21,7 @@ export default function Forms() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="prep-lists" className="flex items-center gap-2">
             <ChefHat className="h-4 w-4" />
             Prep Lists
@@ -40,6 +41,10 @@ export default function Forms() {
           <TabsTrigger value="inventory" className="flex items-center gap-2">
             <Wine className="h-4 w-4" />
             Bar Inventory
+          </TabsTrigger>
+          <TabsTrigger value="dynamic-forms" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Dynamic Forms
           </TabsTrigger>
         </TabsList>
 
@@ -61,6 +66,10 @@ export default function Forms() {
 
         <TabsContent value="inventory" className="mt-0">
           <InventoryDashboard />
+        </TabsContent>
+
+        <TabsContent value="dynamic-forms" className="mt-0">
+          <DynamicFormGenerator organizationId="demo-org-123" />
         </TabsContent>
       </Tabs>
     </div>

@@ -14,6 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { VideoCall } from '@/components/communications/VideoCall';
 import { RealTimeChat } from '@/components/communications/RealTimeChat';
 import { UserPresence } from '@/components/communications/UserPresence';
+import { EnhancedVideoCall } from '@/components/video/EnhancedVideoCall';
+import { RealtimeCollaboration } from '@/components/realtime/RealtimeCollaboration';
 
 const messages = [
   {
@@ -228,16 +230,26 @@ export default function Communications() {
             <h1 className="text-2xl font-bold text-gradient">Communications Hub</h1>
             <p className="text-sm text-muted-foreground">Real-time team collaboration</p>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="hover-scale"
-              onClick={() => handleStartCall('2', 'audio')}
-            >
-              <Phone className="h-4 w-4 mr-1" />
-              Call
-            </Button>
+      {/* Organization Setup Navigation */}
+      <div className="flex items-center gap-4">
+        <Button 
+          size="sm" 
+          variant="outline"
+          onClick={() => window.location.href = '/organization-setup'}
+          className="hover-scale"
+        >
+          <Users className="h-4 w-4 mr-1" />
+          Org Setup
+        </Button>
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="hover-scale"
+          onClick={() => handleStartCall('2', 'audio')}
+        >
+          <Phone className="h-4 w-4 mr-1" />
+          Call
+        </Button>
             <Button 
               size="sm" 
               variant="outline" 
@@ -301,10 +313,14 @@ export default function Communications() {
       <div className="flex-1 flex overflow-hidden">
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="flex-1 flex flex-col">
           {/* Enhanced Tab Navigation with Broadcast Button Styling */}
-          <TabsList className="grid grid-cols-5 w-full h-14 bg-gradient-to-r from-muted/20 via-muted/10 to-muted/20 backdrop-blur-sm mx-4 mt-3 mb-0 border border-border/50 shadow-lg">
+          <TabsList className="grid grid-cols-6 w-full h-14 bg-gradient-to-r from-muted/20 via-muted/10 to-muted/20 backdrop-blur-sm mx-4 mt-3 mb-0 border border-border/50 shadow-lg">
             <TabsTrigger value="messages" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover-scale transition-all duration-300">
               <MessageSquare className="h-4 w-4 mr-2" />
               Chat
+            </TabsTrigger>
+            <TabsTrigger value="video-meeting" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover-scale transition-all duration-300">
+              <Video className="h-4 w-4 mr-2" />
+              Meet
             </TabsTrigger>
             <TabsTrigger value="team" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover-scale transition-all duration-300">
               <Radio className="h-4 w-4 mr-2" />
@@ -407,6 +423,25 @@ export default function Communications() {
                   currentUserId={currentUserId}
                   onStartCall={handleStartCall}
                   onStartChat={handleStartChat}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Enhanced Video Meeting Tab */}
+          <TabsContent value="video-meeting" className="flex-1 p-4 pt-2">
+            <div className="grid grid-cols-12 gap-6 h-full">
+              <div className="col-span-8">
+                <EnhancedVideoCall 
+                  roomName="restaurant-team-meeting"
+                  userName={`User_${currentUserId.slice(-3)}`}
+                  onCallEnd={() => toast({ title: "Call Ended", description: "Thanks for joining!" })}
+                />
+              </div>
+              <div className="col-span-4">
+                <RealtimeCollaboration 
+                  organizationId="demo-org-123"
+                  currentPage="communications"
                 />
               </div>
             </div>

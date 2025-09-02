@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, FileText, Search, Filter, Download, Eye, FolderOpen, Calendar, User } from 'lucide-react';
+import { Upload, FileText, Search, Filter, Download, Eye, FolderOpen, Calendar, User, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { IntelligentDocumentUpload } from '@/components/documents/IntelligentDocumentUpload';
 
 const documents = [
   {
@@ -164,6 +165,10 @@ export default function Documents() {
       <Tabs defaultValue="library" className="space-y-6">
         <TabsList>
           <TabsTrigger value="library">Document Library</TabsTrigger>
+          <TabsTrigger value="ai-upload">
+            <Brain className="h-4 w-4 mr-2" />
+            AI Document Processing
+          </TabsTrigger>
           <TabsTrigger value="search">Advanced Search</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
         </TabsList>
@@ -285,6 +290,10 @@ export default function Documents() {
               </p>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="ai-upload" className="space-y-6">
+          <IntelligentDocumentUpload organizationId="demo-org-123" />
         </TabsContent>
 
         <TabsContent value="search" className="space-y-6">

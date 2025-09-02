@@ -8,6 +8,7 @@ import { RestaurantSidebar } from "@/components/dashboard/RestaurantSidebar";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Auth from "./pages/Auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -26,6 +27,7 @@ import FinanceDashboard from "./pages/FinanceDashboard";
 import CustomerManagement from "./pages/CustomerManagement";
 import AIAgents from "./pages/AIAgents";
 import Training from "./pages/Training";
+import OrganizationSetup from "./pages/OrganizationSetup";
 
 const queryClient = new QueryClient();
 
@@ -36,9 +38,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="restaurant-theme">
         <LanguageProvider>
-          <TooltipProvider>
-            <Toaster />
-            <BrowserRouter>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <BrowserRouter>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/*" element={
@@ -63,6 +66,7 @@ function App() {
                             <Route path="/customers" element={<CustomerManagement />} />
                             <Route path="/ai-agents" element={<AIAgents />} />
                             <Route path="/training" element={<Training />} />
+                            <Route path="/organization-setup" element={<OrganizationSetup />} />
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </main>
@@ -73,7 +77,8 @@ function App() {
                 } />
               </Routes>
             </BrowserRouter>
-          </TooltipProvider>
+            </TooltipProvider>
+          </AuthProvider>
         </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
