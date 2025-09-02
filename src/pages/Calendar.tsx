@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { EnhancedCalendar } from '@/components/calendar/EnhancedCalendar';
 import { DayView } from '@/components/calendar/DayView';
+import { CalendarFeatures } from '@/components/calendar/CalendarFeatures';
 import { 
   CalendarDays, 
   Clock, 
@@ -668,31 +669,162 @@ export default function CalendarPage() {
         </TabsContent>
 
         <TabsContent value="week" className="space-y-6">
-          <Card className="p-6">
-            <div className="text-center py-20">
-              <CalendarDays className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Week View</h3>
-              <p className="text-muted-foreground">Week view coming soon with enhanced scheduling features</p>
-            </div>
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Week of {format(startOfWeek(selectedDate || new Date()), 'MMM dd, yyyy')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-8 gap-2 text-sm">
+                <div className="font-semibold p-2">Time</div>
+                {eachDayOfInterval({ 
+                  start: startOfWeek(selectedDate || new Date()), 
+                  end: endOfWeek(selectedDate || new Date()) 
+                }).map((day) => (
+                  <div key={day.toISOString()} className="font-semibold p-2 text-center border-b">
+                    <div>{format(day, 'EEE')}</div>
+                    <div className="text-lg">{format(day, 'd')}</div>
+                  </div>
+                ))}
+                
+                {/* Time slots */}
+                {Array.from({ length: 12 }, (_, i) => i + 8).map((hour) => (
+                  <React.Fragment key={hour}>
+                    <div className="p-2 text-muted-foreground border-r">
+                      {hour}:00
+                    </div>
+                    {eachDayOfInterval({ 
+                      start: startOfWeek(selectedDate || new Date()), 
+                      end: endOfWeek(selectedDate || new Date()) 
+                    }).map((day) => {
+                      const dayEvents = events.filter(event => 
+                        event.date === format(day, 'yyyy-MM-dd') &&
+                        parseInt(event.startTime.split(':')[0]) === hour
+                      );
+                      
+                      return (
+                        <div key={`${day.toISOString()}-${hour}`} className="p-1 min-h-[60px] border border-border/30">
+                          {dayEvents.map((event) => (
+                            <div
+                              key={event.id}
+                              className={`text-xs p-2 rounded mb-1 truncate ${getEventTypeColor(event.type)}`}
+                              title={event.title}
+                            >
+                              {event.title}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
+              </div>
+            </CardContent>
           </Card>
+
+          {/* Calendar Features Component */}
+          <CalendarFeatures 
+            selectedDate={selectedDate || new Date()}
+            events={events}
+            onEventCreate={handleAddEvent}
+            onEventUpdate={handleUpdateEvent}
+          />
         </TabsContent>
 
+        {/* Agenda View */}
         <TabsContent value="day" className="space-y-6">
-          <Card className="p-6">
-            <div className="text-center py-12">
-              <div className="flex items-center justify-center gap-4 mb-6">
-                <CalendarDays className="h-12 w-12 text-primary" />
-                <div>
-                  <h3 className="text-xl font-semibold">Day View</h3>
-                  <p className="text-muted-foreground">Click on any date in the calendar to view detailed day schedule</p>
-                </div>
-              </div>
-              <Button onClick={() => handleDayClick(new Date())} className="mt-4">
-                <Eye className="w-4 h-4 mr-2" />
-                View Today's Schedule
-              </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Agenda View</span>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">Previous</Button>
+                      <Button variant="outline" size="sm">Today</Button>
+                      <Button variant="outline" size="sm">Next</Button>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {events.slice(0, 10).map((event) => (
+                      <div key={event.id} className="flex gap-4 p-4 border rounded-lg hover:bg-muted/30">
+                        <div className="text-center min-w-[60px]">
+                          <div className="font-bold">{format(new Date(event.date), 'MMM')}</div>
+                          <div className="text-2xl font-bold text-primary">{format(new Date(event.date), 'd')}</div>
+                          <div className="text-xs text-muted-foreground">{format(new Date(event.date), 'EEE')}</div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold">{event.title}</h4>
+                            <Badge className={`${getEventTypeColor(event.type)} text-xs`}>
+                              {event.type.replace('_', ' ')}
+                            </Badge>
+                            {getStatusIcon(event.status)}
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <p className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                            </p>
+                            <p className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {event.location}
+                            </p>
+                            <p className="flex items-center gap-1">
+                              <Users className="h-4 w-4" />
+                              {event.attendees} attendees • Assigned to {event.assignedTo}
+                            </p>
+                            <p>{event.description}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Button variant="outline" size="sm">Edit</Button>
+                          <Button variant="outline" size="sm">Details</Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </Card>
+            
+            <div>
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle>Calendar Overlay</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {[
+                    { name: 'Restaurant Events', color: '#3B82F6', visible: true },
+                    { name: 'Staff Schedule', color: '#10B981', visible: true },
+                    { name: 'Maintenance', color: '#F59E0B', visible: false },
+                    { name: 'Delivery Schedule', color: '#EF4444', visible: true },
+                    { name: 'Training Sessions', color: '#8B5CF6', visible: true }
+                  ].map((calendar) => (
+                    <div key={calendar.name} className="flex items-center gap-3">
+                      <div 
+                        className="w-4 h-4 rounded border-2"
+                        style={{ 
+                          backgroundColor: calendar.visible ? calendar.color : 'transparent',
+                          borderColor: calendar.color 
+                        }}
+                      />
+                      <span className={`flex-1 text-sm ${calendar.visible ? 'font-medium' : 'text-muted-foreground'}`}>
+                        {calendar.name}
+                      </span>
+                      <Button variant="ghost" size="sm" className="p-0 h-auto">
+                        <Eye className={`h-4 w-4 ${calendar.visible ? 'text-primary' : 'text-muted-foreground'}`} />
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="conflicts" className="space-y-6">
