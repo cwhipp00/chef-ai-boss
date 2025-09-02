@@ -29,7 +29,7 @@ import {
   Filter,
   Search
 } from 'lucide-react';
-import { format, addDays, subDays, isSameDay } from 'date-fns';
+import { format, addDays, subDays, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 import { toast } from 'sonner';
 
 // Enhanced event data with more fields for robust scheduling
@@ -672,7 +672,7 @@ export default function CalendarPage() {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
+                <CalendarIcon className="h-5 w-5" />
                 Week of {format(startOfWeek(selectedDate || new Date()), 'MMM dd, yyyy')}
               </CardTitle>
             </CardHeader>

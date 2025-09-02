@@ -510,6 +510,8 @@ export default function Communications() {
               <p className="text-muted-foreground mb-4">Company-wide announcements</p>
               <Button>New Announcement</Button>
             </div>
+          </TabsContent>
+
           <TabsContent value="notifications" className="flex-1 p-4 pt-2">
             <div className="text-center py-12">
               <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
