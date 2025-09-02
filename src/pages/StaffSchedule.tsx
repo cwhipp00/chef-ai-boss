@@ -308,12 +308,27 @@ export default function StaffSchedule() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="schedule">Interactive Schedule</TabsTrigger>
-          <TabsTrigger value="daily">Daily View</TabsTrigger>
-          <TabsTrigger value="staff">Staff Management</TabsTrigger>
-          <TabsTrigger value="requests">Coverage & Requests</TabsTrigger>
-          <TabsTrigger value="analytics">Labor Analytics</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 bg-muted/30 h-12">
+          <TabsTrigger value="schedule" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Calendar className="h-4 w-4 mr-1" />
+            Interactive Schedule
+          </TabsTrigger>
+          <TabsTrigger value="daily" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Clock className="h-4 w-4 mr-1" />
+            Daily View
+          </TabsTrigger>
+          <TabsTrigger value="staff" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Users className="h-4 w-4 mr-1" />
+            Staff Management
+          </TabsTrigger>
+          <TabsTrigger value="requests" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Plus className="h-4 w-4 mr-1" />
+            Coverage & Requests
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Filter className="h-4 w-4 mr-1" />
+            Labor Analytics
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="schedule" className="space-y-6">

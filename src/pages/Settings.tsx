@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
+import { APIManager } from '@/components/integrations/APIManager';
 
 export default function Settings() {
   const [selectedTab, setSelectedTab] = useState('general');
@@ -106,15 +107,39 @@ export default function Settings() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="restaurant">Restaurant</TabsTrigger>
-          <TabsTrigger value="staff">Staff</TabsTrigger>
-          <TabsTrigger value="operations">Operations</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="accessibility">Accessibility</TabsTrigger>
-          <TabsTrigger value="integrations">Integrations</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-8 bg-muted/30 h-12">
+          <TabsTrigger value="general" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <SettingsIcon className="h-4 w-4 mr-1" />
+            General
+          </TabsTrigger>
+          <TabsTrigger value="restaurant" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <MapPin className="h-4 w-4 mr-1" />
+            Restaurant
+          </TabsTrigger>
+          <TabsTrigger value="staff" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Users className="h-4 w-4 mr-1" />
+            Staff
+          </TabsTrigger>
+          <TabsTrigger value="operations" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Gauge className="h-4 w-4 mr-1" />
+            Operations
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Bell className="h-4 w-4 mr-1" />
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger value="security" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Shield className="h-4 w-4 mr-1" />
+            Security
+          </TabsTrigger>
+          <TabsTrigger value="accessibility" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Accessibility className="h-4 w-4 mr-1" />
+            Accessibility
+          </TabsTrigger>
+          <TabsTrigger value="integrations" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Zap className="h-4 w-4 mr-1" />
+            Integrations
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -895,236 +920,7 @@ export default function Settings() {
         </TabsContent>
 
         <TabsContent value="integrations" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Connected Services
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <Database className="h-8 w-8 text-primary" />
-                      <div>
-                        <h4 className="font-medium">Supabase</h4>
-                        <p className="text-sm text-muted-foreground">Database & Auth</p>
-                      </div>
-                    </div>
-                    <Badge className="bg-success text-success-foreground">Connected</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Backend database and authentication services
-                  </p>
-                  <Button variant="outline" size="sm">Configure</Button>
-                </div>
-
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <Bell className="h-8 w-8 text-muted-foreground" />
-                      <div>
-                        <h4 className="font-medium">Slack</h4>
-                        <p className="text-sm text-muted-foreground">Team Communication</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline">Not Connected</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Send notifications and updates to Slack channels
-                  </p>
-                  <Button size="sm">Connect</Button>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h4 className="font-medium">API Settings</h4>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-base font-medium">API Access</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Enable API access for third-party integrations
-                      </p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="apiKey">API Key</Label>
-                    <div className="flex gap-2">
-                      <Input 
-                        id="apiKey" 
-                        value="cc_api_****************************" 
-                        readOnly 
-                        className="font-mono"
-                      />
-                      <Button variant="outline">Regenerate</Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Available Integrations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { name: 'POS System', description: 'Connect your point of sale', status: 'Available', category: 'Operations' },
-                  { name: 'Accounting', description: 'QuickBooks integration', status: 'Available', category: 'Finance' },
-                  { name: 'Delivery Apps', description: 'DoorDash, Uber Eats', status: 'Available', category: 'Operations' },
-                  { name: 'Inventory', description: 'Real-time stock tracking', status: 'Available', category: 'Inventory' },
-                  { name: 'Analytics', description: 'Google Analytics', status: 'Available', category: 'Analytics' },
-                  { name: 'Email Marketing', description: 'Mailchimp integration', status: 'Available', category: 'Marketing' },
-                  { name: 'Reservation System', description: 'OpenTable integration', status: 'Available', category: 'Operations' },
-                  { name: 'Payment Processing', description: 'Stripe, Square', status: 'Available', category: 'Finance' },
-                  { name: 'Social Media', description: 'Facebook, Instagram', status: 'Available', category: 'Marketing' },
-                  { name: 'Food Safety', description: 'HACCP compliance', status: 'Available', category: 'Operations' },
-                  { name: 'Loyalty Programs', description: 'Customer rewards', status: 'Coming Soon', category: 'Marketing' },
-                  { name: 'HR Management', description: 'Staff management', status: 'Available', category: 'Staff' }
-                ].map((integration, index) => (
-                  <div key={index} className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <h5 className="font-medium text-sm">{integration.name}</h5>
-                      <Badge 
-                        variant="outline" 
-                        className="text-xs"
-                      >
-                        {integration.category}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-2">{integration.description}</p>
-                    <div className="flex items-center justify-between">
-                      <Badge 
-                        variant={integration.status === 'Available' ? 'default' : 'secondary'}
-                        className="text-xs"
-                      >
-                        {integration.status}
-                      </Badge>
-                      {integration.status === 'Available' && (
-                        <Button variant="outline" size="sm" className="text-xs h-6 px-2">
-                          Setup
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Separator />
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <HardDrive className="h-5 w-5" />
-                    Data Management
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="backupFreq">Backup Frequency</Label>
-                      <Select value={dataSettings.backupFrequency} onValueChange={(value) => 
-                        setDataSettings(prev => ({ ...prev, backupFrequency: value }))
-                      }>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="hourly">Hourly</SelectItem>
-                          <SelectItem value="daily">Daily</SelectItem>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="dataRetention">Data Retention (days)</Label>
-                      <Input 
-                        id="dataRetention" 
-                        type="number"
-                        value={dataSettings.dataRetention}
-                        onChange={(e) => setDataSettings(prev => ({ ...prev, dataRetention: parseInt(e.target.value) }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="exportFormat">Export Format</Label>
-                      <Select value={dataSettings.exportFormat} onValueChange={(value) => 
-                        setDataSettings(prev => ({ ...prev, exportFormat: value }))
-                      }>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="json">JSON</SelectItem>
-                          <SelectItem value="csv">CSV</SelectItem>
-                          <SelectItem value="excel">Excel</SelectItem>
-                          <SelectItem value="pdf">PDF</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="text-base font-medium">Auto Backup</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Automatically backup your data according to schedule
-                        </p>
-                      </div>
-                      <Switch
-                        checked={dataSettings.autoBackup}
-                        onCheckedChange={(checked) => 
-                          setDataSettings(prev => ({ ...prev, autoBackup: checked }))
-                        }
-                      />
-                    </div>
-
-                    <Separator />
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="text-base font-medium">Cloud Sync</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Sync data across multiple devices and locations
-                        </p>
-                      </div>
-                      <Switch
-                        checked={dataSettings.syncEnabled}
-                        onCheckedChange={(checked) => 
-                          setDataSettings(prev => ({ ...prev, syncEnabled: checked }))
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex gap-2">
-                    <Button variant="outline">
-                      Export All Data
-                    </Button>
-                    <Button variant="outline">
-                      Import Data
-                    </Button>
-                    <Button variant="outline">
-                      Create Backup Now
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
+          <APIManager />
         </TabsContent>
       </Tabs>
     </div>

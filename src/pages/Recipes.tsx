@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Filter, Scale, Clock, Users } from 'lucide-react';
+import { Plus, Search, Filter, Scale, Clock, Users, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -105,13 +105,31 @@ export default function Recipes() {
       </div>
 
       <Tabs defaultValue="recipes" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="recipes">All Recipes</TabsTrigger>
-          <TabsTrigger value="upload">Upload Files</TabsTrigger>
-          <TabsTrigger value="ai-generator">AI Generator</TabsTrigger>
-          <TabsTrigger value="image-creator">From Image</TabsTrigger>
-          <TabsTrigger value="scaler">Recipe Scaler</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6 bg-muted/30 h-12">
+          <TabsTrigger value="recipes" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Users className="h-4 w-4 mr-1" />
+            All Recipes
+          </TabsTrigger>
+          <TabsTrigger value="upload" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Plus className="h-4 w-4 mr-1" />
+            Upload Files
+          </TabsTrigger>
+          <TabsTrigger value="ai-generator" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Zap className="h-4 w-4 mr-1" />
+            AI Generator
+          </TabsTrigger>
+          <TabsTrigger value="image-creator" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Scale className="h-4 w-4 mr-1" />
+            From Image
+          </TabsTrigger>
+          <TabsTrigger value="scaler" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Scale className="h-4 w-4 mr-1" />
+            Recipe Scaler
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Users className="h-4 w-4 mr-1" />
+            Analytics
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="recipes" className="space-y-6">
