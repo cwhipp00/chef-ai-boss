@@ -1,14 +1,14 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { RestaurantSidebar } from "@/components/dashboard/RestaurantSidebar";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import Auth from "./pages/Auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -36,20 +36,20 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="restaurant-theme">
+      <ThemeProvider defaultTheme="system" storageKey="restaurant-theme">
         <LanguageProvider>
           <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <BrowserRouter>
-              <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/*" element={
-                  <ProtectedRoute>
-                    <SidebarProvider>
-                      <div className="flex min-h-screen w-full">
+            <SubscriptionProvider>
+              <TooltipProvider>
+                <Toaster />
+                <BrowserRouter>
+                <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/*" element={
+                    <ProtectedRoute>
+                      <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/30">
                         <RestaurantSidebar onOpenSearch={() => setIsSearchOpen(true)} />
-                        <main className="flex-1">
+                        <main className="flex-1 overflow-auto lg:ml-0">
                           <Routes>
                             <Route path="/" element={<Index />} />
                             <Route path="/recipes" element={<Recipes />} />
@@ -72,12 +72,12 @@ function App() {
                         </main>
                         <GlobalSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} />
                       </div>
-                    </SidebarProvider>
-                  </ProtectedRoute>
-                } />
-              </Routes>
-            </BrowserRouter>
-            </TooltipProvider>
+                    </ProtectedRoute>
+                  } />
+                </Routes>
+              </BrowserRouter>
+              </TooltipProvider>
+            </SubscriptionProvider>
           </AuthProvider>
         </LanguageProvider>
       </ThemeProvider>

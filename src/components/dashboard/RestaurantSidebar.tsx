@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
@@ -72,6 +72,7 @@ interface RestaurantSidebarProps {
 
 export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
   const { t } = useLanguage();
@@ -82,111 +83,145 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
   // For now, assume all users are managers until Clerk is fully set up
   const isManager = true;
 
-  return (
-    <div className={cn(
-      "bg-card border-r border-border transition-all duration-300 h-screen flex flex-col shadow-medium",
-      isCollapsed ? "w-16" : "w-64"
-    )}>
-      {/* Header */}
-      <div className="p-4 border-b border-border flex items-center justify-between">
-        {!isCollapsed && (
-          <div className="flex items-center gap-2">
-            <ChefHat className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg text-foreground">Chef AI</span>
-          </div>
-        )}
-        <div className="flex items-center gap-2">
-          {!isCollapsed && <LanguageSwitcher />}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
-          </Button>
-        </div>
-      </div>
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [currentPath]);
 
-      {/* Search */}
-      {!isCollapsed && (
-        <div className="px-4 py-2">
-          <SearchTrigger onOpenSearch={() => onOpenSearch?.()} />
-        </div>
+  return (
+    <>
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
       )}
 
-      {/* Navigation */}
-      <nav className="flex-1 p-2">
-        <div className="space-y-4">
-          {navigationSections.map((section) => (
-            <div key={section.title}>
-              {!isCollapsed && (
-                <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {t(section.title)}
-                </h3>
-              )}
-              <ul className="space-y-1">
-                {section.items
-                  .filter(item => !item.managerOnly || isManager)
-                  .map((item) => (
-                    <li key={item.titleKey}>
-                      <NavLink
-                        to={item.url}
-                        end
-                        className={({ isActive }) =>
-                          cn(
-                            "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors group hover-lift",
-                            isActive
-                              ? "bg-primary text-primary-foreground glow-on-hover"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                          )
-                        }
-                      >
-                        <item.icon className="h-4 w-4 flex-shrink-0" />
-                        {!isCollapsed && <span>{t(item.titleKey)}</span>}
-                      </NavLink>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </nav>
+      {/* Mobile Toggle Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="fixed top-4 left-4 z-50 lg:hidden bg-card/95 backdrop-blur border border-primary/20"
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+      >
+        {isMobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+      </Button>
 
-      {/* User Section */}
-      <div className="p-4 border-t border-border">
-        <div className={cn(
-          "flex items-center gap-3 p-2 rounded-lg bg-muted hover-lift",
-          isCollapsed && "justify-center"
-        )}>
-          <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
-            <span className="text-sm font-medium text-primary-foreground">
-              {user?.email?.charAt(0).toUpperCase() || 'U'}
-            </span>
-          </div>
+      {/* Sidebar */}
+      <div className={cn(
+        "bg-gradient-to-b from-card to-card/80 border-r border-primary/20 transition-all duration-300 flex flex-col shadow-elegant backdrop-blur",
+        "fixed lg:relative z-50 h-screen",
+        // Mobile positioning
+        isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        // Desktop sizing
+        isCollapsed ? "lg:w-16" : "lg:w-64",
+        // Mobile sizing
+        "w-64"
+      )}>
+        {/* Header */}
+        <div className="p-3 sm:p-4 border-b border-primary/20 flex items-center justify-between bg-gradient-to-r from-card via-card to-primary/5">
           {!isCollapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {user?.email || 'User'}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {isManager ? t('common.manager') : 'Staff'}
-              </p>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-gradient-primary flex items-center justify-center">
+                <ChefHat className="h-3 w-3 text-white" />
+              </div>
+              <span className="font-bold text-base sm:text-lg text-gradient">Chef AI</span>
             </div>
           )}
+          <div className="flex items-center gap-2">
+            {!isCollapsed && <LanguageSwitcher />}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="hidden lg:flex h-8 w-8 p-0 hover:bg-primary/10"
+            >
+              {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
+
+        {/* Search */}
         {!isCollapsed && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={signOut}
-            className="w-full mt-2 text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="px-3 sm:px-4 py-2">
+            <SearchTrigger onOpenSearch={() => onOpenSearch?.()} />
+          </div>
         )}
+
+        {/* Navigation */}
+        <nav className="flex-1 p-2">
+          <div className="space-y-4">
+            {navigationSections.map((section) => (
+              <div key={section.title}>
+                {!isCollapsed && (
+                  <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t(section.title)}
+                  </h3>
+                )}
+                <ul className="space-y-1">
+                  {section.items
+                    .filter(item => !item.managerOnly || isManager)
+                    .map((item) => (
+                      <li key={item.titleKey}>
+                        <NavLink
+                          to={item.url}
+                          end
+                          className={({ isActive }) =>
+                            cn(
+                              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all group hover-lift",
+                              isActive
+                                ? "bg-primary text-primary-foreground shadow-soft"
+                                : "text-muted-foreground hover:text-foreground hover:bg-primary/10 hover:border-primary/20"
+                            )
+                          }
+                        >
+                          <item.icon className="h-4 w-4 flex-shrink-0" />
+                          {!isCollapsed && <span>{t(item.titleKey)}</span>}
+                        </NavLink>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </nav>
+
+        {/* User Section */}
+        <div className="p-3 sm:p-4 border-t border-primary/20 bg-gradient-to-r from-card via-card to-primary/5">
+          <div className={cn(
+            "flex items-center gap-3 p-2 rounded-lg bg-card/50 backdrop-blur border border-primary/10 hover-lift",
+            isCollapsed && "justify-center"
+          )}>
+            <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
+              <span className="text-sm font-medium text-primary-foreground">
+                {user?.email?.charAt(0).toUpperCase() || 'U'}
+              </span>
+            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
+                  {user?.email || 'User'}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {isManager ? t('common.manager') : 'Staff'}
+                </p>
+              </div>
+            )}
+          </div>
+          {!isCollapsed && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={signOut}
+              className="w-full mt-2 text-muted-foreground hover:text-foreground hover:bg-primary/10"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

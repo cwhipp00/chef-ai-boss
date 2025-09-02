@@ -103,13 +103,222 @@ export default function Settings() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="appearance" className="mt-6">
+        <TabsContent value="appearance" className="mt-6 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Appearance Settings</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5" />
+                Theme & Colors
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-3">Color Theme</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button className="flex items-center gap-3 p-4 rounded-lg border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all">
+                      <div className="flex gap-1">
+                        <div className="w-4 h-4 rounded-full bg-primary"></div>
+                        <div className="w-4 h-4 rounded-full bg-accent"></div>
+                        <div className="w-4 h-4 rounded-full bg-success"></div>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-medium">Warm Amber</div>
+                        <div className="text-xs text-muted-foreground">Current theme</div>
+                      </div>
+                    </button>
+                    
+                    <button className="flex items-center gap-3 p-4 rounded-lg border hover:border-primary/50 transition-all">
+                      <div className="flex gap-1">
+                        <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+                        <div className="w-4 h-4 rounded-full bg-indigo-500"></div>
+                        <div className="w-4 h-4 rounded-full bg-purple-500"></div>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-medium">Ocean Blue</div>
+                        <div className="text-xs text-muted-foreground">Professional</div>
+                      </div>
+                    </button>
+                    
+                    <button className="flex items-center gap-3 p-4 rounded-lg border hover:border-primary/50 transition-all">
+                      <div className="flex gap-1">
+                        <div className="w-4 h-4 rounded-full bg-emerald-500"></div>
+                        <div className="w-4 h-4 rounded-full bg-teal-500"></div>
+                        <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-medium">Fresh Green</div>
+                        <div className="text-xs text-muted-foreground">Natural</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h4 className="text-sm font-medium mb-3">Display Mode</h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    <button className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:border-primary/50 transition-all">
+                      <div className="w-8 h-6 bg-white border rounded flex items-center justify-center">
+                        <div className="w-1 h-3 bg-gray-300 rounded-full"></div>
+                      </div>
+                      <span className="text-sm font-medium">Light</span>
+                    </button>
+                    
+                    <button className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:border-primary/50 transition-all">
+                      <div className="w-8 h-6 bg-gray-900 border rounded flex items-center justify-center">
+                        <div className="w-1 h-3 bg-gray-600 rounded-full"></div>
+                      </div>
+                      <span className="text-sm font-medium">Dark</span>
+                    </button>
+                    
+                    <button className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all">
+                      <div className="w-8 h-6 bg-gradient-to-r from-white to-gray-900 border rounded flex items-center justify-center">
+                        <div className="w-1 h-3 bg-gray-500 rounded-full"></div>
+                      </div>
+                      <span className="text-sm font-medium">Auto</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Typography & Layout</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-3 block">Font Size</label>
+                  <div className="grid grid-cols-4 gap-3">
+                    <button className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:border-primary/50 transition-all">
+                      <span className="text-xs font-medium">Aa</span>
+                      <span className="text-xs">Small</span>
+                    </button>
+                    <button className="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all">
+                      <span className="text-sm font-medium">Aa</span>
+                      <span className="text-xs">Normal</span>
+                    </button>
+                    <button className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:border-primary/50 transition-all">
+                      <span className="text-base font-medium">Aa</span>
+                      <span className="text-xs">Large</span>
+                    </button>
+                    <button className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:border-primary/50 transition-all">
+                      <span className="text-lg font-medium">Aa</span>
+                      <span className="text-xs">X-Large</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <label className="text-sm font-medium mb-3 block">Interface Density</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <button className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:border-primary/50 transition-all">
+                      <div className="space-y-1">
+                        <div className="w-6 h-1 bg-muted rounded"></div>
+                        <div className="w-4 h-1 bg-muted rounded"></div>
+                      </div>
+                      <span className="text-xs">Compact</span>
+                    </button>
+                    <button className="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all">
+                      <div className="space-y-1.5">
+                        <div className="w-6 h-1.5 bg-muted rounded"></div>
+                        <div className="w-4 h-1.5 bg-muted rounded"></div>
+                      </div>
+                      <span className="text-xs">Normal</span>
+                    </button>
+                    <button className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:border-primary/50 transition-all">
+                      <div className="space-y-2">
+                        <div className="w-6 h-2 bg-muted rounded"></div>
+                        <div className="w-4 h-2 bg-muted rounded"></div>
+                      </div>
+                      <span className="text-xs">Comfortable</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Animation & Effects</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">Hover Effects</div>
+                  <div className="text-xs text-muted-foreground">Card lift and scale animations</div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">Smooth Transitions</div>
+                  <div className="text-xs text-muted-foreground">Page and component animations</div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">Loading Animations</div>
+                  <div className="text-xs text-muted-foreground">Spinners and progress indicators</div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">Reduced Motion</div>
+                  <div className="text-xs text-muted-foreground">Accessibility mode for motion sensitivity</div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" className="rounded border-gray-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Crown className="h-5 w-5 text-primary" />
+                Preview Your Theme
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Appearance settings coming soon...</p>
+              <div className="space-y-3">
+                <div className="p-4 rounded-lg bg-gradient-card border">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">Sample Card Header</div>
+                      <div className="text-xs text-muted-foreground">This is how your cards will look</div>
+                    </div>
+                  </div>
+                  <Button size="sm" className="w-full">
+                    Action Button
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Changes will apply immediately across the entire application
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

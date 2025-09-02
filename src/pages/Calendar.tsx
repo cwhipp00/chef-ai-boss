@@ -292,46 +292,63 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 p-6 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Enhanced Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
         <div className="space-y-2">
-          <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
-            Calendar & Events
-          </h1>
-          <p className="text-lg text-muted-foreground">Manage restaurant events and scheduling with AI assistance</p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gradient">
+              Calendar & Events
+            </h1>
+            <div className="flex items-center gap-3 self-start sm:self-center">
+              <Badge variant="outline" className="text-xs">
+                Events: {currentUsage.calendar_events}/{usageLimits.calendar_events === Infinity ? '∞' : usageLimits.calendar_events}
+              </Badge>
+              {!canUseFeature('calendar_events') && (
+                <Badge variant="destructive" className="text-xs">
+                  <Crown className="h-3 w-3 mr-1" />
+                  Limit Reached
+                </Badge>
+              )}
+            </div>
+          </div>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl">
+            Manage restaurant events and scheduling with AI assistance
+          </p>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
-              <CalendarIcon className="w-4 h-4" />
-              {events.length} total events
+              <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span>{events.length} total events</span>
             </div>
             <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              {todayEvents.length} today
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span>{todayEvents.length} today</span>
             </div>
             <div className="flex items-center gap-1">
-              <AlertTriangle className="w-4 h-4" />
-              {conflictingEvents.length} pending
+              <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span>{conflictingEvents.length} pending</span>
             </div>
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
           <Button 
             variant="outline" 
             onClick={handleAutoReschedule} 
-            className="flex items-center gap-2 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-all"
-            size="lg"
+            className="flex items-center gap-2 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-all text-sm"
+            size="default"
           >
-            <Zap className="h-5 w-5" />
-            AI Optimize
+            <Zap className="h-4 w-4" />
+            <span className="hidden sm:inline">AI Optimize</span>
+            <span className="sm:hidden">Optimize</span>
           </Button>
           
           <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all">
-                <Plus className="h-5 w-5 mr-2" />
-                Add Event
+              <Button className="bg-gradient-primary shadow-soft hover:shadow-medium transition-all text-sm">
+                <Plus className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Add Event</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">

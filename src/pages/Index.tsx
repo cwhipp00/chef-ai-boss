@@ -3,71 +3,88 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { AIRecipeScaler } from "@/components/dashboard/AIRecipeScaler";
 import { SmartChecklist } from "@/components/dashboard/SmartChecklist";
+import { ResponsiveLayout, ResponsiveHeader, MobileFirstCard } from "@/components/layout/ResponsiveLayout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ChefHat, Sparkles, Activity, TrendingUp } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import restaurantHeroImage from "@/assets/restaurant-hero.jpg";
 
 const Index = () => {
+  const { user } = useAuth();
+  const { isPremium, subscriptionTier } = useSubscription();
+  
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
-        <div className="flex h-16 items-center justify-between px-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Restaurant Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Welcome back, John! Here's your restaurant overview</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-center">
-              <div className="flex flex-col items-center">
-                <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent tracking-wider">
+    <ResponsiveLayout>
+      {/* Animated Background Elements (like login screen) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 bg-primary/5 rounded-full animate-pulse"></div>
+        <div className="absolute top-3/4 right-1/4 w-12 sm:w-16 lg:w-20 h-12 sm:h-16 lg:h-20 bg-accent/5 rounded-full animate-pulse delay-1000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-10 sm:w-12 lg:w-16 h-10 sm:h-12 lg:h-16 bg-secondary/5 rounded-full animate-pulse delay-500"></div>
+      </div>
+
+      <div className="relative z-10 space-y-4 sm:space-y-6 lg:space-y-8">
+        {/* Header */}
+        <ResponsiveHeader
+          title="Restaurant Dashboard"
+          subtitle={`Welcome back, ${user?.email?.split('@')[0] || 'Chef'}! Here's your restaurant overview`}
+          badge={
+            <Badge 
+              variant={isPremium ? "default" : "secondary"} 
+              className={`${isPremium ? "bg-primary" : ""} text-xs sm:text-sm`}
+            >
+              {isPremium && <Sparkles className="h-3 w-3 mr-1" />}
+              {subscriptionTier.toUpperCase()} PLAN
+            </Badge>
+          }
+          actions={
+            <div className="text-center sm:text-right">
+              <div className="flex flex-col items-center sm:items-end">
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gradient tracking-wider">
                   TBC
                 </div>
-                <p className="text-sm font-medium text-foreground -mt-1">The Breakfast Club</p>
+                <p className="text-xs sm:text-sm font-medium text-foreground -mt-1">The Breakfast Club</p>
                 <p className="text-xs text-muted-foreground mt-1">Today • {new Date().toLocaleDateString()}</p>
               </div>
             </div>
-          </div>
-        </div>
-      </header>
+          }
+        />
 
-      {/* Hero Section */}
-      <section className="relative h-40 overflow-hidden bg-gradient-to-br from-background via-primary/10 to-accent/20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-background to-background" />
-        <div className="absolute inset-0 bg-grid-white/5" />
-        
-        <div className="relative flex h-full items-center justify-between px-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">🍳</span>
+        {/* Hero Section with Auth Design */}
+        <MobileFirstCard className="relative overflow-hidden bg-gradient-to-br from-card via-card to-primary/5 border-primary/20">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-lg bg-gradient-primary flex items-center justify-center">
+                    <ChefHat className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-accent rounded-full animate-pulse" />
                 </div>
-                <div className="absolute -top-1 -right-1 h-3 w-3 bg-accent rounded-full animate-pulse" />
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gradient">
+                  Chef AI Command Center
+                </h2>
               </div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                Chef AI Command Center
-              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
+                <span className="w-2 h-2 bg-success rounded-full animate-pulse" />
+                All systems operational • Next-gen culinary intelligence
+              </p>
             </div>
-            <p className="text-muted-foreground text-sm flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              All systems operational • Next-gen culinary intelligence
-            </p>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-4">
-            <div className="glass-card p-3 rounded-xl">
-              <div className="text-xs text-muted-foreground mb-1">Active Sessions</div>
-              <div className="text-lg font-bold text-foreground">12</div>
-            </div>
-            <div className="glass-card p-3 rounded-xl">
-              <div className="text-xs text-muted-foreground mb-1">AI Efficiency</div>
-              <div className="text-lg font-bold text-primary">98%</div>
+            
+            <div className="flex gap-3 sm:gap-4 justify-center sm:justify-end">
+              <div className="bg-card/50 backdrop-blur p-2 sm:p-3 rounded-lg border text-center">
+                <div className="text-xs text-muted-foreground mb-1">Active Sessions</div>
+                <div className="text-lg sm:text-xl font-bold text-foreground">12</div>
+              </div>
+              <div className="bg-card/50 backdrop-blur p-2 sm:p-3 rounded-lg border text-center">
+                <div className="text-xs text-muted-foreground mb-1">AI Efficiency</div>
+                <div className="text-lg sm:text-xl font-bold text-primary">98%</div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </MobileFirstCard>
 
-      {/* Main Content */}
-      <div className="p-6 space-y-6">
         {/* Stats Grid */}
         <DashboardStats />
 
@@ -75,7 +92,7 @@ const Index = () => {
         <QuickActions />
 
         {/* Main Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           {/* Left Column - Recipe Scaler */}
           <div className="lg:col-span-1">
             <AIRecipeScaler />
@@ -92,7 +109,7 @@ const Index = () => {
           </div>
         </div>
       </div>
-    </div>
+    </ResponsiveLayout>
   );
 };
 
