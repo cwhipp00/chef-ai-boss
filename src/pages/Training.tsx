@@ -78,12 +78,18 @@ const Training = () => {
 
   const fetchCourses = async () => {
     try {
+      console.log('Fetching courses...');
       const { data, error } = await supabase
         .from('courses')
         .select('*')
         .order('is_featured', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Courses fetched:', data?.length || 0, 'courses');
       setCourses(data || []);
       
       // Fetch lesson counts for each course
@@ -96,6 +102,7 @@ const Training = () => {
             .eq('course_id', course.id);
           counts[course.id] = count || 0;
         }
+        console.log('Lesson counts:', counts);
         setLessonCounts(counts);
       }
     } catch (error) {
@@ -380,8 +387,18 @@ const Training = () => {
               </TabsList>
 
               <TabsContent value="discover" className="space-y-8">
+                {/* Debug Info */}
+                <div className="mb-4 p-4 bg-muted/50 rounded-lg text-sm">
+                  <p>Total courses: {courses.length}</p>
+                  <p>Featured courses: {featuredCourses.length}</p>
+                  <p>Filtered courses: {filteredCourses.length}</p>
+                  <p>Search query: "{searchQuery}"</p>
+                  <p>Selected difficulty: {selectedDifficulty}</p>
+                  <p>Selected category: {selectedCategory}</p>
+                </div>
+
                 {/* Featured Courses */}
-                {featuredCourses.length > 0 && (
+                {featuredCourses.length > 0 ? (
                   <section>
                     <div className="flex items-center gap-2 mb-6">
                       <Flame className="w-5 h-5 text-orange-500" />
@@ -389,6 +406,40 @@ const Training = () => {
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {featuredCourses.map((course) => (
+                        <CourseCard 
+                          key={course.id} 
+                          course={course} 
+                          isEnrolled={isEnrolled(course.id)}
+                          progress={getEnrollmentProgress(course.id)}
+                          onEnroll={handleEnroll}
+                          lessonCount={lessonCounts[course.id] || 0}
+                          onStartLearning={setSelectedCourse}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ) : (
+                  <section className="p-8 text-center bg-muted/20 rounded-lg">
+                    <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold mb-2">No Featured Courses Found</h3>
+                    <p className="text-muted-foreground">
+                      {courses.length === 0 
+                        ? "Loading courses..." 
+                        : "No courses match your current filters. Try adjusting your search criteria."
+                      }
+                    </p>
+                  </section>
+                )}
+
+                {/* All Courses Section */}
+                {filteredCourses.length > 0 && (
+                  <section>
+                    <div className="flex items-center gap-2 mb-6">
+                      <BookOpen className="w-5 h-5 text-primary" />
+                      <h2 className="text-2xl font-bold">All Courses</h2>
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {filteredCourses.map((course) => (
                         <CourseCard 
                           key={course.id} 
                           course={course} 
