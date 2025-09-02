@@ -35,6 +35,7 @@ interface APIIntegration {
 }
 
 export function APIManager() {
+  const [selectedTab, setSelectedTab] = useState('integrations');
   const { toast } = useToast();
   const [selectedIntegration, setSelectedIntegration] = useState<APIIntegration | null>(null);
 

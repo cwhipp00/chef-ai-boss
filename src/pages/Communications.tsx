@@ -301,39 +301,39 @@ export default function Communications() {
       <div className="flex-1 flex overflow-hidden">
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="flex-1 flex flex-col">
           {/* Enhanced Tab Navigation with Broadcast Button Styling */}
-          <TabsList className="grid grid-cols-5 w-full h-12 bg-muted/30 mx-4 mt-3 mb-0">
-            <TabsTrigger value="messages" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-              <MessageSquare className="h-4 w-4 mr-1" />
+          <TabsList className="grid grid-cols-5 w-full h-14 bg-gradient-to-r from-muted/20 via-muted/10 to-muted/20 backdrop-blur-sm mx-4 mt-3 mb-0 border border-border/50 shadow-lg">
+            <TabsTrigger value="messages" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover-scale transition-all duration-300">
+              <MessageSquare className="h-4 w-4 mr-2" />
               Chat
             </TabsTrigger>
-            <TabsTrigger value="team" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-              <Radio className="h-4 w-4 mr-1" />
+            <TabsTrigger value="team" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover-scale transition-all duration-300">
+              <Radio className="h-4 w-4 mr-2" />
               Broadcast
             </TabsTrigger>
-            <TabsTrigger value="channels" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-              <Hash className="h-4 w-4 mr-1" />
+            <TabsTrigger value="channels" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover-scale transition-all duration-300">
+              <Hash className="h-4 w-4 mr-2" />
               Channels
             </TabsTrigger>
-            <TabsTrigger value="announcements" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-              <Megaphone className="h-4 w-4 mr-1" />
+            <TabsTrigger value="announcements" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover-scale transition-all duration-300">
+              <Megaphone className="h-4 w-4 mr-2" />
               News
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-              <Bell className="h-4 w-4 mr-1" />
+            <TabsTrigger value="notifications" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover-scale transition-all duration-300">
+              <Bell className="h-4 w-4 mr-2" />
               Alerts
             </TabsTrigger>
           </TabsList>
 
           {/* Messages Tab - Three Column Layout */}
           <TabsContent value="messages" className="flex-1 p-4 pt-2">
-            <div className="grid grid-cols-12 gap-4 h-full">
+            <div className="grid grid-cols-12 gap-6 h-full">
               {/* Sidebar - Channels & Online Users */}
               <div className="col-span-3 space-y-4">
                 {/* Channels */}
-                <Card className="glass-card">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Hash className="h-4 w-4" />
+                <Card className="glass-card border-0 shadow-xl bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-lg">
+                  <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-accent/5 rounded-t-lg">
+                    <CardTitle className="text-sm flex items-center gap-2 font-semibold">
+                      <Hash className="h-4 w-4 text-primary" />
                       Channels
                     </CardTitle>
                   </CardHeader>
@@ -341,21 +341,21 @@ export default function Communications() {
                     {channels.map((channel) => (
                       <div
                         key={channel.id}
-                        className={`p-3 cursor-pointer border-b last:border-b-0 hover:bg-muted/50 transition-colors ${
-                          selectedChannel === channel.name.toLowerCase() ? 'bg-primary/10 border-r-4 border-r-primary' : ''
+                        className={`p-4 cursor-pointer border-b last:border-b-0 hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 transition-all duration-300 hover-scale ${
+                          selectedChannel === channel.name.toLowerCase() ? 'bg-gradient-to-r from-primary/15 to-accent/15 border-r-4 border-r-primary shadow-inner' : ''
                         }`}
                         onClick={() => setSelectedChannel(channel.name.toLowerCase())}
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${channel.active ? 'bg-success' : 'bg-muted-foreground'}`} />
+                          <div className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full shadow-lg ${channel.active ? 'bg-success animate-pulse' : 'bg-muted-foreground'}`} />
                             <span className="text-sm font-medium">{channel.name}</span>
                           </div>
                           {channel.unread > 0 && (
-                            <Badge variant="destructive" className="h-5 text-xs px-1.5">{channel.unread}</Badge>
+                            <Badge variant="destructive" className="h-6 text-xs px-2 shadow-lg animate-pulse">{channel.unread}</Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">{channel.members} online</p>
+                        <p className="text-xs text-muted-foreground mt-2 ml-6">{channel.members} online</p>
                       </div>
                     ))}
                   </CardContent>
