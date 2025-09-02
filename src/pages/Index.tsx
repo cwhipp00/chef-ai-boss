@@ -16,13 +16,13 @@ const Index = () => {
             <p className="text-sm text-muted-foreground">Welcome back, John! Here's your restaurant overview</p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="flex flex-col items-end">
-                <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent tracking-wider">
+            <div className="text-center">
+              <div className="flex flex-col items-center">
+                <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent tracking-wider">
                   TBC
                 </div>
                 <p className="text-sm font-medium text-foreground -mt-1">The Breakfast Club</p>
-                <p className="text-xs text-muted-foreground">Today • {new Date().toLocaleDateString()}</p>
+                <p className="text-xs text-muted-foreground mt-1">Today • {new Date().toLocaleDateString()}</p>
               </div>
             </div>
           </div>
