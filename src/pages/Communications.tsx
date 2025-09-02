@@ -300,25 +300,25 @@ export default function Communications() {
       {/* Main Content Area - Single Row Layout */}
       <div className="flex-1 flex overflow-hidden">
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="flex-1 flex flex-col">
-          {/* Compact Tab Navigation */}
+          {/* Enhanced Tab Navigation with Broadcast Button Styling */}
           <TabsList className="grid grid-cols-5 w-full h-12 bg-muted/30 mx-4 mt-3 mb-0">
-            <TabsTrigger value="messages" className="text-xs">
+            <TabsTrigger value="messages" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <MessageSquare className="h-4 w-4 mr-1" />
               Chat
             </TabsTrigger>
-            <TabsTrigger value="team" className="text-xs">
+            <TabsTrigger value="team" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Radio className="h-4 w-4 mr-1" />
               Broadcast
             </TabsTrigger>
-            <TabsTrigger value="channels" className="text-xs">
+            <TabsTrigger value="channels" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Hash className="h-4 w-4 mr-1" />
               Channels
             </TabsTrigger>
-            <TabsTrigger value="announcements" className="text-xs">
+            <TabsTrigger value="announcements" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Megaphone className="h-4 w-4 mr-1" />
               News
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="text-xs">
+            <TabsTrigger value="notifications" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Bell className="h-4 w-4 mr-1" />
               Alerts
             </TabsTrigger>

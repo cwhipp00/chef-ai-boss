@@ -26,7 +26,6 @@ import {
   Search,
   Filter
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -97,117 +96,48 @@ export function RealTimeChat({ selectedChannel, currentUserId, onChannelChange }
     scrollToBottom();
   }, [messages]);
 
-  // Load messages for selected channel
+  // Load mock messages for selected channel
   useEffect(() => {
     if (!selectedChannel) return;
 
-    const loadMessages = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('messages')
-          .select(`
-            *,
-            reactions:message_reactions(*)
-          `)
-          .eq('channel_id', selectedChannel)
-          .order('created_at', { ascending: true })
-          .limit(100);
-
-        if (error) throw error;
-        setMessages(data || []);
-      } catch (error) {
-        console.error('Error loading messages:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load messages",
-          variant: "destructive",
-        });
-      }
+    const loadMessages = () => {
+      // Mock messages for demo
+      const mockMessages: Message[] = [
+        {
+          id: '1',
+          content: 'Welcome to the team chat!',
+          sender_id: 'system',
+          sender_name: 'System',
+          channel_id: selectedChannel,
+          created_at: new Date(Date.now() - 3600000).toISOString(),
+          message_type: 'text',
+          edited: false,
+          reactions: [],
+          read_by: []
+        },
+        {
+          id: '2',
+          content: 'Morning team! Ready for today\'s service?',
+          sender_id: '1',
+          sender_name: 'Sarah Johnson',
+          channel_id: selectedChannel,
+          created_at: new Date(Date.now() - 1800000).toISOString(),
+          message_type: 'text',
+          edited: false,
+          reactions: [],
+          read_by: []
+        }
+      ];
+      setMessages(mockMessages);
     };
 
     loadMessages();
-  }, [selectedChannel, toast]);
-
-  // Real-time message subscription
-  useEffect(() => {
-    if (!selectedChannel) return;
-
-    const channel = supabase
-      .channel(`messages_${selectedChannel}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `channel_id=eq.${selectedChannel}`
-      }, (payload) => {
-        const newMessage = payload.new as Message;
-        setMessages(prev => [...prev, newMessage]);
-        
-        // Mark as read
-        markMessageAsRead(newMessage.id);
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'messages',
-        filter: `channel_id=eq.${selectedChannel}`
-      }, (payload) => {
-        const updatedMessage = payload.new as Message;
-        setMessages(prev => prev.map(msg => 
-          msg.id === updatedMessage.id ? updatedMessage : msg
-        ));
-      })
-      .on('postgres_changes', {
-        event: 'DELETE',
-        schema: 'public',
-        table: 'messages',
-        filter: `channel_id=eq.${selectedChannel}`
-      }, (payload) => {
-        const deletedMessage = payload.old as Message;
-        setMessages(prev => prev.filter(msg => msg.id !== deletedMessage.id));
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [selectedChannel]);
 
-  // Typing indicator
-  useEffect(() => {
-    if (!selectedChannel) return;
-
-    const channel = supabase
-      .channel(`typing_${selectedChannel}`)
-      .on('presence', { event: 'sync' }, () => {
-        const newState = channel.presenceState();
-        const typingUsers = Object.values(newState).flat()
-          .filter((user: any) => user.typing && user.user_id !== currentUserId)
-          .map((user: any) => user.user_name);
-        setTypingUsers(typingUsers);
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [selectedChannel, currentUserId]);
-
-  // Send typing indicator
-  const sendTypingIndicator = async (isTyping: boolean) => {
-    if (!selectedChannel) return;
-
-    try {
-      const channel = supabase.channel(`typing_${selectedChannel}`);
-      await channel.track({
-        user_id: currentUserId,
-        user_name: 'Current User', // Replace with actual user name
-        typing: isTyping,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('Error sending typing indicator:', error);
-    }
+  // Mock typing indicator
+  const sendTypingIndicator = (isTyping: boolean) => {
+    // Mock implementation - in real app this would use Supabase presence
+    console.log('Typing indicator:', isTyping);
   };
 
   // Handle input change with typing indicator
@@ -230,161 +160,96 @@ export function RealTimeChat({ selectedChannel, currentUserId, onChannelChange }
   };
 
   // Send message
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!newMessage.trim() || !selectedChannel) return;
 
-    try {
-      const messageData: Partial<Message> = {
-        content: newMessage,
-        sender_id: currentUserId,
-        sender_name: 'Current User', // Replace with actual user name
-        channel_id: selectedChannel,
-        message_type: 'text',
-        reply_to: replyingTo?.id,
-        edited: false
-      };
+    const messageData: Message = {
+      id: Date.now().toString(),
+      content: newMessage,
+      sender_id: currentUserId,
+      sender_name: 'Current User',
+      channel_id: selectedChannel,
+      message_type: 'text',
+      reply_to: replyingTo?.id,
+      edited: false,
+      created_at: new Date().toISOString(),
+      reactions: [],
+      read_by: []
+    };
 
-      const { error } = await supabase
-        .from('messages')
-        .insert(messageData);
+    setMessages(prev => [...prev, messageData]);
+    setNewMessage('');
+    setReplyingTo(null);
+    setIsTyping(false);
+    sendTypingIndicator(false);
 
-      if (error) throw error;
-
-      setNewMessage('');
-      setReplyingTo(null);
-      setIsTyping(false);
-      sendTypingIndicator(false);
-      
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Message sent",
+      description: "Message sent successfully",
+    });
   };
 
-  // Handle file upload
-  const handleFileUpload = async (file: File) => {
+  // Handle file upload (mock)
+  const handleFileUpload = (file: File) => {
     if (!selectedChannel) return;
 
     setIsUploading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `chat-files/${selectedChannel}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('chat-attachments')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('chat-attachments')
-        .getPublicUrl(filePath);
-
-      const messageData: Partial<Message> = {
+    
+    // Mock file upload
+    setTimeout(() => {
+      const messageData: Message = {
+        id: Date.now().toString(),
         content: `Shared a file: ${file.name}`,
         sender_id: currentUserId,
-        sender_name: 'Current User', // Replace with actual user name
+        sender_name: 'Current User',
         channel_id: selectedChannel,
         message_type: file.type.startsWith('image/') ? 'image' : 'file',
-        file_url: publicUrl,
         file_name: file.name,
         file_size: file.size,
-        edited: false
+        edited: false,
+        created_at: new Date().toISOString(),
+        reactions: [],
+        read_by: []
       };
 
-      const { error } = await supabase
-        .from('messages')
-        .insert(messageData);
-
-      if (error) throw error;
-
+      setMessages(prev => [...prev, messageData]);
+      setIsUploading(false);
+      
       toast({
         title: "File Uploaded",
         description: `${file.name} has been shared`,
       });
-
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      toast({
-        title: "Upload Error",
-        description: "Failed to upload file",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
+    }, 1000);
   };
 
-  // Mark message as read
-  const markMessageAsRead = async (messageId: string) => {
-    try {
-      const { error } = await supabase
-        .from('message_reads')
-        .upsert({
-          message_id: messageId,
-          user_id: currentUserId,
-          read_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error marking message as read:', error);
-    }
+  // Mock functions for demo
+  const markMessageAsRead = (messageId: string) => {
+    console.log('Marked as read:', messageId);
   };
 
-  // Add reaction to message
-  const addReaction = async (messageId: string, emoji: string) => {
-    try {
-      const { error } = await supabase
-        .from('message_reactions')
-        .upsert({
-          message_id: messageId,
-          user_id: currentUserId,
-          emoji: emoji
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error adding reaction:', error);
-    }
+  const addReaction = (messageId: string, emoji: string) => {
+    console.log('Added reaction:', emoji, 'to', messageId);
+    toast({
+      title: "Reaction added",
+      description: `Added ${emoji} reaction`,
+    });
   };
 
-  // Edit message
-  const editMessage = async (messageId: string, newContent: string) => {
-    try {
-      const { error } = await supabase
-        .from('messages')
-        .update({
-          content: newContent,
-          edited: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', messageId);
-
-      if (error) throw error;
-      setEditingMessage(null);
-    } catch (error) {
-      console.error('Error editing message:', error);
-    }
+  const editMessage = (messageId: string, newContent: string) => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId 
+        ? { ...msg, content: newContent, edited: true, updated_at: new Date().toISOString() }
+        : msg
+    ));
+    setEditingMessage(null);
   };
 
-  // Delete message
-  const deleteMessage = async (messageId: string) => {
-    try {
-      const { error } = await supabase
-        .from('messages')
-        .delete()
-        .eq('id', messageId);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error deleting message:', error);
-    }
+  const deleteMessage = (messageId: string) => {
+    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+    toast({
+      title: "Message deleted",
+      description: "Message has been removed",
+    });
   };
 
   // Format message timestamp

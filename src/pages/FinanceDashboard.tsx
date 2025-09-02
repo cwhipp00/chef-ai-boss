@@ -89,61 +89,81 @@ export default function FinanceDashboard() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="profitability">Menu Analysis</TabsTrigger>
-          <TabsTrigger value="expenses">Cost Management</TabsTrigger>
-          <TabsTrigger value="trends">Sales Trends</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-muted/30 h-12">
+          <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <DollarSign className="h-4 w-4 mr-1" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="profitability" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <PieChart className="h-4 w-4 mr-1" />
+            Menu Analysis
+          </TabsTrigger>
+          <TabsTrigger value="expenses" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <Calculator className="h-4 w-4 mr-1" />
+            Cost Management
+          </TabsTrigger>
+          <TabsTrigger value="trends" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <TrendingUp className="h-4 w-4 mr-1" />
+            Sales Trends
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="hover:shadow-medium transition-all duration-200">
+            <Card className="glass-card hover-lift glow-on-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <div className="p-2 rounded-lg bg-gradient-primary">
+                  <DollarSign className="h-4 w-4 text-primary-foreground" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${financialData.revenue.monthly.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-gradient">${financialData.revenue.monthly.toLocaleString()}</div>
                 <div className="flex items-center gap-1 text-xs">
                   {getTrendIcon(financialData.revenue.change)}
-                  <span className="text-success">+{financialData.revenue.change}% from last month</span>
+                  <span className="text-success font-medium">+{financialData.revenue.change}% from last month</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-medium transition-all duration-200">
+            <Card className="glass-card hover-lift glow-on-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Gross Profit</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <div className="p-2 rounded-lg bg-success">
+                  <TrendingUp className="h-4 w-4 text-success-foreground" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${financialData.profit.gross.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  Margin: {financialData.profit.margin}%
+                <div className="text-2xl font-bold text-success">${financialData.profit.gross.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground font-medium">
+                  Margin: <span className="text-success">{financialData.profit.margin}%</span>
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-medium transition-all duration-200">
+            <Card className="glass-card hover-lift glow-on-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Food Cost %</CardTitle>
-                <PieChart className="h-4 w-4 text-muted-foreground" />
+                <div className="p-2 rounded-lg bg-success">
+                  <PieChart className="h-4 w-4 text-success-foreground" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">28.4%</div>
-                <p className="text-xs text-success">Target: 30% ✓</p>
+                <div className="text-2xl font-bold text-success">28.4%</div>
+                <p className="text-xs text-success font-medium">Target: 30% ✓</p>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-medium transition-all duration-200">
+            <Card className="glass-card hover-lift glow-on-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Labor Cost %</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                <div className="p-2 rounded-lg bg-warning">
+                  <BarChart3 className="h-4 w-4 text-warning-foreground" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">33.7%</div>
-                <p className="text-xs text-warning">Target: 30%</p>
+                <div className="text-2xl font-bold text-warning">33.7%</div>
+                <p className="text-xs text-warning font-medium">Target: 30%</p>
               </CardContent>
             </Card>
           </div>
