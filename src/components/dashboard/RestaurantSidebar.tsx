@@ -19,7 +19,8 @@ import {
   Clock,
   BarChart3,
   GraduationCap,
-  LogOut
+  LogOut,
+  Building2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { SearchTrigger } from "@/components/search/GlobalSearch";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const navigationSections = [
   {
@@ -73,6 +75,7 @@ interface RestaurantSidebarProps {
 export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [companyName, setCompanyName] = useState<string>('');
   const location = useLocation();
   const currentPath = location.pathname;
   const { t } = useLanguage();
@@ -82,6 +85,25 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
   
   // For now, assume all users are managers until Clerk is fully set up
   const isManager = true;
+
+  // Fetch company name from user profile
+  useEffect(() => {
+    const fetchCompanyName = async () => {
+      if (!user?.id) return;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_name')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile?.company_name) {
+        setCompanyName(profile.company_name);
+      }
+    };
+
+    fetchCompanyName();
+  }, [user?.id]);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -111,7 +133,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
       {/* Sidebar */}
       <div className={cn(
         "bg-gradient-to-b from-card to-card/80 border-r border-primary/20 transition-all duration-300 flex flex-col shadow-elegant backdrop-blur",
-        "fixed lg:relative z-50 h-screen",
+        "fixed lg:relative z-50 h-screen overflow-hidden",
         // Mobile positioning
         isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         // Desktop sizing
@@ -123,13 +145,30 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
         <div className="p-3 sm:p-4 border-b border-primary/20 flex items-center justify-between bg-gradient-to-r from-card via-card to-primary/5">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-gradient-primary flex items-center justify-center">
+              <div className="w-6 h-6 rounded-lg bg-gradient-primary flex items-center justify-center animate-pulse">
                 <ChefHat className="h-3 w-3 text-white" />
               </div>
-              <span className="font-bold text-base sm:text-lg text-gradient">Chef AI</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-base sm:text-lg bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                  Chef AI Pro
+                </span>
+                {companyName && (
+                  <span className="text-xs text-muted-foreground font-medium truncate max-w-[120px]">
+                    {companyName}
+                  </span>
+                )}
+              </div>
             </div>
           )}
           <div className="flex items-center gap-2">
+            {!isCollapsed && companyName && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 border border-primary/20">
+                <Building2 className="h-3 w-3 text-primary" />
+                <span className="text-xs font-medium text-primary truncate max-w-[80px]">
+                  {companyName}
+                </span>
+              </div>
+            )}
             {!isCollapsed && <LanguageSwitcher />}
             <Button
               variant="ghost"
@@ -150,7 +189,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 p-2">
+        <nav className="flex-1 p-2 overflow-y-auto">
           <div className="space-y-4">
             {navigationSections.map((section) => (
               <div key={section.title}>

@@ -19,6 +19,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
   const { signIn, signUp, user } = useAuth();
@@ -44,7 +45,7 @@ const Auth = () => {
           navigate('/');
         }
       } else {
-        const { error } = await signUp(email, password, displayName);
+        const { error } = await signUp(email, password, displayName, companyName);
         if (error) {
           toast.error(error.message);
         } else {
@@ -78,10 +79,10 @@ const Auth = () => {
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-ping"></div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-foreground bg-gradient-primary bg-clip-text text-transparent">
-                  Chef AI
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-fade-in">
+                  Chef AI Pro
                 </h1>
-                <p className="text-xs text-primary font-medium">Complete Management Platform</p>
+                <p className="text-xs text-primary font-medium tracking-wide">Restaurant Excellence Platform</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground max-w-lg mx-auto lg:mx-0">
@@ -201,18 +202,32 @@ const Auth = () => {
             <CardContent className="pt-0">
               <form onSubmit={handleSubmit} className="space-y-3">
                 {!isLogin && (
-                  <div>
-                    <Label htmlFor="displayName" className="text-xs font-medium">Display Name</Label>
-                    <Input
-                      id="displayName"
-                      type="text"
-                      placeholder="Chef Johnson"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      required={!isLogin}
-                      className="h-8 text-sm transition-all focus:scale-[1.02]"
-                    />
-                  </div>
+                  <>
+                    <div>
+                      <Label htmlFor="companyName" className="text-xs font-medium">Company Name</Label>
+                      <Input
+                        id="companyName"
+                        type="text"
+                        placeholder="TBC Restaurant Group"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        required={!isLogin}
+                        className="h-8 text-sm transition-all focus:scale-[1.02]"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="displayName" className="text-xs font-medium">Your Name</Label>
+                      <Input
+                        id="displayName"
+                        type="text"
+                        placeholder="Chef Johnson"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        required={!isLogin}
+                        className="h-8 text-sm transition-all focus:scale-[1.02]"
+                      />
+                    </div>
+                  </>
                 )}
                 
                 <div>
