@@ -145,10 +145,29 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
         <div className="p-3 sm:p-4 border-b border-primary/20 flex items-center justify-between bg-gradient-to-r from-card via-card to-primary/5">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
-              <div className="relative w-6 h-8 flex items-center justify-center">
-                <ChefHat className="h-4 w-4 text-primary" />
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-2 bg-gradient-to-t from-primary to-accent"></div>
-                <Brain className="h-3 w-3 text-accent absolute -top-1 left-1/2 transform -translate-x-1/2 animate-pulse" />
+              <div className="relative w-8 h-10 flex items-center justify-center">
+                {/* Chef Hat */}
+                <ChefHat className="h-5 w-5 text-primary drop-shadow-sm" />
+                
+                {/* Connection Line with neuron effect */}
+                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-0.5 h-3 bg-gradient-to-t from-primary via-accent to-primary/60 shadow-sm">
+                  {/* Animated neuron pulse */}
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-accent rounded-full animate-ping opacity-75"></div>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-0.5 bg-primary rounded-full animate-pulse"></div>
+                </div>
+                
+                {/* Brain with glow effect */}
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
+                  <div className="relative">
+                    {/* Glow background */}
+                    <div className="absolute inset-0 bg-accent/30 rounded-full blur-sm scale-150 animate-pulse"></div>
+                    {/* Brain icon */}
+                    <Brain className="relative h-4 w-4 text-accent drop-shadow-lg animate-pulse" />
+                    {/* Neuron sparks */}
+                    <div className="absolute -top-0.5 -right-0.5 w-1 h-1 bg-accent rounded-full animate-ping"></div>
+                    <div className="absolute -bottom-0.5 -left-0.5 w-0.5 h-0.5 bg-primary rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                  </div>
+                </div>
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-base sm:text-lg bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
