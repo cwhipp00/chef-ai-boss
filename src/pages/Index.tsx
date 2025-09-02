@@ -27,8 +27,8 @@ const Index = () => {
       <div className="relative z-10 space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Header */}
         <ResponsiveHeader
-          title="Restaurant Dashboard"
-          subtitle={`Welcome back, ${user?.email?.split('@')[0] || 'Chef'}! Here's your restaurant overview`}
+          title="Chef AI Dashboard"
+          subtitle={`Welcome back, ${user?.email?.split('@')[0] || 'Chef'}! Here's your AI-powered restaurant overview`}
           badge={
             <Badge 
               variant={isPremium ? "default" : "secondary"} 

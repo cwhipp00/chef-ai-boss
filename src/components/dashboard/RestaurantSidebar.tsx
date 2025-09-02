@@ -145,8 +145,10 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
         <div className="p-3 sm:p-4 border-b border-primary/20 flex items-center justify-between bg-gradient-to-r from-card via-card to-primary/5">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-gradient-primary flex items-center justify-center animate-pulse">
-                <ChefHat className="h-3 w-3 text-white" />
+              <div className="relative w-6 h-8 flex items-center justify-center">
+                <ChefHat className="h-4 w-4 text-primary" />
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-2 bg-gradient-to-t from-primary to-accent"></div>
+                <Brain className="h-3 w-3 text-accent absolute -top-1 left-1/2 transform -translate-x-1/2 animate-pulse" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-base sm:text-lg bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
