@@ -299,6 +299,94 @@ export function DynamicFormGenerator({ organizationId, category }: DynamicFormGe
     }
   };
 
+  if (isCreating) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Create New Form
+            </CardTitle>
+            <Button variant="outline" onClick={() => setIsCreating(false)}>
+              Back to Forms
+            </Button>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            Upload a document or create a form manually
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Upload Document Option */}
+            <Card className="hover-lift cursor-pointer border-dashed border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+                <FileText className="h-16 w-16 text-primary mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Upload Document</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Upload a company document and let AI generate forms automatically
+                </p>
+                <Button className="w-full" onClick={() => {
+                  // Navigate to documents page
+                  window.location.href = '/documents';
+                }}>
+                  Go to Documents
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Manual Creation Option */}
+            <Card className="hover-lift cursor-pointer border-dashed border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+                <FormInput className="h-16 w-16 text-primary mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Create Manually</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Build a custom form with your own fields and structure
+                </p>
+                <Button variant="outline" className="w-full" disabled>
+                  Coming Soon
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="border-t pt-6">
+            <h4 className="font-semibold mb-3">How it works:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="flex items-start gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                  1
+                </div>
+                <div>
+                  <p className="font-medium">Upload Document</p>
+                  <p className="text-muted-foreground">Upload your company manual, checklist, or any document</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                  2
+                </div>
+                <div>
+                  <p className="font-medium">AI Analysis</p>
+                  <p className="text-muted-foreground">AI analyzes the content and identifies form fields</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                  3
+                </div>
+                <div>
+                  <p className="font-medium">Generate Forms</p>
+                  <p className="text-muted-foreground">Ready-to-use forms appear here automatically</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (selectedForm) {
     return (
       <Card>
@@ -358,6 +446,15 @@ export function DynamicFormGenerator({ organizationId, category }: DynamicFormGe
           <p className="text-muted-foreground">
             AI-generated forms from your company documents
           </p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => setIsCreating(true)}
+            className="bg-gradient-primary"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Form
+          </Button>
         </div>
       </div>
 
