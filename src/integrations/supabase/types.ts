@@ -59,6 +59,57 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          is_public: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+          version: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          is_public?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+          version?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          is_public?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          version?: number | null
+        }
+        Relationships: []
+      }
       lesson_progress: {
         Row: {
           completed_at: string | null
@@ -167,6 +218,75 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      training_content: {
+        Row: {
+          content_type: string
+          course_id: string | null
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          is_required: boolean | null
+          lesson_id: string | null
+          metadata: Json | null
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_type: string
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_required?: boolean | null
+          lesson_id?: string | null
+          metadata?: Json | null
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_type?: string
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_required?: boolean | null
+          lesson_id?: string | null
+          metadata?: Json | null
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_content_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_content_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_enrollments: {
         Row: {
