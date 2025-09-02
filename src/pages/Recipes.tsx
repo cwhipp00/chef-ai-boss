@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIRecipeScaler } from '@/components/dashboard/AIRecipeScaler';
 import { RecipeDetailModal } from '@/components/recipes/RecipeDetailModal';
-import { PrepLists } from '@/components/recipes/PrepLists';
 import { FileRecipeUpload } from '@/components/recipes/FileRecipeUpload';
 import { AIRecipeGenerator } from '@/components/recipes/AIRecipeGenerator';
 import { ImageRecipeCreator } from '@/components/recipes/ImageRecipeCreator';
@@ -106,13 +105,12 @@ export default function Recipes() {
       </div>
 
       <Tabs defaultValue="recipes" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="recipes">All Recipes</TabsTrigger>
           <TabsTrigger value="upload">Upload Files</TabsTrigger>
           <TabsTrigger value="ai-generator">AI Generator</TabsTrigger>
           <TabsTrigger value="image-creator">From Image</TabsTrigger>
           <TabsTrigger value="scaler">Recipe Scaler</TabsTrigger>
-          <TabsTrigger value="prep">Prep Lists</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
@@ -198,10 +196,6 @@ export default function Recipes() {
 
         <TabsContent value="scaler">
           <AIRecipeScaler />
-        </TabsContent>
-
-        <TabsContent value="prep">
-          <PrepLists />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
