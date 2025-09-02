@@ -59,6 +59,50 @@ export type Database = {
         }
         Relationships: []
       }
+      document_templates: {
+        Row: {
+          ai_extraction_prompt: string | null
+          category: string
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          organization_id: string
+          template_fields: Json
+          updated_at: string
+        }
+        Insert: {
+          ai_extraction_prompt?: string | null
+          category: string
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          organization_id: string
+          template_fields?: Json
+          updated_at?: string
+        }
+        Update: {
+          ai_extraction_prompt?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          template_fields?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           category: string
@@ -109,6 +153,89 @@ export type Database = {
           version?: number | null
         }
         Relationships: []
+      }
+      dynamic_forms: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          form_schema: Json
+          generated_from_document: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by: string
+          form_schema: Json
+          generated_from_document?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          form_schema?: Json
+          generated_from_document?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dynamic_forms_generated_from_document_fkey"
+            columns: ["generated_from_document"]
+            isOneToOne: false
+            referencedRelation: "parsed_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dynamic_forms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      form_submissions: {
+        Row: {
+          created_at: string
+          form_id: string
+          id: string
+          submitted_by: string
+          submitted_data: Json
+        }
+        Insert: {
+          created_at?: string
+          form_id: string
+          id?: string
+          submitted_by: string
+          submitted_data: Json
+        }
+        Update: {
+          created_at?: string
+          form_id?: string
+          id?: string
+          submitted_by?: string
+          submitted_data?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "dynamic_forms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lesson_progress: {
         Row: {
@@ -185,6 +312,129 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          domain: string | null
+          id: string
+          name: string
+          settings: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          name: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          name?: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      parsed_documents: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          original_document_id: string | null
+          parsed_data: Json
+          status: string
+          target_category: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          created_by: string
+          id?: string
+          organization_id: string
+          original_document_id?: string | null
+          parsed_data?: Json
+          status?: string
+          target_category: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id?: string
+          original_document_id?: string | null
+          parsed_data?: Json
+          status?: string
+          target_category?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parsed_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parsed_documents_original_document_id_fkey"
+            columns: ["original_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parsed_documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "document_templates"
             referencedColumns: ["id"]
           },
         ]
