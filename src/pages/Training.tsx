@@ -22,11 +22,14 @@ import {
   Target,
   ChefHat,
   Flame,
-  Trophy
+  Trophy,
+  PlayCircle,
+  FileText
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { LessonViewer } from '@/components/training/LessonViewer';
 
 interface Course {
   id: string;
@@ -56,6 +59,8 @@ const Training = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [lessonCounts, setLessonCounts] = useState<{ [courseId: string]: number }>({});
   const { user } = useAuth();
 
   useEffect(() => {
@@ -74,6 +79,19 @@ const Training = () => {
       
       if (error) throw error;
       setCourses(data || []);
+      
+      // Fetch lesson counts for each course
+      if (data) {
+        const counts: { [courseId: string]: number } = {};
+        for (const course of data) {
+          const { count } = await supabase
+            .from('lessons')
+            .select('*', { count: 'exact', head: true })
+            .eq('course_id', course.id);
+          counts[course.id] = count || 0;
+        }
+        setLessonCounts(counts);
+      }
     } catch (error) {
       console.error('Error fetching courses:', error);
       toast.error('Failed to load courses');
@@ -159,6 +177,16 @@ const Training = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
+    );
+  }
+
+  if (selectedCourse) {
+    return (
+      <LessonViewer 
+        courseId={selectedCourse.id}
+        courseTitle={selectedCourse.title}
+        onBack={() => setSelectedCourse(null)}
+      />
     );
   }
 
@@ -309,6 +337,8 @@ const Training = () => {
                       isEnrolled={isEnrolled(course.id)}
                       progress={getEnrollmentProgress(course.id)}
                       onEnroll={handleEnroll}
+                      lessonCount={lessonCounts[course.id] || 0}
+                      onStartLearning={setSelectedCourse}
                     />
                   ))}
                 </div>
@@ -346,6 +376,8 @@ const Training = () => {
                             isEnrolled={isEnrolled(course.id)}
                             progress={getEnrollmentProgress(course.id)}
                             onEnroll={handleEnroll}
+                            lessonCount={lessonCounts[course.id] || 0}
+                            onStartLearning={setSelectedCourse}
                           />
                         ))}
                       </div>
@@ -371,6 +403,8 @@ const Training = () => {
                       isEnrolled={isEnrolled(course.id)}
                       progress={getEnrollmentProgress(course.id)}
                       onEnroll={handleEnroll}
+                      lessonCount={lessonCounts[course.id] || 0}
+                      onStartLearning={setSelectedCourse}
                     />
                   ))}
                 </div>
@@ -396,6 +430,8 @@ const Training = () => {
                       isEnrolled={isEnrolled(course.id)}
                       progress={getEnrollmentProgress(course.id)}
                       onEnroll={handleEnroll}
+                      lessonCount={lessonCounts[course.id] || 0}
+                      onStartLearning={setSelectedCourse}
                     />
                   ))}
                 </div>
@@ -426,6 +462,8 @@ const Training = () => {
                     progress={getEnrollmentProgress(course.id)}
                     onEnroll={handleEnroll}
                     showProgress={true}
+                    lessonCount={lessonCounts[course.id] || 0}
+                    onStartLearning={setSelectedCourse}
                   />
                 ))}
               </div>
@@ -451,13 +489,17 @@ const CourseCard = ({
   isEnrolled, 
   progress, 
   onEnroll, 
-  showProgress = false 
+  showProgress = false,
+  lessonCount = 0,
+  onStartLearning
 }: {
   course: Course;
   isEnrolled: boolean;
   progress: number;
   onEnroll: (courseId: string) => void;
   showProgress?: boolean;
+  lessonCount?: number;
+  onStartLearning?: (course: Course) => void;
 }) => {
   const getDifficultyColor = (level: string) => {
     switch (level) {
@@ -507,6 +549,10 @@ const CourseCard = ({
             {course.duration_hours}h
           </div>
           <div className="flex items-center gap-1">
+            <PlayCircle className="w-4 h-4" />
+            {lessonCount} lessons
+          </div>
+          <div className="flex items-center gap-1">
             <Users className="w-4 h-4" />
             {course.instructor_name}
           </div>
@@ -531,19 +577,35 @@ const CourseCard = ({
         </div>
 
         {isEnrolled ? (
-          <Button className="w-full" size="sm">
+          <Button 
+            className="w-full" 
+            size="sm"
+            onClick={() => onStartLearning && onStartLearning(course)}
+          >
             <Play className="w-4 h-4 mr-2" />
             Continue Learning
           </Button>
         ) : (
-          <Button 
-            className="w-full" 
-            variant="outline" 
-            size="sm"
-            onClick={() => onEnroll(course.id)}
-          >
-            Enroll Now
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              className="flex-1" 
+              variant="outline" 
+              size="sm"
+              onClick={() => onEnroll(course.id)}
+            >
+              Enroll Now
+            </Button>
+            {lessonCount > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => onStartLearning && onStartLearning(course)}
+                className="px-3"
+              >
+                <FileText className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>
