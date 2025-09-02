@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { WeeklyScheduleView } from '@/components/schedule/WeeklyScheduleView';
+import { DailyScheduleView } from '@/components/schedule/DailyScheduleView';
 import { 
   TimeOffRequestModal, 
   ShiftSwapModal, 
@@ -307,8 +308,9 @@ export default function StaffSchedule() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="schedule">Interactive Schedule</TabsTrigger>
+          <TabsTrigger value="daily">Daily View</TabsTrigger>
           <TabsTrigger value="staff">Staff Management</TabsTrigger>
           <TabsTrigger value="requests">Coverage & Requests</TabsTrigger>
           <TabsTrigger value="analytics">Labor Analytics</TabsTrigger>
@@ -353,6 +355,13 @@ export default function StaffSchedule() {
             onSwapRequest={handleSwapRequest}
             onEditShift={handleEditShift}
             currentUserId={1}
+          />
+        </TabsContent>
+
+        <TabsContent value="daily" className="space-y-6">
+          <DailyScheduleView 
+            shifts={shifts}
+            selectedWeek={selectedWeek}
           />
         </TabsContent>
 
