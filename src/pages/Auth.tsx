@@ -79,7 +79,7 @@ const Auth = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-foreground bg-gradient-primary bg-clip-text text-transparent">
-                  RestaurantOS
+                  Chef AI
                 </h1>
                 <p className="text-xs text-primary font-medium">Complete Management Platform</p>
               </div>
@@ -181,7 +181,7 @@ const Auth = () => {
                   <Users className="h-3 w-3 text-white" />
                 </div>
                 <CardTitle className="text-xl bg-gradient-primary bg-clip-text text-transparent">
-                  {isLogin ? 'Welcome Back!' : 'Join RestaurantOS'}
+                  {isLogin ? 'Welcome Back!' : 'Join Chef AI'}
                 </CardTitle>
               </div>
               <CardDescription className="text-xs max-w-xs mx-auto">
@@ -274,7 +274,7 @@ const Auth = () => {
                 <Separator className="my-3" />
                 <div className="text-center text-xs">
                   <span className="text-muted-foreground">
-                    {isLogin ? "New to RestaurantOS?" : "Already managing with us?"}
+                    {isLogin ? "New to Chef AI?" : "Already managing with us?"}
                   </span>
                   <Button
                     type="button"
