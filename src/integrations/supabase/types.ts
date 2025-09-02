@@ -469,6 +469,39 @@ export type Database = {
         }
         Relationships: []
       }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          subscription_end: string | null
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          trial_end: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          subscription_end?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          trial_end?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          subscription_end?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          trial_end?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       training_content: {
         Row: {
           content_type: string
@@ -573,15 +606,64 @@ export type Database = {
           },
         ]
       }
+      user_usage: {
+        Row: {
+          ai_requests: number | null
+          calendar_events: number | null
+          created_at: string
+          document_uploads: number | null
+          forms_created: number | null
+          id: string
+          reset_date: string | null
+          team_members: number | null
+          updated_at: string
+          user_id: string | null
+          video_call_minutes: number | null
+        }
+        Insert: {
+          ai_requests?: number | null
+          calendar_events?: number | null
+          created_at?: string
+          document_uploads?: number | null
+          forms_created?: number | null
+          id?: string
+          reset_date?: string | null
+          team_members?: number | null
+          updated_at?: string
+          user_id?: string | null
+          video_call_minutes?: number | null
+        }
+        Update: {
+          ai_requests?: number | null
+          calendar_events?: number | null
+          created_at?: string
+          document_uploads?: number | null
+          forms_created?: number | null
+          id?: string
+          reset_date?: string | null
+          team_members?: number | null
+          updated_at?: string
+          user_id?: string | null
+          video_call_minutes?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_usage_limit: {
+        Args: { p_feature_type: string; p_limit?: number; p_user_id: string }
+        Returns: boolean
+      }
+      increment_usage: {
+        Args: { p_amount?: number; p_feature_type: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      subscription_tier: "free" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -708,6 +790,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_tier: ["free", "premium"],
+    },
   },
 } as const
