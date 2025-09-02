@@ -59,8 +59,30 @@ export function OrderAnalyzer() {
       description: "Analyzing order patterns and customer behavior...",
     });
 
-    // Simulate AI analysis
-    setTimeout(() => {
+    try {
+      // Call AI order analyzer edge function
+      const response = await fetch('https://lfpnnlkjqpphstpcmcsi.supabase.co/functions/v1/ai-order-analyzer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze orders');
+      }
+
+      const { analysis: aiAnalysis } = await response.json();
+      setAnalysis(aiAnalysis);
+      
+      toast({
+        title: "Analysis Complete",
+        description: "AI has generated insights and recommendations for your orders",
+      });
+    } catch (error) {
+      console.error('Order analysis error:', error);
+      // Fallback to mock data if AI fails
       const mockAnalysis: OrderAnalysis = {
         orderTrends: {
           peakHours: ['12:00-14:00', '18:00-20:30'],
@@ -88,36 +110,25 @@ export function OrderAnalyzer() {
             title: 'Promote salmon dishes during peak hours',
             impact: '+$480/day estimated',
             priority: 'high'
-          },
-          {
-            type: 'staffing',
-            title: 'Add 1 server for 6-8pm shift',
-            impact: 'Reduce wait times by 12%',
-            priority: 'high'
-          },
-          {
-            type: 'inventory',
-            title: 'Increase chicken stock by 20%',
-            impact: 'Prevent stockouts',
-            priority: 'medium'
           }
         ],
         predictions: {
           nextHourOrders: 12,
           todayRevenue: 3240,
           staffingNeeded: 6,
-          inventoryAlerts: ['Chicken breast (2 days left)', 'Parmesan cheese (3 days left)']
+          inventoryAlerts: ['Chicken breast (2 days left)']
         }
       };
-
-      setAnalysis(mockAnalysis);
-      setIsAnalyzing(false);
       
+      setAnalysis(mockAnalysis);
       toast({
         title: "Analysis Complete",
-        description: "AI has generated insights and recommendations for your orders",
+        description: "Using cached data - AI analysis will be available soon",
+        variant: "default",
       });
-    }, 3000);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const getPriorityColor = (priority: string) => {

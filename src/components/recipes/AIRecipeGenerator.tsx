@@ -100,37 +100,61 @@ export function AIRecipeGenerator({ onRecipeGenerated }: { onRecipeGenerated: (r
     setIsGenerating(true);
     
     try {
-      // Simulate AI recipe generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Call AI recipe generation edge function
+      const response = await fetch('https://lfpnnlkjqpphstpcmcsi.supabase.co/functions/v1/ai-recipe-generator', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ingredients: prompt.ingredients,
+          cuisineType: prompt.cuisineType,
+          dietaryRestrictions: prompt.dietaryRestrictions,
+          servings: prompt.servings,
+          cookingTime: prompt.cookingTime,
+          difficulty: prompt.difficulty,
+          mealType: prompt.mealType,
+          equipment: prompt.equipment,
+          occasion: prompt.occasion
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate recipe');
+      }
+
+      const { recipe } = await response.json();
       
-      const mockRecipe: GeneratedRecipe = {
-        name: generateRecipeName(),
-        description: `A delicious ${prompt.cuisineType || 'fusion'} dish made with ${prompt.ingredients.split(',').slice(0, 2).join(' and ')}.`,
-        ingredients: generateIngredients(),
-        instructions: generateInstructions(),
+      // Convert to our interface format
+      const generatedRecipe: GeneratedRecipe = {
+        name: recipe.name,
+        description: recipe.description,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
         servings: prompt.servings,
-        prepTime: Math.max(10, prompt.cookingTime * 0.3),
-        cookTime: prompt.cookingTime,
-        difficulty: (prompt.difficulty as 'Easy' | 'Medium' | 'Hard') || 'Medium',
-        category: prompt.mealType || 'Main Course',
-        cost: calculateEstimatedCost(),
-        allergens: generateAllergens(),
-        nutritionalInfo: {
-          calories: 420 + Math.floor(Math.random() * 200),
-          protein: 25 + Math.floor(Math.random() * 15),
-          carbs: 35 + Math.floor(Math.random() * 20),
-          fat: 15 + Math.floor(Math.random() * 10)
+        prepTime: recipe.prepTime || Math.max(10, prompt.cookingTime * 0.3),
+        cookTime: recipe.cookTime || prompt.cookingTime,
+        difficulty: recipe.difficulty as 'Easy' | 'Medium' | 'Hard',
+        category: recipe.category || prompt.mealType || 'Main Course',
+        cost: recipe.estimatedCost || calculateEstimatedCost(),
+        allergens: recipe.allergens || [],
+        nutritionalInfo: recipe.nutritionalInfo || {
+          calories: 420,
+          protein: 25,
+          carbs: 35,
+          fat: 15
         }
       };
 
-      setGeneratedRecipe(mockRecipe);
-      onRecipeGenerated(mockRecipe);
+      setGeneratedRecipe(generatedRecipe);
+      onRecipeGenerated(generatedRecipe);
       
       toast({
         title: "Recipe Generated!",
-        description: `Created "${mockRecipe.name}" with AI assistance`,
+        description: `Created "${generatedRecipe.name}" with AI assistance`,
       });
     } catch (error) {
+      console.error('Recipe generation error:', error);
       toast({
         title: "Generation Failed",
         description: "Failed to generate recipe. Please try again.",

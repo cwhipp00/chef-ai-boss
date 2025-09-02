@@ -249,12 +249,34 @@ export default function AIAgents() {
     setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsProcessing(true);
 
-    // Simulate AI processing
-    setTimeout(() => {
-      const response = generateAssistantResponse(selectedTool!, userMessage);
-      setChatMessages(prev => [...prev, { role: 'assistant', content: response }]);
+    try {
+      // Call AI assistant edge function
+      const response = await fetch('https://lfpnnlkjqpphstpcmcsi.supabase.co/functions/v1/ai-assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          assistantType: selectedTool!,
+          message: userMessage,
+          conversationHistory: chatMessages
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get assistant response');
+      }
+
+      const { response: assistantResponse } = await response.json();
+      setChatMessages(prev => [...prev, { role: 'assistant', content: assistantResponse }]);
+    } catch (error) {
+      console.error('Assistant chat error:', error);
+      // Fallback response
+      const fallbackResponse = generateAssistantResponse(selectedTool!, userMessage);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: fallbackResponse }]);
+    } finally {
       setIsProcessing(false);
-    }, 1500);
+    }
   };
 
   const generateAssistantResponse = (assistantId: string, question: string) => {

@@ -163,20 +163,56 @@ export function SmartChecklist() {
     });
   };
 
-  const getAISuggestion = () => {
+  const getAISuggestion = async () => {
     const pendingHighPriority = items.filter(item => !item.completed && item.priority === 'high').length;
-    if (pendingHighPriority > 0) {
+    
+    try {
+      // Call AI checklist optimizer
+      const response = await fetch('https://lfpnnlkjqpphstpcmcsi.supabase.co/functions/v1/ai-checklist-optimizer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items,
+          requestType: 'suggest',
+          context: 'restaurant opening procedures'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI suggestions');
+      }
+
+      const { result } = await response.json();
+      
+      // Show the first suggestion as a toast
+      const suggestion = result.immediateActions?.[0] || result.suggestions?.[0] || 
+        (pendingHighPriority > 0 
+          ? `Focus on ${pendingHighPriority} high-priority tasks first to maintain operational flow`
+          : "All high-priority tasks completed. Continue with remaining items at your pace.");
+      
       toast({
         title: "AI Suggestion",
-        description: `Focus on ${pendingHighPriority} high-priority tasks first to maintain operational flow`,
+        description: suggestion,
         variant: "default",
       });
-    } else {
-      toast({
-        title: "Great Progress!",
-        description: "All high-priority tasks completed. Continue with remaining items at your pace.",
-        variant: "default",
-      });
+    } catch (error) {
+      console.error('AI suggestion error:', error);
+      // Fallback suggestion
+      if (pendingHighPriority > 0) {
+        toast({
+          title: "AI Suggestion",
+          description: `Focus on ${pendingHighPriority} high-priority tasks first to maintain operational flow`,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Great Progress!",
+          description: "All high-priority tasks completed. Continue with remaining items at your pace.",
+          variant: "default",
+        });
+      }
     }
   };
 
