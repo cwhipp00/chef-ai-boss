@@ -7,9 +7,13 @@ import OrdersContent from './Orders';
 import { InventoryDashboard } from '@/components/inventory';
 import { StoreListDashboard } from '@/components/store/StoreListDashboard';
 import { DynamicFormGenerator } from '@/components/forms/DynamicFormGenerator';
+import { useUserOrganization } from '@/hooks/useUserOrganization';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function Forms() {
   const [selectedTab, setSelectedTab] = useState('prep-lists');
+  const { organization, loading: orgLoading, error: orgError } = useUserOrganization();
 
   return (
     <div className="p-6 space-y-6">
@@ -69,7 +73,26 @@ export default function Forms() {
         </TabsContent>
 
         <TabsContent value="dynamic-forms" className="mt-0">
-          <DynamicFormGenerator organizationId="demo-org-123" />
+          {orgLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          ) : orgError ? (
+            <Alert variant="destructive">
+              <AlertDescription>
+                Error loading organization: {orgError}
+              </AlertDescription>
+            </Alert>
+          ) : organization ? (
+            <DynamicFormGenerator organizationId={organization.id} />
+          ) : (
+            <Alert>
+              <AlertDescription>
+                No organization found. Please ensure you have completed your profile setup.
+              </AlertDescription>
+            </Alert>
+          )}
         </TabsContent>
       </Tabs>
     </div>
