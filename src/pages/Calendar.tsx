@@ -27,10 +27,14 @@ import {
   Calendar as CalendarIcon,
   Eye,
   Filter,
-  Search
+  Search,
+  Crown
 } from 'lucide-react';
 import { format, addDays, subDays, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { PremiumGate } from '@/components/subscription/PremiumGate';
 
 // Enhanced event data with more fields for robust scheduling
 const initialEvents = [
@@ -139,6 +143,9 @@ const initialEvents = [
 ];
 
 export default function CalendarPage() {
+  const { user } = useAuth();
+  const { canUseFeature, incrementUsage, currentUsage, usageLimits } = useSubscription();
+  
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedView, setSelectedView] = useState<'month' | 'week' | 'day' | 'conflicts'>('month');
