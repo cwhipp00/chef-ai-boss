@@ -265,36 +265,52 @@ export function PrepLists() {
       {/* Prep Grid */}
       <div className="space-y-6">
         {Object.entries(prepCategories).map(([category, items]) => (
-          <Card key={category} className="overflow-hidden hover-lift transition-all">
-            <CardHeader className="bg-gradient-card">
+          <Card key={category} className="overflow-hidden hover-lift transition-all border-l-4 border-l-primary shadow-soft">
+            <CardHeader className="bg-gradient-card border-b border-border/20">
               <CardTitle className="flex items-center gap-2 text-primary">
                 <Utensils className="h-5 w-5" />
-                {category}
+                <span className="text-lg">{category}</span>
+                <Badge variant="outline" className="ml-auto">
+                  {items.length} items
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="text-left p-3 font-semibold text-foreground">Item</th>
-                      {daysOfWeek.map(day => (
-                        <th key={day} className="text-center p-3 font-semibold min-w-32 text-foreground">{day}</th>
+                    <tr className="border-b bg-gradient-card">
+                      <th className="text-left p-4 font-semibold text-primary border-r border-border/20">Item</th>
+                      {daysOfWeek.map((day, index) => (
+                        <th key={day} className={`text-center p-4 font-semibold min-w-32 text-primary ${
+                          index < daysOfWeek.length - 1 ? 'border-r border-border/20' : ''
+                        } ${selectedDays.includes(day) ? 'bg-accent/20' : ''}`}>
+                          <div className="flex flex-col items-center">
+                            <span className="text-sm font-bold">{day}</span>
+                            <span className="text-xs text-muted-foreground">{
+                              new Date(Date.now() + index * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                            }</span>
+                          </div>
+                        </th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {prepData[category]?.map((item, itemIndex) => (
-                      <tr key={itemIndex} className="border-b hover:bg-muted/30 transition-colors">
-                        <td className="p-3 font-medium text-foreground">{item.name}</td>
-                        {daysOfWeek.map(day => (
-                          <td key={day} className="p-2 text-center">
+                      <tr key={itemIndex} className="border-b hover:bg-muted/30 transition-colors group">
+                        <td className="p-4 font-medium text-foreground border-r border-border/10 bg-muted/10">
+                          {item.name}
+                        </td>
+                        {daysOfWeek.map((day, dayIndex) => (
+                          <td key={day} className={`p-3 text-center border-r border-border/10 ${
+                            selectedDays.includes(day) ? 'bg-accent/10' : ''
+                          } ${dayIndex === daysOfWeek.length - 1 ? 'border-r-0' : ''}`}>
                             <div className="flex items-center justify-center gap-1">
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => updateQuantity(category, itemIndex, day, Math.max(0, item.quantities[day] - 1))}
-                                className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                                className="h-7 w-7 p-0 hover:bg-destructive hover:text-destructive-foreground border-destructive/20"
                               >
                                 <Minus className="h-3 w-3" />
                               </Button>
@@ -303,14 +319,16 @@ export function PrepLists() {
                                 min="0"
                                 value={item.quantities[day] || ''}
                                 onChange={(e) => updateQuantity(category, itemIndex, day, parseInt(e.target.value) || 0)}
-                                className="w-12 h-6 text-center text-xs border-0 bg-transparent focus:bg-background focus:border"
+                                className={`w-16 h-7 text-center text-sm border-0 bg-background/80 focus:bg-background focus:border focus:border-primary/50 ${
+                                  item.quantities[day] > 0 ? 'font-semibold text-accent' : ''
+                                }`}
                                 placeholder="0"
                               />
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => updateQuantity(category, itemIndex, day, item.quantities[day] + 1)}
-                                className="h-6 w-6 p-0 hover:bg-success hover:text-success-foreground"
+                                className="h-7 w-7 p-0 hover:bg-success hover:text-success-foreground border-success/20"
                               >
                                 <Plus className="h-3 w-3" />
                               </Button>
