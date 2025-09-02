@@ -11,6 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { VideoCall } from '@/components/communications/VideoCall';
+import { RealTimeChat } from '@/components/communications/RealTimeChat';
+import { UserPresence } from '@/components/communications/UserPresence';
 
 const messages = [
   {
@@ -117,7 +120,52 @@ export default function Communications() {
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [broadcastType, setBroadcastType] = useState('general');
   const [isAnnouncementOpen, setIsAnnouncementOpen] = useState(false);
+  const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
+  const [videoCallRecipient, setVideoCallRecipient] = useState<{id: string, name: string} | null>(null);
+  const [currentCallId, setCurrentCallId] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  const currentUserId = 'current_user_123'; // Replace with actual user ID
+
+  // Handle video call initiation
+  const handleStartCall = (userId: string, type: 'audio' | 'video') => {
+    const recipient = teamMembers.find(member => member.id === userId);
+    if (recipient) {
+      const callId = `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setVideoCallRecipient({ id: userId, name: recipient.name });
+      setCurrentCallId(callId);
+      setIsVideoCallOpen(true);
+      
+      toast({
+        title: type === 'video' ? "Starting Video Call" : "Starting Audio Call",
+        description: `Calling ${recipient.name}...`,
+      });
+    }
+  };
+
+  // Handle chat initiation
+  const handleStartChat = (userId: string) => {
+    const recipient = teamMembers.find(member => member.id === userId);
+    if (recipient) {
+      // Create or switch to direct message channel
+      setSelectedChannel(`dm_${userId}`);
+      setSelectedTab('messages');
+      
+      toast({
+        title: "Opening Chat",
+        description: `Starting conversation with ${recipient.name}`,
+      });
+    }
+  };
+
+  // Team members data
+  const teamMembers = [
+    { id: '1', name: 'Sarah Johnson', role: 'Head Chef', avatar: undefined },
+    { id: '2', name: 'Mike Rodriguez', role: 'Manager', avatar: undefined },
+    { id: '3', name: 'Emily Chen', role: 'Server', avatar: undefined },
+    { id: '4', name: 'David Park', role: 'Line Cook', avatar: undefined },
+    { id: '5', name: 'Lisa Wong', role: 'Host', avatar: undefined },
+  ];
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -181,11 +229,21 @@ export default function Communications() {
             <p className="text-sm text-muted-foreground">Real-time team collaboration</p>
           </div>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="hover-scale">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="hover-scale"
+              onClick={() => handleStartCall('2', 'audio')}
+            >
               <Phone className="h-4 w-4 mr-1" />
               Call
             </Button>
-            <Button size="sm" variant="outline" className="hover-scale">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="hover-scale"
+              onClick={() => handleStartCall('2', 'video')}
+            >
               <Video className="h-4 w-4 mr-1" />
               Meet
             </Button>
@@ -336,150 +394,20 @@ export default function Communications() {
 
               {/* Chat Area */}
               <div className="col-span-6">
-                <Card className="h-full flex flex-col glass-card">
-                  <CardHeader className="border-b bg-muted/10 pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Hash className="h-4 w-4" />
-                        <span className="font-semibold capitalize">{selectedChannel}</span>
-                        <Badge variant="outline" className="text-xs">Live</Badge>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <Pin className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <Search className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                    {messages.filter(m => m.channel === selectedChannel).map((message) => (
-                      <div key={message.id} className="flex gap-3 group hover:bg-muted/20 p-2 rounded-lg -mx-2">
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-accent/20">
-                            {getInitials(message.sender)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-medium">{message.sender}</span>
-                            <Badge variant="outline" className="text-xs h-4">{message.role}</Badge>
-                            <span className="text-xs text-muted-foreground">{message.timestamp}</span>
-                            {getPriorityBadge(message.priority)}
-                          </div>
-                          <p className="text-sm text-foreground">{message.message}</p>
-                        </div>
-                        <div className="opacity-0 group-hover:opacity-100 flex gap-1">
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            <Star className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            <MoreHorizontal className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Message Input */}
-                  <div className="border-t p-4">
-                    <div className="flex gap-2">
-                      <div className="flex-1 relative">
-                        <Textarea
-                          placeholder={`Message #${selectedChannel}`}
-                          value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          className="min-h-[60px] pr-20 resize-none"
-                        />
-                        <div className="absolute bottom-2 right-2 flex gap-1">
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            <Paperclip className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            <Smile className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                      <Button size="sm" className="bg-gradient-primary self-end h-10">
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
+                <RealTimeChat 
+                  selectedChannel={selectedChannel}
+                  currentUserId={currentUserId}
+                  onChannelChange={setSelectedChannel}
+                />
               </div>
 
-              {/* Right Panel - Quick Info */}
+              {/* Right Panel - User Presence & Quick Info */}
               <div className="col-span-3 space-y-4">
-                {/* Today's Activity */}
-                <Card className="glass-card">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Today's Activity
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">Messages Sent</span>
-                      <Badge variant="secondary">147</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">Active Channels</span>
-                      <Badge variant="secondary">4</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">Team Online</span>
-                      <Badge className="bg-success">8/12</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Quick Actions */}
-                <Card className="glass-card">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Share Document
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <Video className="h-4 w-4 mr-2" />
-                      Start Meeting
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <Archive className="h-4 w-4 mr-2" />
-                      Archive Channel
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Recent Broadcasts */}
-                <Card className="glass-card">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Recent Broadcasts</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {teamBroadcasts.slice(0, 3).map((broadcast) => (
-                      <div key={broadcast.id} className="p-2 rounded-lg bg-muted/30">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs">{getBroadcastTypeIcon(broadcast.type)}</span>
-                          <span className="text-xs font-medium truncate">{broadcast.sender}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2">{broadcast.message}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{broadcast.timestamp}</p>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                <UserPresence 
+                  currentUserId={currentUserId}
+                  onStartCall={handleStartCall}
+                  onStartChat={handleStartChat}
+                />
               </div>
             </div>
           </TabsContent>
@@ -522,6 +450,20 @@ export default function Communications() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Video Call Component */}
+      <VideoCall 
+        isOpen={isVideoCallOpen}
+        onClose={() => {
+          setIsVideoCallOpen(false);
+          setVideoCallRecipient(null);
+          setCurrentCallId(null);
+        }}
+        recipientId={videoCallRecipient?.id}
+        recipientName={videoCallRecipient?.name}
+        callId={currentCallId}
+        isIncoming={false}
+      />
     </div>
   );
 }
