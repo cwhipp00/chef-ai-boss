@@ -17,8 +17,13 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-medium text-foreground">Sunny Acres Restaurant</p>
-              <p className="text-xs text-muted-foreground">Today • {new Date().toLocaleDateString()}</p>
+              <div className="flex flex-col items-end">
+                <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent tracking-wider">
+                  TBC
+                </div>
+                <p className="text-sm font-medium text-foreground -mt-1">The Breakfast Club</p>
+                <p className="text-xs text-muted-foreground">Today • {new Date().toLocaleDateString()}</p>
+              </div>
             </div>
           </div>
         </div>
