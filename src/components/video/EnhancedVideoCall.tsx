@@ -87,11 +87,10 @@ export function EnhancedVideoCall({
     
     if (videoRef.current && callObject) {
       // Append the Daily iframe to our container
-      callObject.iframe()?.then(iframe => {
-        if (iframe && videoRef.current && !videoRef.current.contains(iframe)) {
-          videoRef.current.appendChild(iframe);
-        }
-      });
+      const iframe = callObject.iframe();
+      if (iframe && videoRef.current && !videoRef.current.contains(iframe)) {
+        videoRef.current.appendChild(iframe);
+      }
     }
 
     toast({
@@ -114,7 +113,7 @@ export function EnhancedVideoCall({
     });
   };
 
-  const handleParticipantJoined = (event: DailyEvent) => {
+  const handleParticipantJoined = (event: any) => {
     console.log('Participant joined:', event);
     updateParticipants();
     
@@ -124,17 +123,17 @@ export function EnhancedVideoCall({
     });
   };
 
-  const handleParticipantLeft = (event: DailyEvent) => {
+  const handleParticipantLeft = (event: any) => {
     console.log('Participant left:', event);
     updateParticipants();
   };
 
-  const handleParticipantUpdated = (event: DailyEvent) => {
+  const handleParticipantUpdated = (event: any) => {
     console.log('Participant updated:', event);
     updateParticipants();
   };
 
-  const handleError = (event: DailyEvent) => {
+  const handleError = (event: any) => {
     console.error('Daily.co error:', event);
     setIsConnecting(false);
     
@@ -145,7 +144,7 @@ export function EnhancedVideoCall({
     });
   };
 
-  const handleNetworkQualityChange = (event: DailyEvent) => {
+  const handleNetworkQualityChange = (event: any) => {
     setCallStats(event);
   };
 
