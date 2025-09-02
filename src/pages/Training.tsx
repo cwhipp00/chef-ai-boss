@@ -24,12 +24,16 @@ import {
   Flame,
   Trophy,
   PlayCircle,
-  FileText
+  FileText,
+  Grid3X3,
+  List
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { LessonViewer } from '@/components/training/LessonViewer';
+import { POSSystemSelector } from '@/components/training/POSSystemSelector';
+import { POSSystemHub } from '@/components/training/POSSystemHub';
 
 interface Course {
   id: string;
@@ -60,6 +64,8 @@ const Training = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedPOSSystem, setSelectedPOSSystem] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'selector' | 'browse'>('browse');
   const [lessonCounts, setLessonCounts] = useState<{ [courseId: string]: number }>({});
   const { user } = useAuth();
 
@@ -171,6 +177,14 @@ const Training = () => {
   const completedCourses = enrolledCourses.filter(course => getEnrollmentProgress(course.id) === 100);
   
   const categories = [...new Set(courses.map(course => course.category))];
+  
+  // Get POS course counts for the selector
+  const posCategoryCounts = categories
+    .filter(cat => cat.startsWith('pos-'))
+    .reduce((acc, cat) => {
+      acc[cat] = courses.filter(course => course.category === cat).length;
+      return acc;
+    }, {} as { [key: string]: number });
 
   if (loading) {
     return (
@@ -186,6 +200,16 @@ const Training = () => {
         courseId={selectedCourse.id}
         courseTitle={selectedCourse.title}
         onBack={() => setSelectedCourse(null)}
+      />
+    );
+  }
+
+  if (selectedPOSSystem) {
+    return (
+      <POSSystemHub 
+        systemId={selectedPOSSystem}
+        onBack={() => setSelectedPOSSystem(null)}
+        onStartCourse={setSelectedCourse}
       />
     );
   }
@@ -241,243 +265,279 @@ const Training = () => {
         </div>
       </section>
 
-      <div className="px-6 mx-auto max-w-7xl">
-        {/* Search and Filters */}
-        <div className="py-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search courses, instructors, or topics..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            
-            <div className="flex gap-2">
-              <select 
-                value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="px-3 py-2 text-sm border rounded-md bg-background border-border focus:outline-none focus:ring-2 focus:ring-primary"
+      <div className="px-6 py-8 mx-auto max-w-7xl">
+        {/* View Mode Toggle */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold">Training Courses</h2>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === 'browse' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('browse')}
+                className="flex items-center gap-2"
               >
-                <option value="all">All Levels</option>
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-              
-              <select 
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 text-sm border rounded-md bg-background border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                <List className="w-4 h-4" />
+                Browse All
+              </Button>
+              <Button
+                variant={viewMode === 'selector' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('selector')}
+                className="flex items-center gap-2"
               >
-                <option value="all">All Categories</option>
-                <optgroup label="POS Systems">
-                  {categories.filter(cat => cat.startsWith('pos-')).map(category => (
-                    <option key={category} value={category}>
-                      {category.replace('pos-', '').replace('-', ' ').split(' ').map(word => 
-                        word.charAt(0).toUpperCase() + word.slice(1)
-                      ).join(' ')}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="Safety & Compliance">
-                  {categories.filter(cat => cat === 'safety-compliance' || cat === 'safety').map(category => (
-                    <option key={category} value={category}>
-                      {category === 'safety-compliance' ? 'Safety & Compliance' : category.charAt(0).toUpperCase() + category.slice(1)}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="Culinary Arts">
-                  {categories.filter(cat => !cat.startsWith('pos-') && cat !== 'safety-compliance' && cat !== 'safety').map(category => (
-                    <option key={category} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </option>
-                  ))}
-                </optgroup>
-              </select>
+                <Grid3X3 className="w-4 h-4" />
+                POS Systems
+              </Button>
             </div>
           </div>
         </div>
 
-        <Tabs defaultValue="discover" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 lg:w-fit">
-            <TabsTrigger value="discover" className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              Discover
-            </TabsTrigger>
-            <TabsTrigger value="my-courses" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              My Courses
-            </TabsTrigger>
-            <TabsTrigger value="achievements" className="flex items-center gap-2">
-              <Award className="w-4 h-4" />
-              Achievements
-            </TabsTrigger>
-            <TabsTrigger value="leaderboard" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Leaderboard
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="discover" className="space-y-8">
-            {/* Featured Courses */}
-            {featuredCourses.length > 0 && (
-              <section>
-                <div className="flex items-center gap-2 mb-6">
-                  <Flame className="w-5 h-5 text-orange-500" />
-                  <h2 className="text-2xl font-bold">Featured Courses</h2>
-                </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {featuredCourses.map((course) => (
-                    <CourseCard 
-                      key={course.id} 
-                      course={course} 
-                      isEnrolled={isEnrolled(course.id)}
-                      progress={getEnrollmentProgress(course.id)}
-                      onEnroll={handleEnroll}
-                      lessonCount={lessonCounts[course.id] || 0}
-                      onStartLearning={setSelectedCourse}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* POS Systems University */}
-            {filteredCourses.filter(course => course.category.startsWith('pos-')).length > 0 && (
-              <section>
-                <div className="flex items-center gap-2 mb-6">
-                  <Target className="w-5 h-5 text-blue-500" />
-                  <h2 className="text-2xl font-bold">POS Systems University</h2>
-                  <Badge variant="secondary" className="ml-2">Specialized Training</Badge>
+        {viewMode === 'selector' ? (
+          <POSSystemSelector 
+            onSelectSystem={setSelectedPOSSystem}
+            courseCounts={posCategoryCounts}
+          />
+        ) : (
+          <>
+            {/* Search and Filters */}
+            <div className="py-8">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search courses, instructors, or topics..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
                 </div>
                 
-                {/* Group POS courses by provider */}
-                {['pos-square', 'pos-toast', 'pos-touchbistro', 'pos-clover', 'pos-lightspeed', 'pos-resy', 'pos-shopify', 'pos-aloha', 'pos-micros', 'pos-advanced'].map(posCategory => {
-                  const posCourses = filteredCourses.filter(course => course.category === posCategory);
-                  if (posCourses.length === 0) return null;
+                <div className="flex gap-2">
+                  <select 
+                    value={selectedDifficulty}
+                    onChange={(e) => setSelectedDifficulty(e.target.value)}
+                    className="px-3 py-2 text-sm border rounded-md bg-background border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="all">All Levels</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
                   
-                  const providerName = posCategory.replace('pos-', '').replace('-', ' ').split(' ').map(word => 
-                    word.charAt(0).toUpperCase() + word.slice(1)
-                  ).join(' ');
-                  
-                  return (
-                    <div key={posCategory} className="mb-8">
-                      <h3 className="text-lg font-semibold mb-4 text-primary">
-                        {posCategory === 'pos-advanced' ? 'Advanced POS Topics' : `${providerName} Training`}
-                      </h3>
-                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {posCourses.map((course) => (
-                          <CourseCard 
-                            key={course.id} 
-                            course={course} 
-                            isEnrolled={isEnrolled(course.id)}
-                            progress={getEnrollmentProgress(course.id)}
-                            onEnroll={handleEnroll}
-                            lessonCount={lessonCounts[course.id] || 0}
-                            onStartLearning={setSelectedCourse}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </section>
-            )}
-
-            {/* Safety & Compliance */}
-            {filteredCourses.filter(course => course.category === 'safety-compliance' || course.category === 'safety').length > 0 && (
-              <section>
-                <div className="flex items-center gap-2 mb-6">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  <h2 className="text-2xl font-bold">Safety & Compliance</h2>
-                  <Badge variant="secondary" className="ml-2">Required Training</Badge>
+                  <select 
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="px-3 py-2 text-sm border rounded-md bg-background border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="all">All Categories</option>
+                    <optgroup label="POS Systems">
+                      {categories.filter(cat => cat.startsWith('pos-')).map(category => (
+                        <option key={category} value={category}>
+                          {category.replace('pos-', '').replace('-', ' ').split(' ').map(word => 
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                          ).join(' ')}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Safety & Compliance">
+                      {categories.filter(cat => cat === 'safety-compliance' || cat === 'safety').map(category => (
+                        <option key={category} value={category}>
+                          {category === 'safety-compliance' ? 'Safety & Compliance' : category.charAt(0).toUpperCase() + category.slice(1)}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Culinary Arts">
+                      {categories.filter(cat => !cat.startsWith('pos-') && cat !== 'safety-compliance' && cat !== 'safety').map(category => (
+                        <option key={category} value={category}>
+                          {category.charAt(0).toUpperCase() + category.slice(1)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
                 </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredCourses.filter(course => course.category === 'safety-compliance' || course.category === 'safety').map((course) => (
-                    <CourseCard 
-                      key={course.id} 
-                      course={course} 
-                      isEnrolled={isEnrolled(course.id)}
-                      progress={getEnrollmentProgress(course.id)}
-                      onEnroll={handleEnroll}
-                      lessonCount={lessonCounts[course.id] || 0}
-                      onStartLearning={setSelectedCourse}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Culinary Arts */}
-            {filteredCourses.filter(course => !course.category.startsWith('pos-') && course.category !== 'safety-compliance' && course.category !== 'safety').length > 0 && (
-              <section>
-                <div className="flex items-center gap-2 mb-6">
-                  <ChefHat className="w-5 h-5 text-purple-500" />
-                  <h2 className="text-2xl font-bold">Culinary Arts</h2>
-                </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredCourses.filter(course => 
-                    !course.category.startsWith('pos-') && 
-                    course.category !== 'safety-compliance' && 
-                    course.category !== 'safety'
-                  ).map((course) => (
-                    <CourseCard 
-                      key={course.id} 
-                      course={course} 
-                      isEnrolled={isEnrolled(course.id)}
-                      progress={getEnrollmentProgress(course.id)}
-                      onEnroll={handleEnroll}
-                      lessonCount={lessonCounts[course.id] || 0}
-                      onStartLearning={setSelectedCourse}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-          </TabsContent>
-
-          <TabsContent value="my-courses" className="space-y-8">
-            {enrolledCourses.length === 0 ? (
-              <Card className="p-12 text-center">
-                <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-xl font-semibold mb-2">No courses yet</h3>
-                <p className="text-muted-foreground mb-4">Start your culinary journey by enrolling in a course</p>
-                <Button onClick={() => {
-                  const discoverTab = document.querySelector('[value="discover"]') as HTMLElement;
-                  if (discoverTab) discoverTab.click();
-                }}>
-                  Browse Courses
-                </Button>
-              </Card>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {enrolledCourses.map((course) => (
-                  <CourseCard 
-                    key={course.id} 
-                    course={course} 
-                    isEnrolled={true}
-                    progress={getEnrollmentProgress(course.id)}
-                    onEnroll={handleEnroll}
-                    showProgress={true}
-                    lessonCount={lessonCounts[course.id] || 0}
-                    onStartLearning={setSelectedCourse}
-                  />
-                ))}
               </div>
-            )}
-          </TabsContent>
+            </div>
 
-          <TabsContent value="achievements" className="space-y-8">
-            <AchievementsSection completedCourses={completedCourses.length} totalProgress={enrolledCourses.length} />
-          </TabsContent>
+            <Tabs defaultValue="discover" className="space-y-8">
+              <TabsList className="grid w-full grid-cols-4 lg:w-fit">
+                <TabsTrigger value="discover" className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Discover
+                </TabsTrigger>
+                <TabsTrigger value="my-courses" className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  My Courses
+                </TabsTrigger>
+                <TabsTrigger value="achievements" className="flex items-center gap-2">
+                  <Award className="w-4 h-4" />
+                  Achievements
+                </TabsTrigger>
+                <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Leaderboard
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="leaderboard" className="space-y-8">
-            <LeaderboardSection />
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="discover" className="space-y-8">
+                {/* Featured Courses */}
+                {featuredCourses.length > 0 && (
+                  <section>
+                    <div className="flex items-center gap-2 mb-6">
+                      <Flame className="w-5 h-5 text-orange-500" />
+                      <h2 className="text-2xl font-bold">Featured Courses</h2>
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {featuredCourses.map((course) => (
+                        <CourseCard 
+                          key={course.id} 
+                          course={course} 
+                          isEnrolled={isEnrolled(course.id)}
+                          progress={getEnrollmentProgress(course.id)}
+                          onEnroll={handleEnroll}
+                          lessonCount={lessonCounts[course.id] || 0}
+                          onStartLearning={setSelectedCourse}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* POS Systems University */}
+                {filteredCourses.filter(course => course.category.startsWith('pos-')).length > 0 && (
+                  <section>
+                    <div className="flex items-center gap-2 mb-6">
+                      <Target className="w-5 h-5 text-blue-500" />
+                      <h2 className="text-2xl font-bold">POS Systems University</h2>
+                      <Badge variant="secondary" className="ml-2">Specialized Training</Badge>
+                    </div>
+                    
+                    {/* Group POS courses by provider */}
+                    {['pos-square', 'pos-toast', 'pos-touchbistro', 'pos-clover', 'pos-lightspeed', 'pos-resy', 'pos-shopify', 'pos-aloha', 'pos-micros', 'pos-advanced'].map(posCategory => {
+                      const posCourses = filteredCourses.filter(course => course.category === posCategory);
+                      if (posCourses.length === 0) return null;
+                      
+                      const providerName = posCategory.replace('pos-', '').replace('-', ' ').split(' ').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                      ).join(' ');
+                      
+                      return (
+                        <div key={posCategory} className="mb-8">
+                          <h3 className="text-lg font-semibold mb-4 text-primary">
+                            {posCategory === 'pos-advanced' ? 'Advanced POS Topics' : `${providerName} Training`}
+                          </h3>
+                          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {posCourses.map((course) => (
+                              <CourseCard 
+                                key={course.id} 
+                                course={course} 
+                                isEnrolled={isEnrolled(course.id)}
+                                progress={getEnrollmentProgress(course.id)}
+                                onEnroll={handleEnroll}
+                                lessonCount={lessonCounts[course.id] || 0}
+                                onStartLearning={setSelectedCourse}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </section>
+                )}
+
+                {/* Safety & Compliance */}
+                {filteredCourses.filter(course => course.category === 'safety-compliance' || course.category === 'safety').length > 0 && (
+                  <section>
+                    <div className="flex items-center gap-2 mb-6">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <h2 className="text-2xl font-bold">Safety & Compliance</h2>
+                      <Badge variant="secondary" className="ml-2">Required Training</Badge>
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {filteredCourses.filter(course => course.category === 'safety-compliance' || course.category === 'safety').map((course) => (
+                        <CourseCard 
+                          key={course.id} 
+                          course={course} 
+                          isEnrolled={isEnrolled(course.id)}
+                          progress={getEnrollmentProgress(course.id)}
+                          onEnroll={handleEnroll}
+                          lessonCount={lessonCounts[course.id] || 0}
+                          onStartLearning={setSelectedCourse}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Culinary Arts */}
+                {filteredCourses.filter(course => !course.category.startsWith('pos-') && course.category !== 'safety-compliance' && course.category !== 'safety').length > 0 && (
+                  <section>
+                    <div className="flex items-center gap-2 mb-6">
+                      <ChefHat className="w-5 h-5 text-purple-500" />
+                      <h2 className="text-2xl font-bold">Culinary Arts</h2>
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {filteredCourses.filter(course => 
+                        !course.category.startsWith('pos-') && 
+                        course.category !== 'safety-compliance' && 
+                        course.category !== 'safety'
+                      ).map((course) => (
+                        <CourseCard 
+                          key={course.id} 
+                          course={course} 
+                          isEnrolled={isEnrolled(course.id)}
+                          progress={getEnrollmentProgress(course.id)}
+                          onEnroll={handleEnroll}
+                          lessonCount={lessonCounts[course.id] || 0}
+                          onStartLearning={setSelectedCourse}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </TabsContent>
+
+              <TabsContent value="my-courses" className="space-y-8">
+                {enrolledCourses.length === 0 ? (
+                  <Card className="p-12 text-center">
+                    <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-xl font-semibold mb-2">No courses yet</h3>
+                    <p className="text-muted-foreground mb-4">Start your culinary journey by enrolling in a course</p>
+                    <Button onClick={() => {
+                      const discoverTab = document.querySelector('[value="discover"]') as HTMLElement;
+                      if (discoverTab) discoverTab.click();
+                    }}>
+                      Browse Courses
+                    </Button>
+                  </Card>
+                ) : (
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {enrolledCourses.map((course) => (
+                      <CourseCard 
+                        key={course.id} 
+                        course={course} 
+                        isEnrolled={true}
+                        progress={getEnrollmentProgress(course.id)}
+                        onEnroll={handleEnroll}
+                        showProgress={true}
+                        lessonCount={lessonCounts[course.id] || 0}
+                        onStartLearning={setSelectedCourse}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="achievements" className="space-y-8">
+                <AchievementsSection completedCourses={completedCourses.length} totalProgress={enrolledCourses.length} />
+              </TabsContent>
+
+              <TabsContent value="leaderboard" className="space-y-8">
+                <LeaderboardSection />
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
       </div>
     </div>
   );
