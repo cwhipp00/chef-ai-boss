@@ -11,6 +11,7 @@ import { FileRecipeUpload } from '@/components/recipes/FileRecipeUpload';
 import { AIRecipeGenerator } from '@/components/recipes/AIRecipeGenerator';
 import { ImageRecipeCreator } from '@/components/recipes/ImageRecipeCreator';
 import { AddRecipeModal } from '@/components/recipes/AddRecipeModal';
+import { InventoryRecipeBuilder } from '@/components/recipes/InventoryRecipeBuilder';
 
 const recipes = [
   {
@@ -94,41 +95,49 @@ export default function Recipes() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Recipe Management</h1>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Recipe Management</h1>
           <p className="text-muted-foreground">Manage and scale your restaurant recipes</p>
         </div>
-        <AddRecipeModal onRecipeCreated={handleRecipeGenerated} />
+        <div className="flex-shrink-0">
+          <AddRecipeModal onRecipeCreated={handleRecipeGenerated} />
+        </div>
       </div>
 
       <Tabs defaultValue="recipes" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 bg-muted/30 h-12">
-          <TabsTrigger value="recipes" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Users className="h-4 w-4 mr-1" />
-            All Recipes
-          </TabsTrigger>
-          <TabsTrigger value="upload" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Plus className="h-4 w-4 mr-1" />
-            Upload Files
-          </TabsTrigger>
-          <TabsTrigger value="ai-generator" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Zap className="h-4 w-4 mr-1" />
-            AI Generator
-          </TabsTrigger>
-          <TabsTrigger value="image-creator" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Scale className="h-4 w-4 mr-1" />
-            From Image
-          </TabsTrigger>
-          <TabsTrigger value="scaler" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Scale className="h-4 w-4 mr-1" />
-            Recipe Scaler
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Users className="h-4 w-4 mr-1" />
-            Analytics
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="inline-flex w-max min-w-full bg-muted/30 h-12 p-1 gap-1">
+            <TabsTrigger value="recipes" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+              <Users className="h-3 w-3 mr-1" />
+              All Recipes
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+              <Users className="h-3 w-3 mr-1" />
+              From Inventory
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+              <Plus className="h-3 w-3 mr-1" />
+              Upload Files
+            </TabsTrigger>
+            <TabsTrigger value="ai-generator" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+              <Zap className="h-3 w-3 mr-1" />
+              AI Generator
+            </TabsTrigger>
+            <TabsTrigger value="image-creator" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+              <Scale className="h-3 w-3 mr-1" />
+              From Image
+            </TabsTrigger>
+            <TabsTrigger value="scaler" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+              <Scale className="h-3 w-3 mr-1" />
+              Recipe Scaler
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+              <Users className="h-3 w-3 mr-1" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="recipes" className="space-y-6">
           <div className="flex gap-4">
@@ -196,6 +205,10 @@ export default function Recipes() {
               </RecipeDetailModal>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="inventory">
+          <InventoryRecipeBuilder onRecipeGenerated={handleRecipeGenerated} />
         </TabsContent>
 
         <TabsContent value="upload">
