@@ -91,7 +91,7 @@ export default function Recipes() {
   const allRecipes = [...recipes, ...extractedRecipes];
   
   const filteredRecipes = allRecipes.filter(recipe =>
-    recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    recipe.name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (selectedCategory === 'All' || recipe.category === selectedCategory)
   );
 
