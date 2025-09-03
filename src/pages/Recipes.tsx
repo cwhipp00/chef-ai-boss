@@ -94,47 +94,54 @@ export default function Recipes() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6 ml-0 sm:ml-4 lg:ml-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 pl-4 sm:pl-0">
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Recipe Management</h1>
           <p className="text-muted-foreground">Manage and scale your restaurant recipes</p>
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 pr-4 sm:pr-0">
           <AddRecipeModal onRecipeCreated={handleRecipeGenerated} />
         </div>
       </div>
 
       <Tabs defaultValue="recipes" className="space-y-6">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto pl-4 sm:pl-0">
           <TabsList className="inline-flex w-max min-w-full bg-muted/30 h-12 p-1 gap-1">
-            <TabsTrigger value="recipes" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <TabsTrigger value="recipes" className="flex-shrink-0 text-xs px-2 sm:px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Users className="h-3 w-3 mr-1" />
-              All Recipes
+              <span className="hidden sm:inline">All Recipes</span>
+              <span className="sm:hidden">Recipes</span>
             </TabsTrigger>
-            <TabsTrigger value="inventory" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <TabsTrigger value="inventory" className="flex-shrink-0 text-xs px-2 sm:px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Users className="h-3 w-3 mr-1" />
-              From Inventory
+              <span className="hidden sm:inline">From Inventory</span>
+              <span className="sm:hidden">Inventory</span>
             </TabsTrigger>
-            <TabsTrigger value="upload" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <TabsTrigger value="upload" className="flex-shrink-0 text-xs px-2 sm:px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Plus className="h-3 w-3 mr-1" />
-              Upload Files
+              <span className="hidden sm:inline">Upload Files</span>
+              <span className="sm:hidden">Upload</span>
             </TabsTrigger>
-            <TabsTrigger value="ai-generator" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <TabsTrigger value="ai-generator" className="flex-shrink-0 text-xs px-2 sm:px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Zap className="h-3 w-3 mr-1" />
-              AI Generator
+              <span className="hidden sm:inline">AI Generator</span>
+              <span className="sm:hidden">AI Gen</span>
             </TabsTrigger>
-            <TabsTrigger value="image-creator" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <TabsTrigger value="image-creator" className="flex-shrink-0 text-xs px-2 sm:px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Scale className="h-3 w-3 mr-1" />
-              From Image
+              <span className="hidden sm:inline">From Image</span>
+              <span className="sm:hidden">Image</span>
             </TabsTrigger>
-            <TabsTrigger value="scaler" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <TabsTrigger value="scaler" className="flex-shrink-0 text-xs px-2 sm:px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Scale className="h-3 w-3 mr-1" />
-              Recipe Scaler
+              <span className="hidden sm:inline">Recipe Scaler</span>
+              <span className="sm:hidden">Scaler</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex-shrink-0 text-xs px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
+            <TabsTrigger value="analytics" className="flex-shrink-0 text-xs px-2 sm:px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Users className="h-3 w-3 mr-1" />
-              Analytics
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Stats</span>
             </TabsTrigger>
           </TabsList>
         </div>
