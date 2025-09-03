@@ -35,6 +35,8 @@ import { LessonViewer } from '@/components/training/LessonViewer';
 import { POSSystemSelector } from '@/components/training/POSSystemSelector';
 import { POSSystemHub } from '@/components/training/POSSystemHub';
 import PersonalizedLearningPath from '@/components/training/PersonalizedLearningPath';
+import { AICourseCreator } from '@/components/training/AICourseCreator';
+import { OptimizedCourseCard } from '@/components/training/OptimizedCourseCard';
 
 interface Course {
   id: string;
@@ -71,44 +73,63 @@ const Training = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    fetchCourses();
+    fetchCoursesOptimized();
     if (user) {
       fetchEnrollments();
     }
   }, [user]);
 
-  const fetchCourses = async () => {
+  const fetchCoursesOptimized = async () => {
     try {
-      console.log('Fetching courses...');
-      const { data, error } = await supabase
+      console.log('Fetching courses with optimized query...');
+      
+      // Single optimized query to get courses with lesson counts
+      const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
-        .select('*')
+        .select(`
+          *,
+          lesson_count:lessons(count)
+        `)
         .order('is_featured', { ascending: false });
       
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+      if (coursesError) {
+        console.error('Supabase error:', coursesError);
+        throw coursesError;
       }
       
-      console.log('Courses fetched:', data?.length || 0, 'courses');
-      setCourses(data || []);
+      console.log('Courses fetched:', coursesData?.length || 0, 'courses');
       
-      // Fetch lesson counts for each course
-      if (data) {
-        const counts: { [courseId: string]: number } = {};
-        for (const course of data) {
-          const { count } = await supabase
-            .from('lessons')
-            .select('*', { count: 'exact', head: true })
-            .eq('course_id', course.id);
-          counts[course.id] = count || 0;
-        }
-        console.log('Lesson counts:', counts);
-        setLessonCounts(counts);
-      }
+      // Process the data to extract lesson counts
+      const processedCourses = coursesData?.map(course => ({
+        ...course,
+        lesson_count: undefined // Remove the nested count object
+      })) || [];
+      
+      const counts: { [courseId: string]: number } = {};
+      coursesData?.forEach(course => {
+        counts[course.id] = course.lesson_count?.[0]?.count || 0;
+      });
+      
+      setCourses(processedCourses);
+      setLessonCounts(counts);
+      
     } catch (error) {
       console.error('Error fetching courses:', error);
       toast.error('Failed to load courses');
+      
+      // Fallback to basic course fetch
+      try {
+        const { data, error } = await supabase
+          .from('courses')
+          .select('*')
+          .order('is_featured', { ascending: false });
+        
+        if (!error) {
+          setCourses(data || []);
+        }
+      } catch (fallbackError) {
+        console.error('Fallback fetch also failed:', fallbackError);
+      }
     } finally {
       setLoading(false);
     }
@@ -408,7 +429,7 @@ const Training = () => {
             </div>
 
             <Tabs defaultValue="discover" className="space-y-8">
-              <TabsList className="grid w-full grid-cols-4 lg:w-fit">
+              <TabsList className="grid w-full grid-cols-5 lg:w-fit">
                 <TabsTrigger value="discover" className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4" />
                   Discover
@@ -416,6 +437,10 @@ const Training = () => {
                 <TabsTrigger value="learning-path" className="flex items-center gap-2">
                   <Target className="w-4 h-4" />
                   My Path
+                </TabsTrigger>
+                <TabsTrigger value="ai-creator" className="flex items-center gap-2">
+                  <Flame className="w-4 h-4" />
+                  AI Creator
                 </TabsTrigger>
                 <TabsTrigger value="my-courses" className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
@@ -440,6 +465,15 @@ const Training = () => {
                 />
               </TabsContent>
 
+              <TabsContent value="ai-creator">
+                <AICourseCreator 
+                  onCourseCreated={(course) => {
+                    toast.success('Course created successfully!');
+                    fetchCoursesOptimized(); // Refresh course list
+                  }}
+                />
+              </TabsContent>
+
               <TabsContent value="discover" className="space-y-8">
 
                 {/* Featured Courses */}
@@ -450,17 +484,17 @@ const Training = () => {
                       <h2 className="text-2xl font-bold">Featured Courses</h2>
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {featuredCourses.map((course) => (
-                        <CourseCard 
-                          key={course.id} 
-                          course={course} 
-                          isEnrolled={isEnrolled(course.id)}
-                          progress={getEnrollmentProgress(course.id)}
-                          onEnroll={handleEnroll}
-                          lessonCount={lessonCounts[course.id] || 0}
-                          onStartLearning={setSelectedCourse}
-                        />
-                      ))}
+                       {featuredCourses.map((course) => (
+                         <OptimizedCourseCard 
+                           key={course.id} 
+                           course={course} 
+                           lessonCount={lessonCounts[course.id] || 0}
+                           isEnrolled={isEnrolled(course.id)}
+                           progress={getEnrollmentProgress(course.id)}
+                           onEnroll={handleEnroll}
+                           onViewCourse={setSelectedCourse}
+                         />
+                       ))}
                     </div>
                   </section>
                 ) : (
@@ -484,17 +518,17 @@ const Training = () => {
                       <h2 className="text-2xl font-bold">All Courses</h2>
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {filteredCourses.map((course) => (
-                        <CourseCard 
-                          key={course.id} 
-                          course={course} 
-                          isEnrolled={isEnrolled(course.id)}
-                          progress={getEnrollmentProgress(course.id)}
-                          onEnroll={handleEnroll}
-                          lessonCount={lessonCounts[course.id] || 0}
-                          onStartLearning={setSelectedCourse}
-                        />
-                      ))}
+                       {filteredCourses.map((course) => (
+                         <OptimizedCourseCard 
+                           key={course.id} 
+                           course={course} 
+                           lessonCount={lessonCounts[course.id] || 0}
+                           isEnrolled={isEnrolled(course.id)}
+                           progress={getEnrollmentProgress(course.id)}
+                           onEnroll={handleEnroll}
+                           onViewCourse={setSelectedCourse}
+                         />
+                       ))}
                     </div>
                   </section>
                 )}
@@ -523,17 +557,17 @@ const Training = () => {
                             {posCategory === 'pos-advanced' ? 'Advanced POS Topics' : `${providerName} Training`}
                           </h3>
                           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {posCourses.map((course) => (
-                              <CourseCard 
-                                key={course.id} 
-                                course={course} 
-                                isEnrolled={isEnrolled(course.id)}
-                                progress={getEnrollmentProgress(course.id)}
-                                onEnroll={handleEnroll}
-                                lessonCount={lessonCounts[course.id] || 0}
-                                onStartLearning={setSelectedCourse}
-                              />
-                            ))}
+                             {posCourses.map((course) => (
+                               <OptimizedCourseCard 
+                                 key={course.id} 
+                                 course={course} 
+                                 lessonCount={lessonCounts[course.id] || 0}
+                                 isEnrolled={isEnrolled(course.id)}
+                                 progress={getEnrollmentProgress(course.id)}
+                                 onEnroll={handleEnroll}
+                                 onViewCourse={setSelectedCourse}
+                               />
+                             ))}
                           </div>
                         </div>
                       );
@@ -550,17 +584,17 @@ const Training = () => {
                       <Badge variant="secondary" className="ml-2">Required Training</Badge>
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {filteredCourses.filter(course => course.category === 'safety-compliance' || course.category === 'safety').map((course) => (
-                        <CourseCard 
-                          key={course.id} 
-                          course={course} 
-                          isEnrolled={isEnrolled(course.id)}
-                          progress={getEnrollmentProgress(course.id)}
-                          onEnroll={handleEnroll}
-                          lessonCount={lessonCounts[course.id] || 0}
-                          onStartLearning={setSelectedCourse}
-                        />
-                      ))}
+                       {filteredCourses.filter(course => course.category === 'safety-compliance' || course.category === 'safety').map((course) => (
+                         <OptimizedCourseCard 
+                           key={course.id} 
+                           course={course} 
+                           lessonCount={lessonCounts[course.id] || 0}
+                           isEnrolled={isEnrolled(course.id)}
+                           progress={getEnrollmentProgress(course.id)}
+                           onEnroll={handleEnroll}
+                           onViewCourse={setSelectedCourse}
+                         />
+                       ))}
                     </div>
                   </section>
                 )}
@@ -577,17 +611,17 @@ const Training = () => {
                         !course.category.startsWith('pos-') && 
                         course.category !== 'safety-compliance' && 
                         course.category !== 'safety'
-                      ).map((course) => (
-                        <CourseCard 
-                          key={course.id} 
-                          course={course} 
-                          isEnrolled={isEnrolled(course.id)}
-                          progress={getEnrollmentProgress(course.id)}
-                          onEnroll={handleEnroll}
-                          lessonCount={lessonCounts[course.id] || 0}
-                          onStartLearning={setSelectedCourse}
-                        />
-                      ))}
+                       ).map((course) => (
+                         <OptimizedCourseCard 
+                           key={course.id} 
+                           course={course} 
+                           lessonCount={lessonCounts[course.id] || 0}
+                           isEnrolled={isEnrolled(course.id)}
+                           progress={getEnrollmentProgress(course.id)}
+                           onEnroll={handleEnroll}
+                           onViewCourse={setSelectedCourse}
+                         />
+                       ))}
                     </div>
                   </section>
                 )}
@@ -608,18 +642,18 @@ const Training = () => {
                   </Card>
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {enrolledCourses.map((course) => (
-                      <CourseCard 
-                        key={course.id} 
-                        course={course} 
-                        isEnrolled={true}
-                        progress={getEnrollmentProgress(course.id)}
-                        onEnroll={handleEnroll}
-                        showProgress={true}
-                        lessonCount={lessonCounts[course.id] || 0}
-                        onStartLearning={setSelectedCourse}
-                      />
-                    ))}
+                     {enrolledCourses.map((course) => (
+                       <OptimizedCourseCard 
+                         key={course.id} 
+                         course={course} 
+                         lessonCount={lessonCounts[course.id] || 0}
+                         isEnrolled={true}
+                         progress={getEnrollmentProgress(course.id)}
+                         onEnroll={handleEnroll}
+                         onViewCourse={setSelectedCourse}
+                         showProgress={true}
+                       />
+                     ))}
                   </div>
                 )}
               </TabsContent>
@@ -631,229 +665,6 @@ const Training = () => {
           </>
         )}
       </div>
-    </div>
-  );
-};
-
-// Course Card Component
-const CourseCard = ({ 
-  course, 
-  isEnrolled, 
-  progress, 
-  onEnroll, 
-  showProgress = false,
-  lessonCount = 0,
-  onStartLearning
-}: {
-  course: Course;
-  isEnrolled: boolean;
-  progress: number;
-  onEnroll: (courseId: string) => void;
-  showProgress?: boolean;
-  lessonCount?: number;
-  onStartLearning?: (course: Course) => void;
-}) => {
-  const getDifficultyColor = (level: string) => {
-    switch (level) {
-      case 'beginner': return 'bg-green-500/10 text-green-500 border-green-500/20';
-      case 'intermediate': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      case 'advanced': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      default: return 'bg-muted/10 text-muted-foreground border-muted/20';
-    }
-  };
-
-  return (
-    <Card className="group overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 border-primary/10">
-      <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/10 bg-grid-8" />
-        <div className="absolute top-4 left-4">
-          <Badge className={`${course.is_featured ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : getDifficultyColor(course.difficulty_level)} border`}>
-            {course.is_featured ? '⭐ Featured' : course.difficulty_level}
-          </Badge>
-        </div>
-        <div className="absolute bottom-4 right-4">
-          <Avatar className="h-8 w-8 border-2 border-white/20">
-            <AvatarFallback className="text-xs bg-primary/20">
-              {course.instructor_name.split(' ').map(n => n[0]).join('')}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-      </div>
-      
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
-            {course.title}
-          </CardTitle>
-          <Badge variant="outline" className="ml-2 text-xs">
-            {course.category}
-          </Badge>
-        </div>
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {course.description}
-        </p>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            {course.duration_hours}h
-          </div>
-          <div className="flex items-center gap-1">
-            <PlayCircle className="w-4 h-4" />
-            {lessonCount} lessons
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="w-4 h-4" />
-            {course.instructor_name}
-          </div>
-        </div>
-
-        {showProgress && isEnrolled && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progress</span>
-              <span>{progress}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </div>
-        )}
-
-        <div className="flex gap-2">
-          {course.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-
-        {isEnrolled ? (
-          <Button 
-            className="w-full" 
-            size="sm"
-            onClick={() => onStartLearning && onStartLearning(course)}
-          >
-            <Play className="w-4 h-4 mr-2" />
-            Continue Learning
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <Button 
-              className="flex-1" 
-              variant="outline" 
-              size="sm"
-              onClick={() => onEnroll(course.id)}
-            >
-              Enroll Now
-            </Button>
-            {lessonCount > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => onStartLearning && onStartLearning(course)}
-                className="px-3"
-              >
-                <FileText className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-
-// Achievements Section
-const AchievementsSection = ({ completedCourses, totalProgress }: { completedCourses: number; totalProgress: number }) => {
-  const achievements = [
-    { id: 1, title: "First Steps", description: "Complete your first course", icon: "🎯", unlocked: completedCourses >= 1 },
-    { id: 2, title: "Knowledge Seeker", description: "Complete 3 courses", icon: "📚", unlocked: completedCourses >= 3 },
-    { id: 3, title: "Culinary Scholar", description: "Complete 5 courses", icon: "🎓", unlocked: completedCourses >= 5 },
-    { id: 4, title: "Master Chef", description: "Complete 10 courses", icon: "👨‍🍳", unlocked: completedCourses >= 10 },
-    { id: 5, title: "Dedicated Student", description: "Enroll in 5 courses", icon: "⭐", unlocked: totalProgress >= 5 },
-    { id: 6, title: "Speed Learner", description: "Complete a course in one day", icon: "⚡", unlocked: false },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold">Your Achievements</h2>
-        <p className="text-muted-foreground">Track your learning milestones</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {achievements.map((achievement) => (
-          <Card key={achievement.id} className={`transition-all duration-200 ${achievement.unlocked ? 'border-primary/20 bg-primary/5' : 'opacity-50'}`}>
-            <CardContent className="p-6 text-center space-y-2">
-              <div className="text-4xl mb-2">{achievement.icon}</div>
-              <h3 className="font-semibold">{achievement.title}</h3>
-              <p className="text-sm text-muted-foreground">{achievement.description}</p>
-              {achievement.unlocked && (
-                <Badge variant="default" className="mt-2">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Unlocked
-                </Badge>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Leaderboard Section
-const LeaderboardSection = () => {
-  const mockLeaderboard = [
-    { rank: 1, name: "Alex Chen", courses: 12, points: 2400 },
-    { rank: 2, name: "Sarah Johnson", courses: 10, points: 2100 },
-    { rank: 3, name: "Mike Rodriguez", courses: 8, points: 1800 },
-    { rank: 4, name: "Emma Davis", courses: 7, points: 1650 },
-    { rank: 5, name: "David Kim", courses: 6, points: 1400 },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold">Leaderboard</h2>
-        <p className="text-muted-foreground">See how you compare with other learners</p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-yellow-500" />
-            Top Learners This Month
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {mockLeaderboard.map((user, index) => (
-              <div key={user.rank} className="flex items-center justify-between p-3 rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                    index === 0 ? 'bg-yellow-500 text-white' :
-                    index === 1 ? 'bg-gray-400 text-white' :
-                    index === 2 ? 'bg-amber-600 text-white' :
-                    'bg-muted text-muted-foreground'
-                  }`}>
-                    {user.rank}
-                  </div>
-                  <div>
-                    <div className="font-semibold">{user.name}</div>
-                    <div className="text-sm text-muted-foreground">{user.courses} courses completed</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-primary">{user.points}</div>
-                  <div className="text-xs text-muted-foreground">points</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
