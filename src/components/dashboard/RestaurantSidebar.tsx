@@ -20,7 +20,6 @@ import {
   BarChart3,
   GraduationCap,
   LogOut,
-  Building2,
   Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,7 +28,6 @@ import { SearchTrigger } from "@/components/search/GlobalSearch";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
 const navigationSections = [
   {
@@ -77,7 +75,6 @@ interface RestaurantSidebarProps {
 export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [companyName, setCompanyName] = useState<string>('');
   const location = useLocation();
   const currentPath = location.pathname;
   const { t } = useLanguage();
@@ -87,25 +84,6 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
   
   // For now, assume all users are managers until Clerk is fully set up
   const isManager = true;
-
-  // Fetch company name from user profile
-  useEffect(() => {
-    const fetchCompanyName = async () => {
-      if (!user?.id) return;
-      
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('company_name')
-        .eq('id', user.id)
-        .single();
-      
-      if (profile?.company_name) {
-        setCompanyName(profile.company_name);
-      }
-    };
-
-    fetchCompanyName();
-  }, [user?.id]);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -175,23 +153,10 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                 <span className="font-bold text-base sm:text-lg lg:text-xl text-gradient">
                   Chef AI Pro
                 </span>
-                {companyName && (
-                  <span className="hidden lg:block text-xs lg:text-sm text-muted-foreground font-medium truncate max-w-[120px] lg:max-w-[160px]">
-                    {companyName}
-                  </span>
-                )}
               </div>
             </div>
           )}
           <div className="flex items-center gap-2 lg:gap-3">
-            {!isCollapsed && companyName && (
-              <div className="hidden lg:flex items-center gap-1 px-2 lg:px-3 py-1 lg:py-2 rounded-md bg-primary/10 border border-primary/20 touch-target">
-                <Building2 className="h-3 w-3 lg:h-4 lg:w-4 text-primary" />
-                <span className="text-xs lg:text-sm font-medium text-primary truncate max-w-[80px] lg:max-w-[120px]">
-                  {companyName}
-                </span>
-              </div>
-            )}
             {!isCollapsed && <LanguageSwitcher />}
             <Button
               variant="ghost"
