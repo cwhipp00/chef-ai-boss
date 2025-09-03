@@ -68,17 +68,17 @@ const pricingTiers: PricingTier[] = [
   {
     id: 'pro',
     name: 'Pro',
-    price: 299,
+    price: 89,
     period: 'month',
-    description: 'Unlimited power for serious restaurants',
+    description: 'Unlimited power for growing restaurants',
     popular: true,
     features: [
       'Everything in Free',
       'Unlimited AI assistance & generations',
-      'Unlimited document uploads',
+      'Unlimited document uploads & storage',
       'Unlimited video calling',
       'Priority support',
-      'Advanced analytics',
+      'Advanced analytics & reporting',
       'API access',
       'Custom integrations'
     ],
@@ -96,20 +96,21 @@ const pricingTiers: PricingTier[] = [
   {
     id: 'business',
     name: 'Business',
-    price: 799,
+    price: 249,
     period: 'month',
-    description: 'Enterprise-grade solution for restaurant groups',
+    description: 'Enterprise-grade solution for restaurant chains',
     features: [
       'Everything in Pro',
       'Unlimited everything',
       'Multi-location management',
       'Advanced automation workflows',
-      'Custom integrations & API',
+      'Custom integrations & dedicated API',
       'Dedicated account manager',
-      'White-label options',
+      'White-label & branding options',
       'Advanced reporting & analytics',
-      'SLA guarantees',
-      'Custom training & onboarding'
+      '99.9% SLA guarantees',
+      'Custom training & onboarding',
+      'Priority feature development'
     ],
     limits: {
       ai_requests: 'Unlimited',

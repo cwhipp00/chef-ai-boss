@@ -58,11 +58,11 @@ export const UsageDashboard = () => {
             <div className="space-y-2">
               <Button onClick={handleUpgrade} className="w-full">
                 <Crown className="h-4 w-4 mr-2" />
-                Upgrade to Pro - $299/month
+                Upgrade to Pro - $89/month
               </Button>
               <Button onClick={handleUpgrade} variant="outline" className="w-full">
                 <Crown className="h-4 w-4 mr-2" />
-                Upgrade to Business - $799/month
+                Upgrade to Business - $249/month
               </Button>
             </div>
           )}
@@ -129,7 +129,7 @@ export const UsageDashboard = () => {
                 <Sparkles className="h-5 w-5 text-primary" />
                 Pro Plan Benefits
               </CardTitle>
-              <p className="text-2xl font-bold">$299/month</p>
+              <p className="text-2xl font-bold">$89/month</p>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-2">
@@ -168,7 +168,7 @@ export const UsageDashboard = () => {
                 <Crown className="h-5 w-5 text-amber-500" />
                 Business Plan Benefits
               </CardTitle>
-              <p className="text-2xl font-bold">$799/month</p>
+              <p className="text-2xl font-bold">$249/month</p>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-2">
