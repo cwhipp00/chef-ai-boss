@@ -99,10 +99,9 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
     root.style.setProperty('--success', theme.success, 'important');
     root.style.setProperty('--ring', theme.primary, 'important');
     
-    // Apply font size
+    // Apply font size (remove hardcoded fontSize setting)
     const fontSize = fontSizeScales[settings.fontSize];
     root.style.setProperty('--font-size-scale', fontSize);
-    root.style.fontSize = `${parseFloat(fontSize) * 16}px`;
     
     // Apply interface density
     const density = densitySpacing[settings.interfaceDensity];

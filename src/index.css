@@ -155,9 +155,34 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-medium;
     font-size: calc(var(--font-size-scale, 1) * 1rem);
+    line-height: calc(var(--font-size-scale, 1) * 1.5);
+  }
+  
+  /* Global font size scaling */
+  html {
+    font-size: calc(16px * var(--font-size-scale, 1));
   }
   
   /* Spacing adjustments based on interface density */
+  .space-y-1 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(0.25rem * var(--spacing-scale, 1));
+  }
+  
+  .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(0.5rem * var(--spacing-scale, 1));
+  }
+  
+  .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(0.75rem * var(--spacing-scale, 1));
+  }
+  
+  .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(1rem * var(--spacing-scale, 1));
+  }
+  
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(1.5rem * var(--spacing-scale, 1));
+  }
   .no-hover-effects .hover-lift:hover {
     transform: none !important;
     box-shadow: var(--shadow-soft) !important;

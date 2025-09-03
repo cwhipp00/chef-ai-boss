@@ -18,6 +18,40 @@ export default {
 			}
 		},
 		extend: {
+			fontSize: {
+				'xs': ['calc(0.75rem * var(--font-size-scale, 1))', { lineHeight: 'calc(1rem * var(--font-size-scale, 1))' }],
+				'sm': ['calc(0.875rem * var(--font-size-scale, 1))', { lineHeight: 'calc(1.25rem * var(--font-size-scale, 1))' }],
+				'base': ['calc(1rem * var(--font-size-scale, 1))', { lineHeight: 'calc(1.5rem * var(--font-size-scale, 1))' }],
+				'lg': ['calc(1.125rem * var(--font-size-scale, 1))', { lineHeight: 'calc(1.75rem * var(--font-size-scale, 1))' }],
+				'xl': ['calc(1.25rem * var(--font-size-scale, 1))', { lineHeight: 'calc(1.75rem * var(--font-size-scale, 1))' }],
+				'2xl': ['calc(1.5rem * var(--font-size-scale, 1))', { lineHeight: 'calc(2rem * var(--font-size-scale, 1))' }],
+				'3xl': ['calc(1.875rem * var(--font-size-scale, 1))', { lineHeight: 'calc(2.25rem * var(--font-size-scale, 1))' }],
+				'4xl': ['calc(2.25rem * var(--font-size-scale, 1))', { lineHeight: 'calc(2.5rem * var(--font-size-scale, 1))' }]
+			},
+			spacing: {
+				'0.5': 'calc(0.125rem * var(--spacing-scale, 1))',
+				'1': 'calc(0.25rem * var(--spacing-scale, 1))',
+				'1.5': 'calc(0.375rem * var(--spacing-scale, 1))',
+				'2': 'calc(0.5rem * var(--spacing-scale, 1))',
+				'2.5': 'calc(0.625rem * var(--spacing-scale, 1))',
+				'3': 'calc(0.75rem * var(--spacing-scale, 1))',
+				'3.5': 'calc(0.875rem * var(--spacing-scale, 1))',
+				'4': 'calc(1rem * var(--spacing-scale, 1))',
+				'5': 'calc(1.25rem * var(--spacing-scale, 1))',
+				'6': 'calc(1.5rem * var(--spacing-scale, 1))',
+				'7': 'calc(1.75rem * var(--spacing-scale, 1))',
+				'8': 'calc(2rem * var(--spacing-scale, 1))',
+				'9': 'calc(2.25rem * var(--spacing-scale, 1))',
+				'10': 'calc(2.5rem * var(--spacing-scale, 1))',
+				'11': 'calc(2.75rem * var(--spacing-scale, 1))',
+				'12': 'calc(3rem * var(--spacing-scale, 1))',
+				'14': 'calc(3.5rem * var(--spacing-scale, 1))',
+				'16': 'calc(4rem * var(--spacing-scale, 1))',
+				'20': 'calc(5rem * var(--spacing-scale, 1))',
+				'24': 'calc(6rem * var(--spacing-scale, 1))',
+				'28': 'calc(7rem * var(--spacing-scale, 1))',
+				'32': 'calc(8rem * var(--spacing-scale, 1))'
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
