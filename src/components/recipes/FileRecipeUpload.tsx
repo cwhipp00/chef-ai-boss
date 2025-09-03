@@ -82,7 +82,10 @@ export function FileRecipeUpload({ onRecipesExtracted }: { onRecipesExtracted: (
         throw new Error('Failed to parse file');
       }
 
-      const { recipes } = await response.json();
+      const responseData = await response.json();
+      console.log('AI Parser Response:', responseData);
+      const { recipes } = responseData;
+      console.log('Extracted recipes from response:', recipes);
       return recipes || [];
     } catch (error) {
       console.error('File parsing error:', error);

@@ -74,7 +74,13 @@ export default function Recipes() {
   const [extractedRecipes, setExtractedRecipes] = useState<any[]>([]);
 
   const handleRecipesExtracted = (newRecipes: any[]) => {
-    setExtractedRecipes(prev => [...prev, ...newRecipes]);
+    console.log('Handling extracted recipes:', newRecipes);
+    console.log('Current extracted recipes before update:', extractedRecipes);
+    setExtractedRecipes(prev => {
+      const updated = [...prev, ...newRecipes];
+      console.log('Updated extracted recipes:', updated);
+      return updated;
+    });
     // Here you could also save to your backend/database
   };
 
