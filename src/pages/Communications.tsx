@@ -16,6 +16,7 @@ import { RealTimeChat } from '@/components/communications/RealTimeChat';
 import { UserPresence } from '@/components/communications/UserPresence';
 import { EnhancedVideoCall } from '@/components/video/EnhancedVideoCall';
 import { RealtimeCollaboration } from '@/components/realtime/RealtimeCollaboration';
+import { AIRecorder } from '@/components/communications/AIRecorder';
 
 const messages = [
   {

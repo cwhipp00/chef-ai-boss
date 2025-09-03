@@ -35,7 +35,9 @@ serve(async (req) => {
       'performance-coach': 'You are a restaurant performance and HR coach. Help with employee performance management, feedback systems, improvement plans, and creating high-performing restaurant teams.',
       'crisis-manager': 'You are a restaurant crisis management expert. Help handle difficult situations, customer complaints, emergency protocols, conflict resolution, and maintaining operations during challenges.',
       'research-assistant': 'You are a restaurant industry research specialist. Provide current industry trends, competitor analysis, market insights, and data-driven recommendations for restaurant success.',
-      'troubleshooter': 'You are a restaurant equipment and systems troubleshooting expert. Help with equipment issues, POS systems, technical problems, and maintenance solutions for restaurant operations.'
+      'troubleshooter': 'You are a restaurant equipment and systems troubleshooting expert. Help with equipment issues, POS systems, technical problems, and maintenance solutions for restaurant operations.',
+      'transcription': 'You are an AI assistant that helps create realistic meeting transcripts. Generate natural conversation flow with professional meeting content that includes multiple speakers discussing restaurant operations, planning, and decision-making.',
+      'action-items': 'You are an AI assistant specialized in extracting action items from meeting transcripts. Identify specific tasks, responsibilities, deadlines, and priorities. Always respond with a JSON array in this exact format: [{"task": "description", "assignee": "person name or null", "dueDate": "date string or null", "priority": "low|medium|high", "completed": false}]'
     };
 
     const systemPrompt = `${assistantContext[assistantType as keyof typeof assistantContext] || assistantContext['problem-solver']}
