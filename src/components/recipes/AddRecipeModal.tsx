@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -100,6 +100,9 @@ export function AddRecipeModal({ onRecipeCreated }: AddRecipeModalProps) {
             <Sparkles className="h-5 w-5 text-primary" />
             Add New Recipe
           </DialogTitle>
+          <DialogDescription>
+            Choose how you'd like to create your recipe using our AI-powered tools
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">

@@ -121,41 +121,99 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
         "w-64"
       )}>
         {/* Header */}
-        <div className="p-3 sm:p-4 lg:p-6 border-b border-primary/20 flex items-center justify-between bg-gradient-to-r from-card via-card to-primary/5">
+        <div className="p-4 sm:p-6 lg:p-8 border-b border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 relative overflow-hidden">
+          {/* Ambient background effects */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-accent/3"></div>
+          <div className="absolute top-0 left-1/4 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-24 h-24 bg-accent/6 rounded-full blur-2xl"></div>
+          
           {!isCollapsed && (
-            <div className="flex items-center gap-2 lg:gap-3">
-              <div className="relative w-8 lg:w-10 h-10 lg:h-12 flex items-center justify-center">
-                {/* Chef Hat */}
-                <ChefHat className="h-5 w-5 lg:h-6 lg:w-6 text-primary drop-shadow-sm" />
+            <div className="relative flex flex-col items-center text-center space-y-4">
+              {/* Premium Logo Design */}
+              <div className="relative group">
+                {/* Outer glow ring */}
+                <div className="absolute inset-0 w-20 h-20 bg-gradient-to-br from-primary/30 via-accent/40 to-primary/30 rounded-full blur-xl scale-110 group-hover:scale-125 transition-all duration-700 animate-pulse"></div>
                 
-                {/* Connection Line with neuron effect */}
-                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-0.5 h-3 lg:h-4 bg-gradient-to-t from-primary via-accent to-primary/60 shadow-sm">
-                  {/* Animated neuron pulse */}
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-accent rounded-full animate-ping opacity-75"></div>
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-0.5 bg-primary rounded-full animate-pulse"></div>
-                </div>
-                
-                {/* Brain with glow effect */}
-                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
-                  <div className="relative">
-                    {/* Glow background */}
-                    <div className="absolute inset-0 bg-accent/30 rounded-full blur-sm scale-150 animate-pulse"></div>
-                    {/* Brain icon */}
-                    <Brain className="relative h-4 w-4 lg:h-5 lg:w-5 text-accent drop-shadow-lg animate-pulse" />
-                    {/* Neuron sparks */}
-                    <div className="absolute -top-0.5 -right-0.5 w-1 h-1 bg-accent rounded-full animate-ping"></div>
-                    <div className="absolute -bottom-0.5 -left-0.5 w-0.5 h-0.5 bg-primary rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                {/* Main logo container */}
+                <div className="relative w-20 h-20 bg-gradient-to-br from-background via-background/95 to-background/90 backdrop-blur-sm border-2 border-primary/30 rounded-full shadow-2xl group-hover:shadow-primary/40 transition-all duration-500 flex items-center justify-center">
+                  
+                  {/* Rotating outer ring */}
+                  <div className="absolute inset-1 border border-accent/20 rounded-full animate-spin" style={{ animationDuration: '12s' }}>
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-primary rounded-full"></div>
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-1 h-1 bg-accent rounded-full"></div>
+                    <div className="absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-0.5 bg-primary rounded-full"></div>
+                    <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-0.5 h-0.5 bg-accent rounded-full"></div>
+                  </div>
+                  
+                  {/* Inner logo elements */}
+                  <div className="relative z-10">
+                    {/* Chef Hat with AI elements */}
+                    <div className="relative">
+                      <ChefHat className="h-8 w-8 text-primary drop-shadow-lg group-hover:scale-110 group-hover:text-accent transition-all duration-500" />
+                      {/* AI neural connections */}
+                      <div className="absolute -top-1 -right-0.5 w-2 h-2 bg-accent rounded-full animate-pulse shadow-lg"></div>
+                      <div className="absolute -bottom-0.5 -left-1 w-1.5 h-1.5 bg-primary rounded-full animate-ping opacity-80" style={{ animationDelay: '0.8s' }}></div>
+                      <div className="absolute top-1 left-2 w-1 h-1 bg-accent rounded-full animate-ping opacity-60" style={{ animationDelay: '1.6s' }}></div>
+                    </div>
+                  </div>
+                  
+                  {/* Orbiting particles */}
+                  <div className="absolute inset-0 animate-spin" style={{ animationDuration: '20s', animationDirection: 'reverse' }}>
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary/60 rounded-full animate-pulse"></div>
+                    <div className="absolute bottom-2 right-3 w-0.5 h-0.5 bg-accent/80 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-base sm:text-lg lg:text-xl text-gradient">
-                  Chef AI Pro
-                </span>
+              
+              {/* Premium Typography */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <h1 className="text-3xl lg:text-4xl font-black bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent group-hover:from-accent group-hover:via-primary group-hover:to-accent transition-all duration-1000 tracking-tight leading-none">
+                    Chef AI
+                  </h1>
+                  {/* Text glow effect */}
+                  <div className="absolute inset-0 text-3xl lg:text-4xl font-black text-primary/10 blur-sm transition-all duration-1000 tracking-tight leading-none">
+                    Chef AI
+                  </div>
+                </div>
+                
+                {/* Pro badge */}
+                <div className="flex items-center justify-center gap-3">
+                  <div className="h-px w-8 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+                  <div className="relative">
+                    <span className="text-lg font-black text-accent tracking-[0.3em] uppercase relative z-10">
+                      PRO
+                    </span>
+                    <div className="absolute inset-0 text-lg font-black text-accent/30 blur-sm tracking-[0.3em] uppercase">
+                      PRO
+                    </div>
+                  </div>
+                  <div className="h-px w-8 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+                </div>
+                
+                {/* Subtitle */}
+                <p className="text-sm text-muted-foreground/90 font-medium tracking-wide leading-relaxed max-w-xs">
+                  Restaurant Excellence Platform
+                </p>
+                
+                {/* Animated status indicators */}
+                <div className="flex items-center justify-center gap-2 pt-2">
+                  <div className="flex gap-1">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  </div>
+                  <span className="text-xs text-muted-foreground/70 font-medium ml-2">AI ACTIVE</span>
+                </div>
               </div>
+              
+              {/* Bottom accent line */}
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-4/5 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
             </div>
           )}
-          <div className="flex items-center gap-2 lg:gap-3">
+          
+          {/* Controls */}
+          <div className={`${!isCollapsed ? 'absolute top-4 right-4' : ''} flex items-center gap-2 lg:gap-3`}>
             {!isCollapsed && <LanguageSwitcher />}
             {!isCollapsed && <HelpChatDropdown />}
             <Button
