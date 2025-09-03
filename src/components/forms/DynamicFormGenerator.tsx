@@ -67,19 +67,23 @@ export function DynamicFormGenerator({ organizationId, category }: DynamicFormGe
 
   const loadForms = async () => {
     try {
+      console.log('Loading forms for organization:', organizationId);
+      
       let query = supabase
         .from('dynamic_forms')
         .select(`
           *,
           form_submissions(count)
         `)
-        .eq('organization_id', organizationId);
+        .eq('created_by', (await supabase.auth.getUser()).data.user?.id);
 
       if (category) {
         query = query.eq('category', category);
       }
 
       const { data, error } = await query;
+      
+      console.log('Forms query result:', { data, error });
       
       if (error) throw error;
 
@@ -89,6 +93,7 @@ export function DynamicFormGenerator({ organizationId, category }: DynamicFormGe
         submissions_count: form.form_submissions?.[0]?.count || 0
       })) || [];
 
+      console.log('Processed forms:', formsWithCounts);
       setForms(formsWithCounts);
     } catch (error) {
       console.error('Error loading forms:', error);

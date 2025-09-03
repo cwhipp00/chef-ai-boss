@@ -28,6 +28,24 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Get user from authorization header
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
+    
+    let userId = null;
+    if (token) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser(token);
+        userId = user?.id;
+      } catch (authError) {
+        console.error('Auth error:', authError);
+      }
+    }
+
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
     const { prompt, organizationId, category }: FormGenerationRequest = await req.json();
 
     // Generate form using Gemini
@@ -104,6 +122,7 @@ Make the form practical and professional. Include relevant validation and field 
         category: formData.category,
         form_schema: formData.form_schema,
         organization_id: organizationId,
+        created_by: userId,
         ai_generated: true
       })
       .select()

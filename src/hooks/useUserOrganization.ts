@@ -24,48 +24,41 @@ export function useUserOrganization() {
       try {
         setLoading(true);
         
-        // Get user's organization membership
+        // Get user's organization membership first
         const { data: membership, error: membershipError } = await supabase
           .from('organization_members')
-          .select(`
-            role,
-            organization_id,
-            organizations(
-              id,
-              name
-            )
-          `)
+          .select('role, organization_id')
           .eq('user_id', user.id)
           .single();
 
         if (membershipError) {
-          // If no membership exists, try to create one
           if (membershipError.code === 'PGRST116') {
-            // User has no organization membership, which should be handled by the trigger
-            // But let's make sure they have a profile first
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('company_name')
-              .eq('id', user.id)
-              .single();
-            
-            if (profile) {
-              // Refresh the page to trigger the organization creation
-              window.location.reload();
-              return;
-            }
+            setError('No organization membership found');
+          } else {
+            throw membershipError;
           }
-          throw membershipError;
+          return;
         }
 
-        if (membership?.organizations) {
+        // Then get the organization details
+        const { data: org, error: orgError } = await supabase
+          .from('organizations')
+          .select('id, name')
+          .eq('id', membership.organization_id)
+          .single();
+
+        if (orgError) {
+          throw orgError;
+        }
+
+        if (org) {
           setOrganization({
-            id: membership.organizations.id,
-            name: membership.organizations.name,
+            id: org.id,
+            name: org.name,
             role: membership.role
           });
         } else {
-          setError('No organization found');
+          setError('Organization not found');
         }
       } catch (err) {
         console.error('Error fetching organization:', err);
