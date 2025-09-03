@@ -1,19 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Settings as SettingsIcon, Crown, User, Bell, Shield, Palette, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Settings as SettingsIcon, Crown, User, Bell, Shield, Palette, Check, Loader2 } from 'lucide-react';
 import { UsageDashboard } from '@/components/subscription/UsageDashboard';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppearance, type ColorTheme, type DisplayMode, type FontSize, type InterfaceDensity } from '@/contexts/AppearanceContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Settings() {
   const { user } = useAuth();
   const { isPremium, subscriptionTier } = useSubscription();
+  const { toast } = useToast();
   const { 
     settings, 
     updateColorTheme, 
@@ -22,6 +26,164 @@ export default function Settings() {
     updateInterfaceDensity, 
     updateAnimationSetting 
   } = useAppearance();
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  // Notification settings state
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailNotifications: {
+      courseUpdates: true,
+      assignmentReminders: true,
+      teamUpdates: true,
+      marketing: false,
+    },
+    pushNotifications: {
+      realTimeAlerts: true,
+      soundNotifications: true,
+      desktopNotifications: false,
+    },
+    emailFrequency: 'daily',
+    preferredTime: 'morning',
+  });
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+
+  // Load notification settings
+  useEffect(() => {
+    if (user) {
+      loadNotificationSettings();
+    }
+  }, [user]);
+
+  const loadNotificationSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('notification_settings')
+        .eq('id', user?.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading notification settings:', error);
+        return;
+      }
+
+      if (data?.notification_settings) {
+        setNotificationSettings(prev => ({
+          ...prev,
+          ...data.notification_settings
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading notification settings:', error);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "New password and confirmation don't match",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        toast({
+          title: "Password Update Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Password Updated",
+          description: "Your password has been successfully changed",
+        });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (error) {
+      toast({
+        title: "Password Update Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  const updateNotificationSetting = (category: string, setting: string, value: any) => {
+    if (category === 'emailFrequency' || category === 'preferredTime') {
+      setNotificationSettings(prev => ({
+        ...prev,
+        [category]: value
+      }));
+    } else {
+      setNotificationSettings(prev => ({
+        ...prev,
+        [category]: {
+          ...prev[category as keyof typeof prev.emailNotifications],
+          [setting]: value
+        }
+      }));
+    }
+  };
+
+  const saveNotificationSettings = async () => {
+    setIsSavingNotifications(true);
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          notification_settings: notificationSettings
+        })
+        .eq('id', user?.id);
+
+      if (error) {
+        toast({
+          title: "Save Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Settings Saved",
+          description: "Your notification preferences have been updated",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSavingNotifications(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 p-4 space-y-6">
@@ -91,24 +253,265 @@ export default function Settings() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="notifications" className="mt-6">
+        <TabsContent value="notifications" className="mt-6 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Notification Preferences
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Notification settings coming soon...</p>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-4">Email Notifications</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <label className="text-sm font-medium">Course Updates</label>
+                        <p className="text-xs text-muted-foreground">
+                          Get notified about new courses and content updates
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.emailNotifications.courseUpdates}
+                        onCheckedChange={(checked) => updateNotificationSetting('emailNotifications', 'courseUpdates', checked)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <label className="text-sm font-medium">Assignment Reminders</label>
+                        <p className="text-xs text-muted-foreground">
+                          Receive reminders about pending assignments and deadlines
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.emailNotifications.assignmentReminders}
+                        onCheckedChange={(checked) => updateNotificationSetting('emailNotifications', 'assignmentReminders', checked)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <label className="text-sm font-medium">Team Updates</label>
+                        <p className="text-xs text-muted-foreground">
+                          Stay informed about team activities and announcements
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.emailNotifications.teamUpdates}
+                        onCheckedChange={(checked) => updateNotificationSetting('emailNotifications', 'teamUpdates', checked)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <label className="text-sm font-medium">Marketing Communications</label>
+                        <p className="text-xs text-muted-foreground">
+                          Receive product updates and promotional content
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.emailNotifications.marketing}
+                        onCheckedChange={(checked) => updateNotificationSetting('emailNotifications', 'marketing', checked)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h4 className="text-sm font-medium mb-4">In-App Notifications</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <label className="text-sm font-medium">Real-time Alerts</label>
+                        <p className="text-xs text-muted-foreground">
+                          Show instant notifications for important events
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.pushNotifications.realTimeAlerts}
+                        onCheckedChange={(checked) => updateNotificationSetting('pushNotifications', 'realTimeAlerts', checked)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <label className="text-sm font-medium">Sound Notifications</label>
+                        <p className="text-xs text-muted-foreground">
+                          Play sounds for new notifications and messages
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.pushNotifications.soundNotifications}
+                        onCheckedChange={(checked) => updateNotificationSetting('pushNotifications', 'soundNotifications', checked)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <label className="text-sm font-medium">Desktop Notifications</label>
+                        <p className="text-xs text-muted-foreground">
+                          Show browser notifications even when tab is not active
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.pushNotifications.desktopNotifications}
+                        onCheckedChange={(checked) => updateNotificationSetting('pushNotifications', 'desktopNotifications', checked)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h4 className="text-sm font-medium mb-4">Communication Preferences</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Email Frequency</label>
+                      <select 
+                        className="w-full p-2 border border-input rounded-md bg-background text-sm"
+                        value={notificationSettings.emailFrequency}
+                        onChange={(e) => updateNotificationSetting('emailFrequency', '', e.target.value)}
+                      >
+                        <option value="immediate">Immediate</option>
+                        <option value="daily">Daily Digest</option>
+                        <option value="weekly">Weekly Summary</option>
+                        <option value="never">Never</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Preferred Communication Time</label>
+                      <select 
+                        className="w-full p-2 border border-input rounded-md bg-background text-sm"
+                        value={notificationSettings.preferredTime}
+                        onChange={(e) => updateNotificationSetting('preferredTime', '', e.target.value)}
+                      >
+                        <option value="morning">Morning (8-12 PM)</option>
+                        <option value="afternoon">Afternoon (12-6 PM)</option>
+                        <option value="evening">Evening (6-10 PM)</option>
+                        <option value="any">Any Time</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t">
+                <Button 
+                  onClick={saveNotificationSettings}
+                  disabled={isSavingNotifications}
+                  className="w-full sm:w-auto"
+                >
+                  {isSavingNotifications ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Preferences'
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="security" className="mt-6">
+        <TabsContent value="security" className="mt-6 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Password & Security
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Security settings coming soon...</p>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-3">Change Password</h4>
+                  <div className="space-y-4 max-w-md">
+                    <div>
+                      <label className="text-sm font-medium block mb-2">Current Password</label>
+                      <Input 
+                        type="password" 
+                        placeholder="Enter current password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-2">New Password</label>
+                      <Input 
+                        type="password" 
+                        placeholder="Enter new password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-2">Confirm New Password</label>
+                      <Input 
+                        type="password" 
+                        placeholder="Confirm new password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                    </div>
+                    <Button 
+                      onClick={handlePasswordChange}
+                      disabled={isUpdatingPassword || !currentPassword || !newPassword || !confirmPassword}
+                      className="w-full"
+                    >
+                      {isUpdatingPassword ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Updating Password...
+                        </>
+                      ) : (
+                        'Update Password'
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h4 className="text-sm font-medium mb-3">Account Security</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-medium">Email Address</div>
+                        <div className="text-xs text-muted-foreground">{user?.email}</div>
+                      </div>
+                      <Badge variant="secondary">Verified</Badge>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-medium">Account Created</div>
+                        <div className="text-xs text-muted-foreground">
+                          {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-medium">Last Sign In</div>
+                        <div className="text-xs text-muted-foreground">
+                          {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Unknown'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
