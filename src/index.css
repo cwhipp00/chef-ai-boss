@@ -235,6 +235,11 @@ All colors MUST be HSL.
     @apply transition-all duration-200 active:scale-95 active:shadow-sm;
   }
 
+  /* Touch-friendly targets for tablet and mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
   /* Safe area support for mobile devices */
   @supports (padding: max(0px)) {
     .safe-area-top {
