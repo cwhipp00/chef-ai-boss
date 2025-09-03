@@ -179,7 +179,7 @@ const Training = () => {
         console.log('Calling generate-course-content edge function...');
         
         const { data: contentResult, error: contentError } = await supabase.functions.invoke(
-          'generate-training-content',
+          'generate-course-content',
           {
             body: {
               courseId: courseId,
