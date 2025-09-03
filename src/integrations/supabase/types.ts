@@ -156,6 +156,7 @@ export type Database = {
       }
       dynamic_forms: {
         Row: {
+          ai_generated: boolean | null
           category: string
           created_at: string
           created_by: string
@@ -167,6 +168,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_generated?: boolean | null
           category: string
           created_at?: string
           created_by: string
@@ -178,6 +180,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_generated?: boolean | null
           category?: string
           created_at?: string
           created_by?: string
