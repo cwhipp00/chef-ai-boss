@@ -19,13 +19,13 @@ import {
   Clock,
   BarChart3,
   GraduationCap,
-  LogOut,
-  Sparkles
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SearchTrigger } from "@/components/search/GlobalSearch";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { HelpChatDropdown } from "@/components/ai/HelpChatDropdown";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -45,7 +45,6 @@ const navigationSections = [
     title: "section.management",
     items: [
       { titleKey: "nav.ai-agents", url: "/ai-agents", icon: Brain, managerOnly: true },
-      { titleKey: "nav.ai-assistant", url: "/ai-assistant", icon: Sparkles },
       { titleKey: "nav.manager", url: "/manager", icon: Users, managerOnly: true },
       { titleKey: "nav.staff-schedule", url: "/staff-schedule", icon: Clock },
       { titleKey: "nav.training", url: "/training", icon: GraduationCap },
@@ -158,6 +157,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
           )}
           <div className="flex items-center gap-2 lg:gap-3">
             {!isCollapsed && <LanguageSwitcher />}
+            {!isCollapsed && <HelpChatDropdown />}
             <Button
               variant="ghost"
               size="sm"
