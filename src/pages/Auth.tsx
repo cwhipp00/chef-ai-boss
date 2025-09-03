@@ -79,7 +79,7 @@ const Auth = () => {
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-ping"></div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-fade-in">
+                <h1 className="text-3xl font-bold text-gradient animate-fade-in">
                   Chef AI Pro
                 </h1>
                 <p className="text-xs text-primary font-medium tracking-wide">Restaurant Excellence Platform</p>

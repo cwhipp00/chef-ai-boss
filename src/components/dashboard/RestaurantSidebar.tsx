@@ -170,7 +170,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-base sm:text-lg bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                <span className="font-bold text-base sm:text-lg text-gradient">
                   Chef AI Pro
                 </span>
                 {companyName && (
