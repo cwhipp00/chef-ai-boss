@@ -156,6 +156,8 @@ const Training = () => {
     if (!user) return;
     
     try {
+      console.log('Starting enrollment for course:', courseId, 'user:', user.id);
+      
       // First enroll the user
       const { error } = await supabase
         .from('user_enrollments')
@@ -168,11 +170,14 @@ const Training = () => {
       if (error) throw error;
       
       toast.success('Successfully enrolled in course!');
+      console.log('Enrollment successful, now generating content...');
       
       // Generate course content with AI
       toast.loading('Generating course content with AI...', { id: 'generating-content' });
       
       try {
+        console.log('Calling generate-course-content edge function...');
+        
         const { data: contentResult, error: contentError } = await supabase.functions.invoke(
           'generate-course-content',
           {
@@ -183,23 +188,28 @@ const Training = () => {
           }
         );
 
+        console.log('Edge function response:', { contentResult, contentError });
+
         if (contentError) {
           console.error('Content generation error:', contentError);
-          toast.error('Failed to generate course content', { id: 'generating-content' });
+          toast.error(`Failed to generate course content: ${contentError.message}`, { id: 'generating-content' });
         } else if (contentResult?.success) {
+          console.log('Course content generated successfully:', contentResult);
           toast.success(
             `Course content ready! ${contentResult.lessonsGenerated || 'Existing'} lessons available`,
             { id: 'generating-content' }
           );
         } else {
-          toast.error('Failed to generate course content', { id: 'generating-content' });
+          console.error('Content generation failed:', contentResult);
+          toast.error(`Failed to generate course content: ${contentResult?.error || 'Unknown error'}`, { id: 'generating-content' });
         }
       } catch (contentError) {
-        console.error('Content generation error:', contentError);
-        toast.error('Failed to generate course content', { id: 'generating-content' });
+        console.error('Content generation error (catch):', contentError);
+        toast.error(`Failed to generate course content: ${contentError.message}`, { id: 'generating-content' });
       }
       
       // Refresh data
+      console.log('Refreshing course data...');
       fetchEnrollments();
       fetchCoursesOptimized(); // Refresh to get updated lesson counts
       
