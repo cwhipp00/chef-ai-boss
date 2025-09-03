@@ -308,6 +308,46 @@ const Training = () => {
           />
         ) : (
           <>
+            {/* Enhanced POS System Filter */}
+            <div className="mb-6">
+              <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-lg border border-primary/20">
+                <div className="flex items-center gap-2">
+                  <Grid3X3 className="w-5 h-5 text-primary" />
+                  <span className="font-semibold text-primary">POS Systems Training</span>
+                </div>
+                <select 
+                  value={selectedCategory.startsWith('pos-') ? selectedCategory : 'all-pos'}
+                  onChange={(e) => {
+                    if (e.target.value === 'all-pos') {
+                      setSelectedCategory('all');
+                    } else {
+                      setSelectedCategory(e.target.value);
+                    }
+                  }}
+                  className="px-3 py-2 text-sm border rounded-md bg-background border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="all-pos">All POS Systems</option>
+                  {categories.filter(cat => cat.startsWith('pos-')).map(category => (
+                    <option key={category} value={category}>
+                      {category.replace('pos-', '').replace('-', ' ').split(' ').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                      ).join(' ')} ({courses.filter(c => c.category === category).length} courses)
+                    </option>
+                  ))}
+                </select>
+                {selectedCategory.startsWith('pos-') && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedCategory('all')}
+                    className="text-xs"
+                  >
+                    Clear Filter
+                  </Button>
+                )}
+              </div>
+            </div>
+
             {/* Search and Filters */}
             <div className="py-8">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -368,7 +408,7 @@ const Training = () => {
             </div>
 
             <Tabs defaultValue="discover" className="space-y-8">
-              <TabsList className="grid w-full grid-cols-5 lg:w-fit">
+              <TabsList className="grid w-full grid-cols-4 lg:w-fit">
                 <TabsTrigger value="discover" className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4" />
                   Discover
@@ -384,10 +424,6 @@ const Training = () => {
                 <TabsTrigger value="achievements" className="flex items-center gap-2">
                   <Award className="w-4 h-4" />
                   Achievements
-                </TabsTrigger>
-                <TabsTrigger value="leaderboard" className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  Leaderboard
                 </TabsTrigger>
               </TabsList>
 
@@ -590,10 +626,6 @@ const Training = () => {
 
               <TabsContent value="achievements" className="space-y-8">
                 <AchievementsSection completedCourses={completedCourses.length} totalProgress={enrolledCourses.length} />
-              </TabsContent>
-
-              <TabsContent value="leaderboard" className="space-y-8">
-                <LeaderboardSection />
               </TabsContent>
             </Tabs>
           </>

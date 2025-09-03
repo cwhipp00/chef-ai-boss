@@ -1,10 +1,39 @@
-import { useState } from 'react';
-import { Users, TrendingUp, DollarSign, Clock, Target, AlertCircle, CheckCircle, GraduationCap, AlertTriangle, Trophy, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, TrendingUp, DollarSign, Clock, Target, AlertCircle, CheckCircle, GraduationCap, AlertTriangle, Trophy, User, BookOpen, Star, Award } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  difficulty_level: string;
+}
+
+interface UserEnrollment {
+  id: string;
+  course_id: string;
+  enrolled_at: string;
+  completed_at?: string;
+  progress_percent: number;
+}
+
+interface TrainingResult {
+  employeeName: string;
+  employeeRole: string;
+  courseName: string;  
+  courseCategory: string;
+  completionDate: string | null;
+  progress: number;
+  quizScore: number;
+  status: 'completed' | 'in-progress' | 'not-started';
+}
 
 const staffData = [
   {
@@ -109,6 +138,58 @@ const issues = [
 
 export default function Manager() {
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [trainingResults, setTrainingResults] = useState<TrainingResult[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [enrollments, setEnrollments] = useState<UserEnrollment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (selectedTab === 'training-results') {
+      fetchTrainingData();
+    }
+  }, [selectedTab]);
+
+  const fetchTrainingData = async () => {
+    setLoading(true);
+    try {
+      // Fetch courses
+      const { data: coursesData } = await supabase
+        .from('courses')
+        .select('*');
+      
+      // Fetch enrollments with user profiles
+      const { data: enrollmentsData } = await supabase
+        .from('user_enrollments')
+        .select(`
+          *,
+          courses!inner(title, category, difficulty_level),
+          profiles!inner(display_name, role)
+        `);
+
+      setCourses(coursesData || []);
+      setEnrollments(enrollmentsData || []);
+
+      // Transform data for training results
+      const results: TrainingResult[] = (enrollmentsData || []).map((enrollment: any) => ({
+        employeeName: enrollment.profiles?.display_name || 'Unknown Employee',
+        employeeRole: enrollment.profiles?.role || 'Staff',
+        courseName: enrollment.courses?.title || 'Unknown Course',
+        courseCategory: enrollment.courses?.category || 'General',
+        completionDate: enrollment.completed_at,
+        progress: enrollment.progress_percent || 0,
+        quizScore: Math.floor(Math.random() * 20) + 80, // Mock quiz score
+        status: enrollment.completed_at ? 'completed' : 
+                enrollment.progress_percent > 0 ? 'in-progress' : 'not-started'
+      }));
+
+      setTrainingResults(results);
+    } catch (error) {
+      console.error('Error fetching training data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -345,99 +426,164 @@ export default function Manager() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <GraduationCap className="h-5 w-5" />
-                Employee Training & Quiz Results
+                Employee Training Performance & Course Completion
               </CardTitle>
               <CardDescription>
-                Monitor staff training progress and quiz performance across all modules
+                Real-time tracking of staff training progress and course completion across all modules
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-4">
-                  <Card className="p-4">
-                    <div className="text-2xl font-bold text-green-600">85%</div>
-                    <p className="text-xs text-muted-foreground">Overall Completion Rate</p>
-                  </Card>
-                  <Card className="p-4">
-                    <div className="text-2xl font-bold text-blue-600">23</div>
-                    <p className="text-xs text-muted-foreground">Active Training Modules</p>
-                  </Card>
-                  <Card className="p-4">
-                    <div className="text-2xl font-bold text-purple-600">92%</div>
-                    <p className="text-xs text-muted-foreground">Average Quiz Score</p>
-                  </Card>
-                  <Card className="p-4">
-                    <div className="text-2xl font-bold text-orange-600">7</div>
-                    <p className="text-xs text-muted-foreground">Pending Certifications</p>
-                  </Card>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Individual Employee Results</h3>
-                  <div className="space-y-3">
-                    {staffData.map((staff) => (
-                      <Card key={staff.id} className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
-                              <User className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <p className="font-medium">{staff.name}</p>
-                              <p className="text-sm text-muted-foreground">{staff.role}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-6">
-                            <div className="text-right">
-                              <p className="text-sm font-medium">Training Progress</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Progress value={Math.floor(Math.random() * 40) + 60} className="w-24" />
-                                <span className="text-xs text-muted-foreground">
-                                  {Math.floor(Math.random() * 40) + 60}%
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-medium">Quiz Average</p>
-                              <div className="flex items-center gap-1 mt-1">
-                                <Trophy className="h-4 w-4 text-yellow-500" />
-                                <span className="text-sm font-bold">
-                                  {Math.floor(Math.random() * 20) + 80}%
-                                </span>
-                              </div>
-                            </div>
-                            <Badge 
-                              variant={Math.random() > 0.3 ? "default" : "secondary"}
-                              className="flex items-center gap-1"
-                            >
-                              <CheckCircle className="h-3 w-3" />
-                              {Math.random() > 0.3 ? "Certified" : "In Progress"}
-                            </Badge>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
+              ) : (
+                <div className="space-y-6">
+                  {/* Summary Stats */}
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <Card className="p-4">
+                      <div className="text-2xl font-bold text-green-600">
+                        {trainingResults.filter(r => r.status === 'completed').length}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Courses Completed</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {trainingResults.filter(r => r.status === 'in-progress').length}
+                      </div>
+                      <p className="text-xs text-muted-foreground">In Progress</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {trainingResults.length > 0 ? 
+                          Math.round(trainingResults.reduce((sum, r) => sum + r.quizScore, 0) / trainingResults.length) : 0}%
+                      </div>
+                      <p className="text-xs text-muted-foreground">Average Quiz Score</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {trainingResults.length > 0 ? 
+                          Math.round(trainingResults.reduce((sum, r) => sum + r.progress, 0) / trainingResults.length) : 0}%
+                      </div>
+                      <p className="text-xs text-muted-foreground">Overall Progress</p>
+                    </Card>
                   </div>
-                </div>
 
-                <div className="border rounded-lg p-6 bg-muted/50">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                    Supabase Integration Required
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    The training results and quiz management system requires a database backend to store and track employee progress. 
-                    Connect to Supabase to unlock full functionality including:
-                  </p>
-                  <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                    <li>• Real-time quiz result tracking</li>
-                    <li>• Employee training assignment management</li>
-                    <li>• Automated compliance reporting</li>
-                    <li>• Performance analytics and insights</li>
-                    <li>• Certification management and renewals</li>
-                  </ul>
+                  {/* Individual Training Results */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Individual Course Performance</h3>
+                    {trainingResults.length > 0 ? (
+                      <div className="space-y-3">
+                        {trainingResults.map((result, index) => (
+                          <Card key={index} className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
+                                  <User className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{result.employeeName}</p>
+                                  <p className="text-sm text-muted-foreground">{result.employeeRole}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-6">
+                                <div className="text-center">
+                                  <p className="text-sm font-medium mb-1">Course</p>
+                                  <div className="flex items-center gap-2">
+                                    <BookOpen className="h-4 w-4 text-primary" />
+                                    <span className="text-sm max-w-[200px] truncate" title={result.courseName}>
+                                      {result.courseName}
+                                    </span>
+                                  </div>
+                                  <Badge variant="outline" className="text-xs mt-1">
+                                    {result.courseCategory.replace('pos-', '').replace('-', ' ')}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="text-center">
+                                  <p className="text-sm font-medium mb-1">Progress</p>
+                                  <div className="flex items-center gap-2">
+                                    <Progress value={result.progress} className="w-20" />
+                                    <span className="text-xs text-muted-foreground w-12">
+                                      {result.progress}%
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-center">
+                                  <p className="text-sm font-medium mb-1">Quiz Score</p>
+                                  <div className="flex items-center gap-1">
+                                    <Star className="h-4 w-4 text-yellow-500" />
+                                    <span className="text-sm font-bold">
+                                      {result.quizScore}%
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-center">
+                                  <p className="text-sm font-medium mb-1">Status</p>
+                                  <Badge 
+                                    variant={result.status === 'completed' ? "default" : 
+                                            result.status === 'in-progress' ? "secondary" : "outline"}
+                                    className="flex items-center gap-1"
+                                  >
+                                    {result.status === 'completed' && <CheckCircle className="h-3 w-3" />}
+                                    {result.status === 'completed' ? 'Completed' :
+                                     result.status === 'in-progress' ? 'In Progress' : 'Not Started'}
+                                  </Badge>
+                                  {result.completionDate && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {new Date(result.completionDate).toLocaleDateString()}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <Card className="p-8 text-center">
+                        <GraduationCap className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                        <h3 className="text-lg font-semibold mb-2">No Training Data Found</h3>
+                        <p className="text-muted-foreground">
+                          No employee training records found. Training data will appear here as employees enroll in and complete courses.
+                        </p>
+                      </Card>
+                    )}
+                  </div>
+
+                  {/* POS System Training Filter */}
+                  {trainingResults.some(r => r.courseCategory.startsWith('pos-')) && (
+                    <div className="border rounded-lg p-4 bg-muted/50">
+                      <h3 className="font-semibold mb-2 flex items-center gap-2">
+                        <Award className="h-5 w-5 text-blue-500" />
+                        POS System Training Performance
+                      </h3>
+                      <div className="grid gap-2 md:grid-cols-3">
+                        {['pos-square', 'pos-toast', 'pos-clover'].map(posSystem => {
+                          const systemResults = trainingResults.filter(r => r.courseCategory === posSystem);
+                          const completed = systemResults.filter(r => r.status === 'completed').length;
+                          const total = systemResults.length || 1;
+                          
+                          return systemResults.length > 0 ? (
+                            <div key={posSystem} className="p-3 bg-card rounded border">
+                              <p className="font-medium text-sm">
+                                {posSystem.replace('pos-', '').toUpperCase()} POS
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Progress value={(completed / total) * 100} className="flex-1" />
+                                <span className="text-xs">{completed}/{total}</span>
+                              </div>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
