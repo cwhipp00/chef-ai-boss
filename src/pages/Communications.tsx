@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Users, MessageSquare, Bell, Search, Filter, Plus, Megaphone, Clock, CheckCircle, AlertTriangle, Radio, UserCheck, Phone, Video, Mail, FileText, Archive, Star, Paperclip, Smile, MoreHorizontal, Pin, Hash, Settings, Mic, MicOff, VideoOff, ScreenShare, Volume2, Minimize2, Maximize2 } from 'lucide-react';
+import { Send, Users, MessageSquare, Bell, Search, Filter, Plus, Megaphone, Clock, CheckCircle, AlertTriangle, Radio, UserCheck, Phone, Video, Mail, FileText, Archive, Star, Paperclip, Smile, MoreHorizontal, Pin, Hash, Settings, Mic, MicOff, VideoOff, ScreenShare, Volume2, Minimize2, Maximize2, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -117,17 +117,15 @@ const teamBroadcasts = [
 ];
 
 export default function Communications() {
+  const [selectedView, setSelectedView] = useState('dashboard');
   const [selectedChannel, setSelectedChannel] = useState('general');
   const [newMessage, setNewMessage] = useState('');
-  const [selectedTab, setSelectedTab] = useState('messages');
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [broadcastType, setBroadcastType] = useState('general');
   const [isAnnouncementOpen, setIsAnnouncementOpen] = useState(false);
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
   const [videoCallRecipient, setVideoCallRecipient] = useState<{id: string, name: string} | null>(null);
   const [currentCallId, setCurrentCallId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const { toast } = useToast();
   
   const currentUserId = 'current_user_123'; // Replace with actual user ID
@@ -152,9 +150,8 @@ export default function Communications() {
   const handleStartChat = (userId: string) => {
     const recipient = teamMembers.find(member => member.id === userId);
     if (recipient) {
-      // Create or switch to direct message channel
-      setSelectedChannel(`dm_${userId}`);
-      setSelectedTab('messages');
+      setSelectedChannel('general');
+      setSelectedView('chat');
       
       toast({
         title: "Opening Chat",
@@ -165,11 +162,11 @@ export default function Communications() {
 
   // Team members data
   const teamMembers = [
-    { id: '1', name: 'Sarah Johnson', role: 'Head Chef', avatar: undefined },
-    { id: '2', name: 'Mike Rodriguez', role: 'Manager', avatar: undefined },
-    { id: '3', name: 'Emily Chen', role: 'Server', avatar: undefined },
-    { id: '4', name: 'David Park', role: 'Line Cook', avatar: undefined },
-    { id: '5', name: 'Lisa Wong', role: 'Host', avatar: undefined },
+    { id: '1', name: 'Sarah Johnson', role: 'Head Chef', avatar: undefined, status: 'active' },
+    { id: '2', name: 'Mike Rodriguez', role: 'Manager', avatar: undefined, status: 'active' },
+    { id: '3', name: 'Emily Chen', role: 'Server', avatar: undefined, status: 'busy' },
+    { id: '4', name: 'David Park', role: 'Line Cook', avatar: undefined, status: 'active' },
+    { id: '5', name: 'Lisa Wong', role: 'Host', avatar: undefined, status: 'away' },
   ];
 
   const getPriorityColor = (priority: string) => {
@@ -225,153 +222,98 @@ export default function Communications() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background to-muted/5 flex">
-      {/* Modern Sidebar */}
-      <div className="w-80 border-r border-border/50 bg-card/30 backdrop-blur-sm flex flex-col">
-        {/* Sidebar Header */}
-        <div className="p-4 border-b border-border/30">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-foreground">Communications</h1>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                <Search className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/5">
+      {selectedView === 'dashboard' && (
+        <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Team Communications</h1>
+            <p className="text-muted-foreground">Connect with your team through chat, calls, and announcements</p>
           </div>
-          
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search channels, people..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-muted/30 border-border/30 focus:border-primary/50 transition-colors"
-            />
-          </div>
-        </div>
 
-        {/* Navigation Tabs */}
-        <div className="p-2 border-b border-border/30">
-          <div className="grid grid-cols-4 gap-1 p-1 bg-muted/20 rounded-lg">
-            <Button
-              size="sm"
-              variant={selectedTab === 'messages' ? 'default' : 'ghost'}
-              onClick={() => setSelectedTab('messages')}
-              className="text-xs"
-            >
-              <MessageSquare className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              size="sm"
-              variant={selectedTab === 'meetings' ? 'default' : 'ghost'}
-              onClick={() => setSelectedTab('meetings')}
-              className="text-xs"
-            >
-              <Radio className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              size="sm"
-              variant={selectedTab === 'video-meeting' ? 'default' : 'ghost'}
-              onClick={() => setSelectedTab('video-meeting')}
-              className="text-xs"
-            >
-              <Video className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              size="sm"
-              variant={selectedTab === 'announcements' ? 'default' : 'ghost'}
-              onClick={() => setSelectedTab('announcements')}
-              className="text-xs"
-            >
-              <Megaphone className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-
-        {selectedTab === 'messages' && (
-          <>
-            {/* Channels Section */}
-            <div className="flex-1 overflow-hidden flex flex-col">
-              <div className="p-3 border-b border-border/20">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <Hash className="h-4 w-4 text-primary" />
-                    Channels
-                  </h3>
-                  <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-                    <Plus className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-                <div className="space-y-1">
-                  {channels.map((channel) => (
-                    <div
-                      key={channel.id}
-                      className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all hover:bg-accent/10 ${
-                        selectedChannel === channel.name.toLowerCase()
-                          ? 'bg-primary/10 text-primary shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                      onClick={() => setSelectedChannel(channel.name.toLowerCase())}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-2 h-2 rounded-full ${
-                          channel.active ? 'bg-success' : 'bg-muted-foreground/40'
-                        }`} />
-                        <span className="text-sm font-medium truncate">{channel.name}</span>
-                      </div>
-                      {channel.unread > 0 && (
-                        <Badge variant="destructive" className="h-5 text-xs px-1.5 min-w-[20px] justify-center">
-                          {channel.unread}
-                        </Badge>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Team Members Section */}
-              <div className="flex-1 overflow-hidden">
-                <div className="p-3 border-b border-border/20">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Users className="h-4 w-4 text-success" />
-                      Team
-                      <Badge variant="secondary" className="text-xs">8</Badge>
-                    </h3>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowOnlineOnly(!showOnlineOnly)}
-                      className={`h-6 text-xs px-2 ${
-                        showOnlineOnly ? 'bg-success/10 text-success' : ''
-                      }`}
-                    >
-                      Online
-                    </Button>
+          {/* Quick Action Cards */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+            {/* Start a Chat */}
+            <Card className="hover-lift cursor-pointer bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40 transition-all"
+                  onClick={() => setSelectedView('chat')}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <MessageSquare className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Team Chat</h3>
+                    <p className="text-sm text-muted-foreground">Join conversations</p>
                   </div>
                 </div>
-                
-                <div className="overflow-y-auto flex-1 p-2">
-                  <div className="space-y-1">
-                    {[
-                      { id: '1', name: 'Sarah Johnson', role: 'Head Chef', status: 'active', avatar: 'SJ' },
-                      { id: '2', name: 'Mike Rodriguez', role: 'Manager', status: 'active', avatar: 'MR' },
-                      { id: '3', name: 'Emily Chen', role: 'Server', status: 'busy', avatar: 'EC' },
-                      { id: '4', name: 'David Park', role: 'Line Cook', status: 'active', avatar: 'DP' },
-                      { id: '5', name: 'Lisa Wong', role: 'Host', status: 'away', avatar: 'LW' },
-                      { id: '6', name: 'Tom Wilson', role: 'Bartender', status: 'offline', avatar: 'TW' },
-                    ]
-                    .filter(member => !showOnlineOnly || member.status !== 'offline')
-                    .map((member) => (
-                      <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/5 cursor-pointer transition-colors group">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">4 active channels</span>
+                  <Badge variant="destructive" className="text-xs">6 unread</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Video Meeting */}
+            <Card className="hover-lift cursor-pointer bg-gradient-to-br from-success/5 to-success/10 border-success/20 hover:border-success/40 transition-all"
+                  onClick={() => setSelectedView('video-meeting')}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center">
+                    <Video className="h-6 w-6 text-success" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Video Call</h3>
+                    <p className="text-sm text-muted-foreground">Start face-to-face meeting</p>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-success flex items-center gap-2">
+                    <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
+                    {teamMembers.filter(m => m.status === 'active').length} online
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Announcements */}
+            <Card className="hover-lift cursor-pointer bg-gradient-to-br from-warning/5 to-warning/10 border-warning/20 hover:border-warning/40 transition-all"
+                  onClick={() => setSelectedView('announcements')}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center">
+                    <Megaphone className="h-6 w-6 text-warning" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Announcements</h3>
+                    <p className="text-sm text-muted-foreground">Broadcast to team</p>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">2 recent posts</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Team Overview */}
+          <div className="grid gap-6 md:grid-cols-2 mb-8">
+            {/* Team Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Team Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {teamMembers.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-3">
                         <div className="relative">
-                          <Avatar className="w-8 h-8 shadow-sm">
-                            <AvatarFallback className="text-xs font-medium bg-gradient-to-br from-primary/20 to-primary/5 text-foreground">
-                              {member.avatar}
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback className="text-xs font-medium">
+                              {getInitials(member.name)}
                             </AvatarFallback>
                           </Avatar>
                           <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${
@@ -380,267 +322,271 @@ export default function Communications() {
                             member.status === 'away' ? 'bg-muted-foreground' : 'bg-muted-foreground/40'
                           }`} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate text-foreground">{member.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{member.role}</p>
-                        </div>
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 w-6 p-0"
-                            onClick={() => handleStartChat(member.id)}
-                          >
-                            <MessageSquare className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 w-6 p-0"
-                            onClick={() => handleStartCall(member.id, 'video')}
-                          >
-                            <Video className="h-3.5 w-3.5" />
-                          </Button>
+                        <div>
+                          <p className="font-medium text-sm">{member.name}</p>
+                          <p className="text-xs text-muted-foreground">{member.role}</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => handleStartChat(member.id)}>
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => handleStartCall(member.id, 'video')}>
+                          <Video className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            {/* Quick Actions */}
-            <div className="p-3 border-t border-border/20">
-              <div className="flex gap-2">
-                <Dialog open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="flex-1 bg-gradient-primary hover:shadow-medium transition-all">
-                      <Radio className="h-3.5 w-3.5 mr-2" />
-                      Broadcast
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-xl bg-card border-border shadow-strong">
-                    <DialogHeader className="space-y-2">
-                      <DialogTitle className="flex items-center gap-3 text-xl">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <Radio className="h-5 w-5 text-primary" />
-                        </div>
-                        Team Broadcast
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                      <Select value={broadcastType} onValueChange={setBroadcastType}>
-                        <SelectTrigger className="bg-muted/30 border-border/50">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="z-50 bg-card border border-border shadow-strong">
-                          <SelectItem value="general">💬 General Update</SelectItem>
-                          <SelectItem value="urgent">⚠️ Urgent Notice</SelectItem>
-                          <SelectItem value="celebration">🎉 Celebration</SelectItem>
-                          <SelectItem value="policy">📋 Policy Update</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Textarea
-                        placeholder="Type your team-wide message..."
-                        value={broadcastMessage}
-                        onChange={(e) => setBroadcastMessage(e.target.value)}
-                        className="min-h-[120px] bg-muted/30 border-border/50 focus:border-primary/50 transition-colors resize-none"
-                      />
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/30 text-sm text-muted-foreground">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span>Sending to <strong className="text-foreground">12 team members</strong></span>
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {teamBroadcasts.slice(0, 3).map((broadcast) => (
+                    <div key={broadcast.id} className={`p-3 rounded-lg border-l-4 ${getBroadcastTypeColor(broadcast.type)}`}>
+                      <div className="flex items-start justify-between mb-2">
+                        <span className="text-xs font-medium text-muted-foreground">{broadcast.sender}</span>
+                        <span className="text-xs text-muted-foreground">{broadcast.timestamp}</span>
                       </div>
+                      <p className="text-sm text-foreground line-clamp-2">{broadcast.message}</p>
                     </div>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
-                      <Button variant="outline" onClick={() => setIsAnnouncementOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleSendBroadcast} className="bg-gradient-primary hover:shadow-medium">
-                        <Send className="h-4 w-4 mr-2" />
-                        Send Broadcast
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Button size="sm" variant="outline" onClick={() => handleStartCall('2', 'video')}>
-                  <Video className="h-3.5 w-3.5" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {selectedView === 'chat' && (
+        <div className="h-screen bg-gradient-to-br from-background to-muted/5 flex">
+          {/* Chat Sidebar */}
+          <div className="w-80 border-r border-border/50 bg-card/30 backdrop-blur-sm flex flex-col">
+            <div className="p-4 border-b border-border/30">
+              <div className="flex items-center justify-between mb-4">
+                <Button variant="ghost" size="sm" onClick={() => setSelectedView('dashboard')}>
+                  ← Back to Dashboard
                 </Button>
               </div>
+              <h2 className="text-lg font-semibold">Team Chat</h2>
             </div>
-          </>
-        )}
 
-        {selectedTab === 'meetings' && (
-          <div className="flex-1 p-4 flex items-center justify-center">
-            <div className="text-center space-y-4 max-w-sm">
-              <div className="p-4 rounded-full bg-primary/10 w-fit mx-auto">
-                <Radio className="h-8 w-8 text-primary" />
+            {/* Channels */}
+            <div className="p-4 border-b border-border/20">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <Hash className="h-4 w-4 text-primary" />
+                Channels
+              </h3>
+              <div className="space-y-1">
+                {channels.map((channel) => (
+                  <div
+                    key={channel.id}
+                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all hover:bg-accent/10 ${
+                      selectedChannel === channel.name.toLowerCase()
+                        ? 'bg-primary/10 text-primary shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                    onClick={() => setSelectedChannel(channel.name.toLowerCase())}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        channel.active ? 'bg-success' : 'bg-muted-foreground/40'
+                      }`} />
+                      <span className="text-sm font-medium">{channel.name}</span>
+                    </div>
+                    {channel.unread > 0 && (
+                      <Badge variant="destructive" className="h-5 text-xs px-1.5">
+                        {channel.unread}
+                      </Badge>
+                    )}
+                  </div>
+                ))}
               </div>
+            </div>
+
+            {/* Team Members in sidebar */}
+            <div className="flex-1 overflow-hidden p-4">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <Users className="h-4 w-4 text-success" />
+                Team
+              </h3>
               <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">AI Meeting Recorder</h3>
-                <p className="text-sm text-muted-foreground">Record and transcribe meetings with automatic action items</p>
+                {teamMembers.map((member) => (
+                  <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/5 cursor-pointer transition-colors">
+                    <div className="relative">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="text-xs font-medium">
+                          {getInitials(member.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${
+                        member.status === 'active' ? 'bg-success' :
+                        member.status === 'busy' ? 'bg-warning' :
+                        member.status === 'away' ? 'bg-muted-foreground' : 'bg-muted-foreground/40'
+                      }`} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{member.name}</p>
+                      <p className="text-xs text-muted-foreground">{member.role}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <Button size="sm" className="bg-gradient-primary">Start Recording</Button>
             </div>
           </div>
-        )}
 
-        {selectedTab === 'video-meeting' && (
-          <div className="flex-1 p-4 flex items-center justify-center">
-            <div className="text-center space-y-4 max-w-sm">
-              <div className="p-4 rounded-full bg-accent/10 w-fit mx-auto">
-                <Video className="h-8 w-8 text-accent" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">Video Conference</h3>
-                <p className="text-sm text-muted-foreground">Start or join team video meetings</p>
-              </div>
-              <Button size="sm" className="bg-gradient-primary">Join Meeting</Button>
-            </div>
-          </div>
-        )}
-
-        {selectedTab === 'announcements' && (
-          <div className="flex-1 p-4 flex items-center justify-center">
-            <div className="text-center space-y-4 max-w-sm">
-              <div className="p-4 rounded-full bg-warning/10 w-fit mx-auto">
-                <Megaphone className="h-8 w-8 text-warning" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">Announcements</h3>
-                <p className="text-sm text-muted-foreground">Company-wide updates and important news</p>
-              </div>
-              <Button size="sm" className="bg-gradient-primary">View All</Button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Main Content Area - Dynamic Based on Tab */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {selectedTab === 'messages' && (
+          {/* Chat Area */}
           <div className="flex-1 flex">
-            {/* Chat Area */}
-            <div className="flex-1 flex flex-col bg-background/50">
-              {/* Chat Header */}
-              <div className="p-4 border-b border-border/50 bg-card/30 backdrop-blur-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Hash className="h-5 w-5 text-primary" />
+            <RealTimeChat 
+              selectedChannel={selectedChannel}
+              currentUserId={currentUserId}
+              onChannelChange={setSelectedChannel}
+            />
+          </div>
+        </div>
+      )}
+
+      {selectedView === 'video-meeting' && (
+        <div className="min-h-screen bg-gradient-to-br from-background to-muted/5 p-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-6">
+              <Button variant="ghost" onClick={() => setSelectedView('dashboard')}>
+                ← Back to Dashboard
+              </Button>
+            </div>
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Video Meeting Room</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-12">
+                      <Video className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-semibold mb-2">Video Conference</h3>
+                      <p className="text-muted-foreground mb-4">Start or join a video meeting with your team</p>
+                      <Button>
+                        <Video className="h-4 w-4 mr-2" />
+                        Start Meeting
+                      </Button>
                     </div>
-                    <div>
-                      <h2 className="font-semibold text-foreground capitalize">{selectedChannel}</h2>
-                      <p className="text-sm text-muted-foreground">
-                        {channels.find(c => c.name.toLowerCase() === selectedChannel)?.members || 0} members
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                      <Phone className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                      <Video className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                      <Pin className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chat Messages Area */}
-              <div className="flex-1 overflow-hidden">
-                <RealTimeChat 
-                  selectedChannel={selectedChannel}
-                  currentUserId={currentUserId}
-                  onChannelChange={setSelectedChannel}
-                />
-              </div>
-            </div>
-
-            {/* Right Panel - User Presence */}
-            <div className="w-72 border-l border-border/50 bg-card/20 backdrop-blur-sm">
-              <UserPresence 
-                currentUserId={currentUserId}
-                onStartCall={handleStartCall}
-                onStartChat={handleStartChat}
-              />
-            </div>
-          </div>
-        )}
-
-        {selectedTab === 'meetings' && (
-          <div className="flex-1 bg-background/50">
-            <AIRecorder />
-          </div>
-        )}
-
-        {selectedTab === 'video-meeting' && (
-          <div className="flex-1 p-6 bg-background/50">
-            <div className="grid grid-cols-12 gap-6 h-full">
-              <div className="col-span-8">
-                <div className="h-full rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm shadow-strong overflow-hidden">
-                  <EnhancedVideoCall 
-                    roomName="restaurant-team-meeting"
-                    userName={`User_${currentUserId.slice(-3)}`}
-                    onCallEnd={() => toast({ title: "Call Ended", description: "Thanks for joining!" })}
-                  />
-                </div>
-              </div>
-              <div className="col-span-4">
-                <div className="h-full rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm shadow-strong overflow-hidden">
-                  <RealtimeCollaboration 
-                    organizationId="demo-org-123"
-                    currentPage="communications"
-                  />
-                </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {selectedTab === 'announcements' && (
-          <div className="flex-1 bg-background/50 flex items-center justify-center">
-            <div className="text-center max-w-md mx-auto space-y-6 p-8">
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-warning/10 to-warning/5 w-fit mx-auto">
-                <Megaphone className="h-16 w-16 text-warning" />
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-foreground">Company Announcements</h3>
-                <p className="text-muted-foreground">Stay updated with important company news and updates</p>
-              </div>
-              <div className="space-y-3">
-                <Button className="bg-gradient-primary hover:shadow-medium transition-all w-full">
-                  <Plus className="h-4 w-4 mr-2" />
+      {selectedView === 'announcements' && (
+        <div className="min-h-screen bg-gradient-to-br from-background to-muted/5">
+          <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+            <div className="mb-6">
+              <Button variant="ghost" onClick={() => setSelectedView('dashboard')}>
+                ← Back to Dashboard
+              </Button>
+            </div>
+            
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold mb-2">Team Announcements</h1>
+              <p className="text-muted-foreground">Share important updates with your entire team</p>
+            </div>
+
+            {/* Create Announcement */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Megaphone className="h-5 w-5" />
                   Create Announcement
-                </Button>
-                <Button variant="outline" className="w-full">
-                  View All Announcements
-                </Button>
-              </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="announcement-type">Type</Label>
+                    <Select value={broadcastType} onValueChange={setBroadcastType}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general">General</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                        <SelectItem value="celebration">Celebration</SelectItem>
+                        <SelectItem value="policy">Policy Update</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="announcement-message">Message</Label>
+                    <Textarea
+                      id="announcement-message"
+                      placeholder="Write your announcement..."
+                      value={broadcastMessage}
+                      onChange={(e) => setBroadcastMessage(e.target.value)}
+                      rows={4}
+                    />
+                  </div>
+                  <Button onClick={handleSendBroadcast} className="w-full">
+                    <Megaphone className="h-4 w-4 mr-2" />
+                    Send Announcement
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Announcements */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Recent Announcements</h2>
+              {teamBroadcasts.map((broadcast) => (
+                <Card key={broadcast.id} className={`border-l-4 ${getBroadcastTypeColor(broadcast.type)}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{getBroadcastTypeIcon(broadcast.type)}</span>
+                        <div>
+                          <p className="font-medium">{broadcast.sender}</p>
+                          <p className="text-sm text-muted-foreground">{broadcast.role}</p>
+                        </div>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{broadcast.timestamp}</span>
+                    </div>
+                    <p className="text-foreground mb-3">{broadcast.message}</p>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Read by {broadcast.readBy}/{broadcast.totalStaff} team members</span>
+                      <Badge variant="secondary" className="capitalize">{broadcast.type}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Video Call Component */}
-      <VideoCall 
-        isOpen={isVideoCallOpen}
-        onClose={() => {
-          setIsVideoCallOpen(false);
-          setVideoCallRecipient(null);
-          setCurrentCallId(null);
-        }}
-        recipientId={videoCallRecipient?.id}
-        recipientName={videoCallRecipient?.name}
-        callId={currentCallId}
-        isIncoming={false}
-      />
+      {/* Video Call Dialog */}
+      <Dialog open={isVideoCallOpen} onOpenChange={setIsVideoCallOpen}>
+        <DialogContent className="max-w-4xl h-[600px] p-0">
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center">
+              <Video className="h-16 w-16 mx-auto mb-4 text-primary" />
+              <h3 className="text-lg font-semibold mb-2">Calling {videoCallRecipient?.name}</h3>
+              <p className="text-muted-foreground mb-4">Connecting to video call...</p>
+              <Button variant="destructive" onClick={() => setIsVideoCallOpen(false)}>
+                End Call
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

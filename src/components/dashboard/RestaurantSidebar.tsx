@@ -99,11 +99,11 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
         />
       )}
 
-      {/* Mobile Toggle Button */}
+      {/* Mobile Toggle Button - Positioned to avoid header overlap */}
       <Button
         variant="ghost"
         size="sm"
-        className="fixed top-4 left-4 z-50 lg:hidden bg-card/95 backdrop-blur border border-primary/20"
+        className="fixed top-4 right-4 z-50 lg:hidden bg-card/95 backdrop-blur border border-primary/20 shadow-soft"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
