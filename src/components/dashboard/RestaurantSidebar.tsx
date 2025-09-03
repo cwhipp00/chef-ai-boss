@@ -176,7 +176,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                   Chef AI Pro
                 </span>
                 {companyName && (
-                  <span className="text-xs lg:text-sm text-muted-foreground font-medium truncate max-w-[120px] lg:max-w-[160px]">
+                  <span className="hidden lg:block text-xs lg:text-sm text-muted-foreground font-medium truncate max-w-[120px] lg:max-w-[160px]">
                     {companyName}
                   </span>
                 )}
@@ -185,7 +185,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
           )}
           <div className="flex items-center gap-2 lg:gap-3">
             {!isCollapsed && companyName && (
-              <div className="flex items-center gap-1 px-2 lg:px-3 py-1 lg:py-2 rounded-md bg-primary/10 border border-primary/20 touch-target">
+              <div className="hidden lg:flex items-center gap-1 px-2 lg:px-3 py-1 lg:py-2 rounded-md bg-primary/10 border border-primary/20 touch-target">
                 <Building2 className="h-3 w-3 lg:h-4 lg:w-4 text-primary" />
                 <span className="text-xs lg:text-sm font-medium text-primary truncate max-w-[80px] lg:max-w-[120px]">
                   {companyName}
