@@ -18,7 +18,9 @@ import {
   Plus,
   FileText,
   CheckCircle,
-  FormInput
+  FormInput,
+  Bot,
+  Sparkles
 } from 'lucide-react';
 
 interface FormField {
@@ -335,16 +337,19 @@ export function DynamicFormGenerator({ organizationId, category }: DynamicFormGe
               </CardContent>
             </Card>
 
-            {/* Manual Creation Option */}
+            {/* AI Creation Option */}
             <Card className="hover-lift cursor-pointer border-dashed border-2 hover:border-primary/50 transition-colors">
               <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                <FormInput className="h-16 w-16 text-primary mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Create Manually</h3>
+                <Bot className="h-16 w-16 text-primary mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Create with AI</h3>
                 <p className="text-muted-foreground text-sm mb-4">
-                  Build a custom form with your own fields and structure
+                  Describe what you need and let AI generate the perfect form
                 </p>
-                <Button variant="outline" className="w-full" disabled>
-                  Coming Soon
+                <Button className="w-full bg-gradient-primary" onClick={() => {
+                  window.location.href = '/ai-assistant?tab=form-creator';
+                }}>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Try AI Creator
                 </Button>
               </CardContent>
             </Card>
@@ -454,6 +459,13 @@ export function DynamicFormGenerator({ organizationId, category }: DynamicFormGe
           >
             <Plus className="h-4 w-4 mr-2" />
             Create Form
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => window.location.href = '/ai-assistant?tab=form-creator'}
+          >
+            <Bot className="h-4 w-4 mr-2" />
+            AI Form Creator
           </Button>
         </div>
       </div>

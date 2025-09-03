@@ -68,3 +68,9 @@ verify_jwt = false
 
 [functions.ai-checklist-optimizer]
 verify_jwt = false
+
+[functions.ai-form-generator]
+verify_jwt = false
+
+[functions.ai-app-modifier]
+verify_jwt = false
