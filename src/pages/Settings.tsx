@@ -62,7 +62,7 @@ export default function Settings() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('notification_settings')
+        .select('*')
         .eq('id', user?.id)
         .single();
 
