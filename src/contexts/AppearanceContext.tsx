@@ -90,13 +90,14 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
     console.log('🔧 Applying appearance settings:', settings);
     const root = document.documentElement;
     
-    // Apply color theme
+    // Apply color theme with !important to override CSS specificity
     const theme = colorThemes[settings.colorTheme];
     console.log('🎨 Applying theme colors:', theme);
-    root.style.setProperty('--primary', theme.primary);
-    root.style.setProperty('--primary-glow', theme.primaryGlow);
-    root.style.setProperty('--accent', theme.accent);
-    root.style.setProperty('--success', theme.success);
+    root.style.setProperty('--primary', theme.primary, 'important');
+    root.style.setProperty('--primary-glow', theme.primaryGlow, 'important');
+    root.style.setProperty('--accent', theme.accent, 'important');
+    root.style.setProperty('--success', theme.success, 'important');
+    root.style.setProperty('--ring', theme.primary, 'important');
     
     // Apply font size
     const fontSize = fontSizeScales[settings.fontSize];
