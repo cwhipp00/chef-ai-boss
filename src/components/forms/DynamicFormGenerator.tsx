@@ -20,8 +20,12 @@ import {
   CheckCircle,
   FormInput,
   Bot,
-  Sparkles
+  Sparkles,
+  Upload,
+  File,
+  Image
 } from 'lucide-react';
+import { IntelligentDocumentUpload } from '@/components/documents/IntelligentDocumentUpload';
 
 interface FormField {
   name: string;
@@ -326,21 +330,17 @@ export function DynamicFormGenerator({ organizationId, category }: DynamicFormGe
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Upload Document Option */}
-            <Card className="hover-lift cursor-pointer border-dashed border-2 hover:border-primary/50 transition-colors">
-              <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                <FileText className="h-16 w-16 text-primary mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Upload Document</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Upload a company document and let AI generate forms automatically
-                </p>
-                <Button className="w-full" onClick={() => {
-                  // Navigate to documents page
-                  window.location.href = '/documents';
-                }}>
-                  Go to Documents
-                </Button>
-              </CardContent>
-            </Card>
+            <IntelligentDocumentUpload 
+              organizationId={organizationId}
+              onDocumentProcessed={(document) => {
+                toast({
+                  title: "Document Processed",
+                  description: `${document.name} has been analyzed successfully!`,
+                });
+                // Refresh forms after document processing
+                setTimeout(() => loadForms(), 2000);
+              }}
+            />
 
             {/* AI Creation Option */}
             <Card className="hover-lift cursor-pointer border-dashed border-2 hover:border-primary/50 transition-colors">
