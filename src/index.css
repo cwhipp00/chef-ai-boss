@@ -210,4 +210,39 @@ All colors MUST be HSL.
     background: hsl(var(--primary));
     box-shadow: 0 0 6px hsl(var(--primary) / 0.3);
   }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 768px) {
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    
+    body {
+      -webkit-overflow-scrolling: touch;
+      overflow-scrolling: touch;
+    }
+  }
+
+  /* Native app optimizations */
+  .capacitor-app {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Touch improvements */
+  .hover-lift {
+    @apply transition-all duration-200 active:scale-95 active:shadow-sm;
+  }
+
+  /* Safe area support for mobile devices */
+  @supports (padding: max(0px)) {
+    .safe-area-top {
+      padding-top: max(1rem, env(safe-area-inset-top));
+    }
+    
+    .safe-area-bottom {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+  }
 }
