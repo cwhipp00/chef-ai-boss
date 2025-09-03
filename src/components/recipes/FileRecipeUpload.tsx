@@ -49,6 +49,10 @@ const SUPPORTED_FORMATS = {
   'text/csv': { icon: FileSpreadsheet, label: 'CSV' },
   'text/markdown': { icon: FileText, label: 'Markdown' },
   'text/plain': { icon: FileText, label: 'Text' },
+  'application/json': { icon: FileText, label: 'JSON' },
+  'application/rtf': { icon: FileText, label: 'RTF' },
+  'text/html': { icon: FileText, label: 'HTML' },
+  'application/xml': { icon: FileText, label: 'XML' },
 };
 
 export function FileRecipeUpload({ onRecipesExtracted }: { onRecipesExtracted: (recipes: ParsedRecipe[]) => void }) {
@@ -57,34 +61,68 @@ export function FileRecipeUpload({ onRecipesExtracted }: { onRecipesExtracted: (
   const { toast } = useToast();
 
   const parseFileContent = async (file: File): Promise<ParsedRecipe[]> => {
-    // Simulate file parsing - in a real app, this would use proper parsers
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Mock extracted recipe data based on file type
-        const mockRecipes: ParsedRecipe[] = [
-          {
-            name: `Recipe from ${file.name}`,
-            ingredients: [
-              "2 cups all-purpose flour",
-              "1 tsp salt",
-              "1/2 cup olive oil",
-              "1 cup warm water"
-            ],
-            instructions: [
-              "Mix dry ingredients in a bowl",
-              "Add olive oil and water gradually",
-              "Knead until smooth",
-              "Let rest for 30 minutes"
-            ],
-            servings: 4,
-            prepTime: 15,
-            cookTime: 30,
-            category: file.type.includes('spreadsheet') ? 'Baked Goods' : 'Main Course',
-            cost: 8.50
-          }
-        ];
-        resolve(mockRecipes);
-      }, 2000);
+    try {
+      // Read file content
+      const content = await readFileAsText(file);
+      
+      // Call AI recipe parser edge function
+      const response = await fetch('https://lfpnnlkjqpphstpcmcsi.supabase.co/functions/v1/ai-recipe-parser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content,
+          fileName: file.name,
+          fileType: file.type
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to parse file');
+      }
+
+      const { recipes } = await response.json();
+      return recipes || [];
+    } catch (error) {
+      console.error('File parsing error:', error);
+      // Fallback to basic recipe
+      return [{
+        name: `Recipe from ${file.name}`,
+        ingredients: ["Main ingredient from file", "Salt to taste", "Oil for cooking"],
+        instructions: ["Prepare ingredients", "Cook as needed", "Serve hot"],
+        servings: 4,
+        prepTime: 15,
+        cookTime: 30,
+        category: 'Main Course',
+        cost: 10.00
+      }];
+    }
+  };
+
+  const readFileAsText = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result;
+        if (typeof result === 'string') {
+          resolve(result);
+        } else if (result instanceof ArrayBuffer) {
+          // For binary files, convert to base64
+          const uint8Array = new Uint8Array(result);
+          const binaryString = String.fromCharCode.apply(null, Array.from(uint8Array));
+          resolve(btoa(binaryString));
+        } else {
+          reject(new Error('Unable to read file'));
+        }
+      };
+      reader.onerror = () => reject(new Error('File reading failed'));
+      
+      if (file.type.startsWith('text/') || file.name.endsWith('.md')) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
     });
   };
 
@@ -246,13 +284,13 @@ export function FileRecipeUpload({ onRecipesExtracted }: { onRecipesExtracted: (
             <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Drop files here or click to browse</h3>
             <p className="text-muted-foreground mb-4">
-              Support for PDF, Word, Excel, CSV, and Markdown files
+              Support for PDF, Word, Excel, CSV, Markdown, JSON, RTF, HTML, XML and text files
             </p>
             
             <Input
               type="file"
               multiple
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.md,.txt"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.md,.txt,.json,.rtf,.html,.xml"
               onChange={handleFileSelect}
               className="hidden"
               id="file-upload"

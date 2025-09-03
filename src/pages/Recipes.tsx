@@ -10,6 +10,7 @@ import { RecipeDetailModal } from '@/components/recipes/RecipeDetailModal';
 import { FileRecipeUpload } from '@/components/recipes/FileRecipeUpload';
 import { AIRecipeGenerator } from '@/components/recipes/AIRecipeGenerator';
 import { ImageRecipeCreator } from '@/components/recipes/ImageRecipeCreator';
+import { AddRecipeModal } from '@/components/recipes/AddRecipeModal';
 
 const recipes = [
   {
@@ -98,10 +99,7 @@ export default function Recipes() {
           <h1 className="text-3xl font-bold text-foreground">Recipe Management</h1>
           <p className="text-muted-foreground">Manage and scale your restaurant recipes</p>
         </div>
-        <Button size="lg" className="bg-gradient-primary">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Recipe
-        </Button>
+        <AddRecipeModal onRecipeCreated={handleRecipeGenerated} />
       </div>
 
       <Tabs defaultValue="recipes" className="space-y-6">

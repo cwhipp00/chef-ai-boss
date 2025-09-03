@@ -60,6 +60,9 @@ verify_jwt = false
 [functions.ai-recipe-generator]
 verify_jwt = false
 
+[functions.ai-recipe-parser]
+verify_jwt = false
+
 [functions.ai-order-analyzer]
 verify_jwt = false
 
