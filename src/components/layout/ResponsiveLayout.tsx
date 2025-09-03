@@ -92,11 +92,12 @@ interface ResponsiveHeaderProps {
   subtitle?: string;
   actions?: React.ReactNode;
   badge?: React.ReactNode;
+  className?: string;
 }
 
-export const ResponsiveHeader = ({ title, subtitle, actions, badge }: ResponsiveHeaderProps) => {
+export const ResponsiveHeader = ({ title, subtitle, actions, badge, className }: ResponsiveHeaderProps) => {
   return (
-    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+    <div className={cn("space-y-4 sm:space-y-6 lg:space-y-8", className)}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 lg:gap-6">
         <div className="space-y-1 lg:space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 lg:gap-4">

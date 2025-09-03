@@ -25,10 +25,11 @@ const Index = () => {
       </div>
 
       <div className="relative z-10 space-y-4 sm:space-y-6 lg:space-y-8 xl:space-y-10">
-        {/* Header */}
+        {/* Header with mobile spacing */}
         <ResponsiveHeader
           title="Chef AI Dashboard"
           subtitle={`Welcome back, ${user?.email?.split('@')[0] || 'Chef'}! Here's your AI-powered restaurant overview`}
+          className="lg:ml-0 ml-16"
           badge={
             <Badge 
               variant={isPremium ? "default" : "secondary"} 
