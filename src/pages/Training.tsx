@@ -156,6 +156,7 @@ const Training = () => {
     if (!user) return;
     
     try {
+      // First enroll the user
       const { error } = await supabase
         .from('user_enrollments')
         .insert({
@@ -167,7 +168,41 @@ const Training = () => {
       if (error) throw error;
       
       toast.success('Successfully enrolled in course!');
+      
+      // Generate course content with AI
+      toast.loading('Generating course content with AI...', { id: 'generating-content' });
+      
+      try {
+        const { data: contentResult, error: contentError } = await supabase.functions.invoke(
+          'generate-course-content',
+          {
+            body: {
+              courseId: courseId,
+              userId: user.id
+            }
+          }
+        );
+
+        if (contentError) {
+          console.error('Content generation error:', contentError);
+          toast.error('Failed to generate course content', { id: 'generating-content' });
+        } else if (contentResult?.success) {
+          toast.success(
+            `Course content ready! ${contentResult.lessonsGenerated || 'Existing'} lessons available`,
+            { id: 'generating-content' }
+          );
+        } else {
+          toast.error('Failed to generate course content', { id: 'generating-content' });
+        }
+      } catch (contentError) {
+        console.error('Content generation error:', contentError);
+        toast.error('Failed to generate course content', { id: 'generating-content' });
+      }
+      
+      // Refresh data
       fetchEnrollments();
+      fetchCoursesOptimized(); // Refresh to get updated lesson counts
+      
     } catch (error) {
       console.error('Error enrolling:', error);
       toast.error('Failed to enroll in course');
