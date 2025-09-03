@@ -142,15 +142,15 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
         "w-64"
       )}>
         {/* Header */}
-        <div className="p-3 sm:p-4 border-b border-primary/20 flex items-center justify-between bg-gradient-to-r from-card via-card to-primary/5">
+        <div className="p-3 sm:p-4 lg:p-6 border-b border-primary/20 flex items-center justify-between bg-gradient-to-r from-card via-card to-primary/5">
           {!isCollapsed && (
-            <div className="flex items-center gap-2">
-              <div className="relative w-8 h-10 flex items-center justify-center">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="relative w-8 lg:w-10 h-10 lg:h-12 flex items-center justify-center">
                 {/* Chef Hat */}
-                <ChefHat className="h-5 w-5 text-primary drop-shadow-sm" />
+                <ChefHat className="h-5 w-5 lg:h-6 lg:w-6 text-primary drop-shadow-sm" />
                 
                 {/* Connection Line with neuron effect */}
-                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-0.5 h-3 bg-gradient-to-t from-primary via-accent to-primary/60 shadow-sm">
+                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-0.5 h-3 lg:h-4 bg-gradient-to-t from-primary via-accent to-primary/60 shadow-sm">
                   {/* Animated neuron pulse */}
                   <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-accent rounded-full animate-ping opacity-75"></div>
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-0.5 bg-primary rounded-full animate-pulse"></div>
@@ -162,7 +162,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                     {/* Glow background */}
                     <div className="absolute inset-0 bg-accent/30 rounded-full blur-sm scale-150 animate-pulse"></div>
                     {/* Brain icon */}
-                    <Brain className="relative h-4 w-4 text-accent drop-shadow-lg animate-pulse" />
+                    <Brain className="relative h-4 w-4 lg:h-5 lg:w-5 text-accent drop-shadow-lg animate-pulse" />
                     {/* Neuron sparks */}
                     <div className="absolute -top-0.5 -right-0.5 w-1 h-1 bg-accent rounded-full animate-ping"></div>
                     <div className="absolute -bottom-0.5 -left-0.5 w-0.5 h-0.5 bg-primary rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
@@ -170,22 +170,22 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-base sm:text-lg text-gradient">
+                <span className="font-bold text-base sm:text-lg lg:text-xl text-gradient">
                   Chef AI Pro
                 </span>
                 {companyName && (
-                  <span className="text-xs text-muted-foreground font-medium truncate max-w-[120px]">
+                  <span className="text-xs lg:text-sm text-muted-foreground font-medium truncate max-w-[120px] lg:max-w-[160px]">
                     {companyName}
                   </span>
                 )}
               </div>
             </div>
           )}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 lg:gap-3">
             {!isCollapsed && companyName && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 border border-primary/20">
-                <Building2 className="h-3 w-3 text-primary" />
-                <span className="text-xs font-medium text-primary truncate max-w-[80px]">
+              <div className="flex items-center gap-1 px-2 lg:px-3 py-1 lg:py-2 rounded-md bg-primary/10 border border-primary/20 touch-target">
+                <Building2 className="h-3 w-3 lg:h-4 lg:w-4 text-primary" />
+                <span className="text-xs lg:text-sm font-medium text-primary truncate max-w-[80px] lg:max-w-[120px]">
                   {companyName}
                 </span>
               </div>
@@ -195,31 +195,31 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
               variant="ghost"
               size="sm"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex h-8 w-8 p-0 hover:bg-primary/10"
+              className="hidden lg:flex h-8 w-8 lg:h-10 lg:w-10 p-0 hover:bg-primary/10 touch-target"
             >
-              {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+              {isCollapsed ? <Menu className="h-4 w-4 lg:h-5 lg:w-5" /> : <X className="h-4 w-4 lg:h-5 lg:w-5" />}
             </Button>
           </div>
         </div>
 
         {/* Search */}
         {!isCollapsed && (
-          <div className="px-3 sm:px-4 py-2">
+          <div className="px-3 sm:px-4 lg:px-6 py-2 lg:py-3">
             <SearchTrigger onOpenSearch={() => onOpenSearch?.()} />
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 p-2 overflow-y-auto">
-          <div className="space-y-4">
+        <nav className="flex-1 p-2 lg:p-3 overflow-y-auto">
+          <div className="space-y-4 lg:space-y-6">
             {navigationSections.map((section) => (
               <div key={section.title}>
                 {!isCollapsed && (
-                  <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <h3 className="px-3 lg:px-4 mb-2 lg:mb-3 text-xs lg:text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     {t(section.title)}
                   </h3>
                 )}
-                <ul className="space-y-1">
+                <ul className="space-y-1 lg:space-y-2">
                   {section.items
                     .filter(item => !item.managerOnly || isManager)
                     .map((item) => (
@@ -229,14 +229,14 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                           end
                           className={({ isActive }) =>
                             cn(
-                              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all group hover-lift",
+                              "flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-2 lg:py-3 rounded-lg text-sm lg:text-base font-medium transition-all group hover-lift touch-target",
                               isActive
                                 ? "bg-primary text-primary-foreground shadow-soft"
                                 : "text-muted-foreground hover:text-foreground hover:bg-primary/10 hover:border-primary/20"
                             )
                           }
                         >
-                          <item.icon className="h-4 w-4 flex-shrink-0" />
+                          <item.icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
                           {!isCollapsed && <span>{t(item.titleKey)}</span>}
                         </NavLink>
                       </li>
@@ -248,22 +248,22 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
         </nav>
 
         {/* User Section */}
-        <div className="p-3 sm:p-4 border-t border-primary/20 bg-gradient-to-r from-card via-card to-primary/5">
+        <div className="p-3 sm:p-4 lg:p-6 border-t border-primary/20 bg-gradient-to-r from-card via-card to-primary/5">
           <div className={cn(
-            "flex items-center gap-3 p-2 rounded-lg bg-card/50 backdrop-blur border border-primary/10 hover-lift",
+            "flex items-center gap-3 lg:gap-4 p-2 lg:p-3 rounded-lg bg-card/50 backdrop-blur border border-primary/10 hover-lift touch-target",
             isCollapsed && "justify-center"
           )}>
-            <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
-              <span className="text-sm font-medium text-primary-foreground">
+            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+              <span className="text-sm lg:text-base font-medium text-primary-foreground">
                 {user?.email?.charAt(0).toUpperCase() || 'U'}
               </span>
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
+                <p className="text-sm lg:text-base font-medium text-foreground truncate">
                   {user?.email || 'User'}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-xs lg:text-sm text-muted-foreground truncate">
                   {isManager ? t('common.manager') : 'Staff'}
                 </p>
               </div>
@@ -274,9 +274,9 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
               variant="ghost"
               size="sm"
               onClick={signOut}
-              className="w-full mt-2 text-muted-foreground hover:text-foreground hover:bg-primary/10"
+              className="w-full mt-2 lg:mt-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 lg:py-3 lg:text-base touch-target"
             >
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
               Sign Out
             </Button>
           )}
