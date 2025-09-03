@@ -823,17 +823,29 @@ export const POSSystemHub: React.FC<POSSystemHubProps> = ({ systemId, onBack, on
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {systemData.learningPath?.map((step: string, index: number) => (
+                  {systemData.learningPath?.map((step: any, index: number) => (
                     <div key={index} className="flex items-center gap-4 p-4 rounded-lg border">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium">{step}</h4>
+                        {typeof step === 'string' ? (
+                          <h4 className="font-medium">{step}</h4>
+                        ) : (
+                          <>
+                            <h4 className="font-medium">{step.title}</h4>
+                            {step.topics && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {step.topics.slice(0, 3).join(' • ')}
+                                {step.topics.length > 3 && ` +${step.topics.length - 3} more`}
+                              </p>
+                            )}
+                          </>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="w-4 h-4" />
-                        2-4 hours
+                        {typeof step === 'string' ? '2-4 hours' : step.duration || '2-4 hours'}
                       </div>
                     </div>
                   ))}
@@ -851,10 +863,25 @@ export const POSSystemHub: React.FC<POSSystemHubProps> = ({ systemId, onBack, on
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-2">
-                    {systemData.certifications.map((cert: string, index: number) => (
-                      <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
-                        <Award className="w-5 h-5 text-yellow-500" />
-                        <span className="font-medium">{cert}</span>
+                    {systemData.certifications.map((cert: any, index: number) => (
+                      <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
+                        <Award className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1" />
+                        <div className="flex-1">
+                          {typeof cert === 'string' ? (
+                            <span className="font-medium">{cert}</span>
+                          ) : (
+                            <>
+                              <div className="font-medium">{cert.name}</div>
+                              <p className="text-sm text-muted-foreground mt-1">{cert.description}</p>
+                              {cert.requirements && (
+                                <div className="mt-2">
+                                  <div className="text-xs text-muted-foreground font-medium">Requirements:</div>
+                                  <div className="text-xs text-muted-foreground">{cert.requirements.slice(0, 2).join(' • ')}</div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
