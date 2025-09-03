@@ -87,10 +87,12 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
 
   // Apply settings to CSS custom properties
   useEffect(() => {
+    console.log('🔧 Applying appearance settings:', settings);
     const root = document.documentElement;
     
     // Apply color theme
     const theme = colorThemes[settings.colorTheme];
+    console.log('🎨 Applying theme colors:', theme);
     root.style.setProperty('--primary', theme.primary);
     root.style.setProperty('--primary-glow', theme.primaryGlow);
     root.style.setProperty('--accent', theme.accent);
@@ -106,10 +108,13 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
     root.style.setProperty('--spacing-scale', density);
     
     // Apply display mode (dark/light)
+    console.log('🌙 Applying display mode:', settings.displayMode);
     if (settings.displayMode === 'auto') {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      console.log('🌙 Auto mode - system prefers dark:', prefersDark);
       root.classList.toggle('dark', prefersDark);
     } else {
+      console.log('🌙 Manual mode - setting dark:', settings.displayMode === 'dark');
       root.classList.toggle('dark', settings.displayMode === 'dark');
     }
     
@@ -121,6 +126,7 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
     
     // Store in localStorage
     localStorage.setItem('appearance-settings', JSON.stringify(settings));
+    console.log('💾 Settings saved to localStorage');
   }, [settings]);
 
   // Listen for system theme changes when in auto mode
@@ -137,10 +143,12 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
   }, [settings.displayMode]);
 
   const updateColorTheme = (theme: ColorTheme) => {
+    console.log('🎨 Color theme changing to:', theme);
     setSettings(prev => ({ ...prev, colorTheme: theme }));
   };
 
   const updateDisplayMode = (mode: DisplayMode) => {
+    console.log('🌙 Display mode changing to:', mode);
     setSettings(prev => ({ ...prev, displayMode: mode }));
   };
 
