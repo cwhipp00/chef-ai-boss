@@ -210,13 +210,13 @@ export default function Manager() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 ml-0 sm:ml-8 lg:ml-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Manager Dashboard</h1>
-          <p className="text-muted-foreground">Monitor operations, staff, and performance</p>
+          <h1 className="text-3xl font-bold text-foreground ml-4 sm:ml-0">Manager Dashboard</h1>
+          <p className="text-muted-foreground ml-4 sm:ml-0">Monitor operations, staff, and performance</p>
         </div>
-        <Button size="lg" className="bg-gradient-primary">
+        <Button size="lg" className="bg-gradient-primary mr-4 sm:mr-0">
           <AlertCircle className="h-4 w-4 mr-2" />
           Create Alert
         </Button>

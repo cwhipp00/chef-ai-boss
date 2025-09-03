@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
-import { Settings as SettingsIcon, Crown, User, Bell, Shield, Palette, Check, Loader2 } from 'lucide-react';
+import { Settings as SettingsIcon, Crown, User, Bell, Shield, Palette, Check, Loader2, LogOut } from 'lucide-react';
 import { UsageDashboard } from '@/components/subscription/UsageDashboard';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { isPremium, subscriptionTier } = useSubscription();
   const { toast } = useToast();
   const { 
@@ -186,16 +186,16 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 p-4 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 p-4 space-y-6 ml-0 sm:ml-8 lg:ml-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight flex items-center gap-3">
+          <h1 className="text-4xl font-bold tracking-tight flex items-center gap-3 ml-4 sm:ml-0">
             <SettingsIcon className="h-8 w-8" />
             Settings
           </h1>
-          <p className="text-muted-foreground mt-2">Manage your account and preferences</p>
+          <p className="text-muted-foreground mt-2 ml-4 sm:ml-0">Manage your account and preferences</p>
         </div>
-        <Badge variant={isPremium ? "default" : "secondary"} className={`${isPremium ? "bg-primary" : ""} text-sm`}>
+        <Badge variant={isPremium ? "default" : "secondary"} className={`${isPremium ? "bg-primary" : ""} text-sm mr-4 sm:mr-0`}>
           {isPremium && <Crown className="h-3 w-3 mr-1" />}
           {subscriptionTier.toUpperCase()} PLAN
         </Badge>
@@ -508,6 +508,31 @@ export default function Settings() {
                           {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Unknown'}
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h4 className="text-sm font-medium mb-3">Account Actions</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 border border-destructive/20 rounded-lg bg-destructive/5 hover:bg-destructive/10 transition-colors">
+                      <div>
+                        <div className="text-sm font-medium text-destructive">Sign Out of Account</div>
+                        <div className="text-xs text-muted-foreground">
+                          Sign out of your account on this device
+                        </div>
+                      </div>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={signOut}
+                        className="flex items-center gap-2"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </Button>
                     </div>
                   </div>
                 </div>

@@ -245,38 +245,27 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
         </nav>
 
         {/* User Section */}
-        <div className="p-3 sm:p-4 lg:p-6 border-t border-primary/20 bg-gradient-to-r from-card via-card to-primary/5">
+        <div className="p-2 border-t border-primary/20 bg-gradient-to-r from-card via-card to-primary/5">
           <div className={cn(
-            "flex items-center gap-3 lg:gap-4 p-2 lg:p-3 rounded-lg bg-card/50 backdrop-blur border border-primary/10 hover-lift touch-target",
+            "flex items-center gap-2 p-2 rounded-lg bg-card/50 backdrop-blur border border-primary/10 hover-lift touch-target",
             isCollapsed && "justify-center"
           )}>
-            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-              <span className="text-sm lg:text-base font-medium text-primary-foreground">
+            <div className="w-6 h-6 rounded-full bg-gradient-primary flex items-center justify-center flex-shrink-0">
+              <span className="text-xs font-medium text-primary-foreground">
                 {user?.email?.charAt(0).toUpperCase() || 'U'}
               </span>
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm lg:text-base font-medium text-foreground truncate">
+                <p className="text-xs font-medium text-foreground truncate">
                   {user?.email || 'User'}
                 </p>
-                <p className="text-xs lg:text-sm text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground/80 truncate">
                   {isManager ? t('common.manager') : 'Staff'}
                 </p>
               </div>
             )}
           </div>
-          {!isCollapsed && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={signOut}
-              className="w-full mt-2 lg:mt-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 lg:py-3 lg:text-base touch-target"
-            >
-              <LogOut className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
-              Sign Out
-            </Button>
-          )}
         </div>
       </div>
     </>

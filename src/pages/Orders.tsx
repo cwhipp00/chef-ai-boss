@@ -127,13 +127,13 @@ export default function Orders() {
   });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 ml-0 sm:ml-8 lg:ml-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Orders Management</h1>
-          <p className="text-muted-foreground">AI-powered order management with automation and analytics</p>
+          <h1 className="text-3xl font-bold text-foreground ml-4 sm:ml-0">Orders Management</h1>
+          <p className="text-muted-foreground ml-4 sm:ml-0">AI-powered order management with automation and analytics</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mr-4 sm:mr-0">
           <Button
             variant="outline"
             onClick={handleDocumentUpload}
