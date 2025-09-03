@@ -480,6 +480,8 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           subscription_end: string | null
           subscription_tier: Database["public"]["Enums"]["subscription_tier"]
           trial_end: string | null
@@ -490,6 +492,8 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_end?: string | null
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           trial_end?: string | null
@@ -500,6 +504,8 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_end?: string | null
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           trial_end?: string | null
@@ -669,7 +675,7 @@ export type Database = {
       }
     }
     Enums: {
-      subscription_tier: "free" | "premium"
+      subscription_tier: "free" | "premium" | "basic"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -797,7 +803,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      subscription_tier: ["free", "premium"],
+      subscription_tier: ["free", "premium", "basic"],
     },
   },
 } as const

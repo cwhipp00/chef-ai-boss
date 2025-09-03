@@ -21,6 +21,7 @@ import Reminders from "./pages/Reminders";
 import CalendarPage from "./pages/Calendar";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
+import Pricing from "./pages/Pricing";
 import Reservations from "./pages/Reservations";
 import StaffSchedule from "./pages/StaffSchedule";
 import FinanceDashboard from "./pages/FinanceDashboard";
@@ -61,6 +62,7 @@ function App() {
                             <Route path="/calendar" element={<CalendarPage />} />
                             <Route path="/documents" element={<Documents />} />
                             <Route path="/settings" element={<Settings />} />
+                            <Route path="/pricing" element={<Pricing />} />
                             <Route path="/reservations" element={<Reservations />} />
                             <Route path="/staff-schedule" element={<StaffSchedule />} />
                             <Route path="/finance" element={<FinanceDashboard />} />

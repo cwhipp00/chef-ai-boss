@@ -24,7 +24,7 @@ interface CurrentUsage {
 interface SubscriptionContextType {
   isLoading: boolean;
   isPremium: boolean;
-  subscriptionTier: 'free' | 'premium';
+  subscriptionTier: 'free' | 'basic' | 'premium';
   currentUsage: CurrentUsage;
   usageLimits: UsageLimits;
   canUseFeature: (feature: keyof UsageLimits) => boolean;
@@ -39,6 +39,15 @@ const FREE_LIMITS: UsageLimits = {
   video_call_minutes: 60,
   forms_created: 3,
   team_members: 2,
+};
+
+const BASIC_LIMITS: UsageLimits = {
+  ai_requests: 500,
+  calendar_events: 200,
+  document_uploads: Infinity,
+  video_call_minutes: 500,
+  forms_created: 25,
+  team_members: 10,
 };
 
 const PREMIUM_LIMITS: UsageLimits = {
@@ -63,7 +72,7 @@ export const useSubscription = () => {
 export const SubscriptionProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'premium'>('free');
+  const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'basic' | 'premium'>('free');
   const [currentUsage, setCurrentUsage] = useState<CurrentUsage>({
     ai_requests: 0,
     calendar_events: 0,
@@ -74,7 +83,8 @@ export const SubscriptionProvider = ({ children }: { children: React.ReactNode }
   });
 
   const isPremium = subscriptionTier === 'premium';
-  const usageLimits = isPremium ? PREMIUM_LIMITS : FREE_LIMITS;
+  const usageLimits = subscriptionTier === 'premium' ? PREMIUM_LIMITS :
+                     subscriptionTier === 'basic' ? BASIC_LIMITS : FREE_LIMITS;
 
   const refreshSubscription = async () => {
     if (!user) return;

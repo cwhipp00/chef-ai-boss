@@ -32,8 +32,8 @@ export const PremiumGate = ({ feature, children, customMessage, showUsage = true
   const usagePercentage = limit === Infinity ? 0 : Math.min((usage / limit) * 100, 100);
 
   const handleUpgrade = () => {
-    toast.info('Upgrade to Premium for unlimited access to all features!');
-    // TODO: Integrate with Stripe checkout
+    // Redirect to pricing page
+    window.location.href = '/pricing';
   };
 
   if (isPremium || canUse) {
@@ -103,7 +103,7 @@ export const PremiumGate = ({ feature, children, customMessage, showUsage = true
           className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
         >
           <Crown className="h-4 w-4 mr-2" />
-          Upgrade to Premium
+          View Pricing Plans
         </Button>
       </CardContent>
     </Card>
