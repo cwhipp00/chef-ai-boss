@@ -24,6 +24,8 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import AITrainingCoach from './AITrainingCoach';
+import AIAssessment from './AIAssessment';
 
 interface Lesson {
   id: string;
@@ -57,6 +59,9 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ courseId, courseTitl
   const [quizAnswers, setQuizAnswers] = useState<{ [key: number]: number }>({});
   const [showQuizResults, setShowQuizResults] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showAICoach, setShowAICoach] = useState(false);
+  const [showAIAssessment, setShowAIAssessment] = useState(false);
+  const [coachMinimized, setCoachMinimized] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -231,6 +236,25 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ courseId, courseTitl
               <Badge variant={isLessonCompleted(currentLesson.id) ? "default" : "secondary"}>
                 {isLessonCompleted(currentLesson.id) ? "Completed" : "In Progress"}
               </Badge>
+              
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAIAssessment(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Target className="w-4 h-4" />
+                  AI Assessment
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setCoachMinimized(false)}
+                  className="flex items-center gap-2"
+                >
+                  <Lightbulb className="w-4 h-4" />
+                  AI Coach
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -560,6 +584,46 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ courseId, courseTitl
           </div>
         </div>
       </div>
+
+      {/* AI Assessment Modal */}
+      {showAIAssessment && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-background rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h2 className="text-xl font-semibold">AI Assessment</h2>
+              <Button variant="ghost" onClick={() => setShowAIAssessment(false)}>
+                ×
+              </Button>
+            </div>
+            <div className="p-6">
+              <AIAssessment
+                lessonId={currentLesson.id}
+                lessonTitle={currentLesson.title}
+                lessonContent={currentLesson.content}
+                onComplete={(score, passed) => {
+                  if (passed) {
+                    markLessonComplete(currentLesson.id);
+                  }
+                  setShowAIAssessment(false);
+                  toast.success(`Assessment completed with ${score}%!`);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Training Coach */}
+      <AITrainingCoach
+        lessonContext={{
+          lessonId: currentLesson.id,
+          lessonTitle: currentLesson.title,
+          courseTitle: courseTitle,
+          content: currentLesson.content
+        }}
+        isMinimized={coachMinimized}
+        onToggleMinimize={() => setCoachMinimized(!coachMinimized)}
+      />
     </div>
   );
 };

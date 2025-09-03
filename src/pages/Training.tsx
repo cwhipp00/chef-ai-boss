@@ -34,6 +34,7 @@ import { toast } from 'sonner';
 import { LessonViewer } from '@/components/training/LessonViewer';
 import { POSSystemSelector } from '@/components/training/POSSystemSelector';
 import { POSSystemHub } from '@/components/training/POSSystemHub';
+import PersonalizedLearningPath from '@/components/training/PersonalizedLearningPath';
 
 interface Course {
   id: string;
@@ -367,10 +368,14 @@ const Training = () => {
             </div>
 
             <Tabs defaultValue="discover" className="space-y-8">
-              <TabsList className="grid w-full grid-cols-4 lg:w-fit">
+              <TabsList className="grid w-full grid-cols-5 lg:w-fit">
                 <TabsTrigger value="discover" className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4" />
                   Discover
+                </TabsTrigger>
+                <TabsTrigger value="learning-path" className="flex items-center gap-2">
+                  <Target className="w-4 h-4" />
+                  My Path
                 </TabsTrigger>
                 <TabsTrigger value="my-courses" className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
@@ -386,16 +391,20 @@ const Training = () => {
                 </TabsTrigger>
               </TabsList>
 
+              <TabsContent value="learning-path">
+                <PersonalizedLearningPath 
+                  userEnrollments={enrollments}
+                  completedCourses={completedCourses}
+                  userProfile={{
+                    experience_level: 'intermediate',
+                    role: 'staff',
+                    interests: ['cooking', 'food safety', 'customer service'],
+                    learning_goals: 'advance to management position'
+                  }}
+                />
+              </TabsContent>
+
               <TabsContent value="discover" className="space-y-8">
-                {/* Debug Info */}
-                <div className="mb-4 p-4 bg-muted/50 rounded-lg text-sm">
-                  <p>Total courses: {courses.length}</p>
-                  <p>Featured courses: {featuredCourses.length}</p>
-                  <p>Filtered courses: {filteredCourses.length}</p>
-                  <p>Search query: "{searchQuery}"</p>
-                  <p>Selected difficulty: {selectedDifficulty}</p>
-                  <p>Selected category: {selectedCategory}</p>
-                </div>
 
                 {/* Featured Courses */}
                 {featuredCourses.length > 0 ? (
