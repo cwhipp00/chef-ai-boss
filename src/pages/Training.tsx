@@ -26,7 +26,8 @@ import {
   PlayCircle,
   FileText,
   Grid3X3,
-  List
+  List,
+  ArrowLeft
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -344,9 +345,22 @@ const Training = () => {
         {/* POS System Selection Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold">Choose Your POS System</h2>
+            {viewMode === 'browse' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setViewMode('selector')}
+                className="flex items-center gap-2 -ml-2 text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to POS Systems
+              </Button>
+            )}
+            <h2 className="text-2xl font-bold">
+              {viewMode === 'selector' ? 'Choose Your POS System' : 'All Training Courses'}
+            </h2>
             <Badge variant="secondary" className="text-xs">
-              System-Specific Training
+              {viewMode === 'selector' ? 'System-Specific Training' : 'Browse All'}
             </Badge>
           </div>
           {viewMode === 'selector' && (
