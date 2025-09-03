@@ -170,11 +170,24 @@ All colors MUST be HSL.
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent;
   }
 
   .bg-gradient-primary {
     @apply bg-gradient-to-br from-primary to-primary-glow hover:from-primary/90 hover:to-primary shadow-soft;
+  }
+
+  /* Enhanced dropdown and select components */
+  .dropdown-content,
+  [data-radix-select-content],
+  [data-radix-dropdown-content] {
+    @apply z-50 bg-background border border-border shadow-lg backdrop-blur-sm;
+  }
+
+  /* Fix transparent dropdowns */
+  [role="menu"],
+  [role="listbox"] {
+    @apply bg-background border border-border shadow-lg z-50;
   }
 
   /* Enhanced scrollbars */

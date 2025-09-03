@@ -155,6 +155,7 @@ interface GlobalSearchProps {
 
 export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [recentSearches, setRecentSearches] = useState<string[]>(['recipes', 'staff schedule', 'food safety']);
   const navigate = useNavigate();
 
   const filteredItems = searchableItems.filter(item => {
@@ -178,7 +179,16 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const handleSelect = (item: SearchItem) => {
     navigate(item.route);
     onOpenChange(false);
+    
+    // Add to recent searches
+    const newRecent = [searchQuery || item.title, ...recentSearches.filter(s => s !== (searchQuery || item.title))].slice(0, 3);
+    setRecentSearches(newRecent);
+    
     setSearchQuery('');
+  };
+
+  const handleRecentSearch = (query: string) => {
+    setSearchQuery(query);
   };
 
   useEffect(() => {
@@ -196,12 +206,37 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <CommandInput 
-        placeholder="Search Chef Central..." 
+        placeholder="Search Chef Central... (recipes, staff, orders, documents)" 
         value={searchQuery}
         onValueChange={setSearchQuery}
+        className="text-base"
       />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+      <CommandList className="max-h-96">
+        {!searchQuery && recentSearches.length > 0 && (
+          <CommandGroup heading="Recent Searches">
+            {recentSearches.map((query, index) => (
+              <CommandItem
+                key={`recent-${index}`}
+                value={query}
+                onSelect={() => handleRecentSearch(query)}
+                className="flex items-center gap-3 px-3 py-2 cursor-pointer"
+              >
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1 font-medium">{query}</div>
+                <Badge variant="outline" className="text-xs">Recent</Badge>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+        
+        <CommandEmpty>
+          <div className="py-8 text-center space-y-2">
+            <Search className="h-8 w-8 mx-auto text-muted-foreground" />
+            <p className="text-muted-foreground">No results found</p>
+            <p className="text-xs text-muted-foreground">Try searching for recipes, staff, documents, or settings</p>
+          </div>
+        </CommandEmpty>
+        
         {Object.entries(groupedItems).map(([category, items]) => (
           <CommandGroup key={category} heading={category}>
             {items.map((item) => (
@@ -209,13 +244,15 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                 key={item.id}
                 value={item.title}
                 onSelect={() => handleSelect(item)}
-                className="flex items-center gap-3 px-3 py-2 cursor-pointer"
+                className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted/50"
               >
                 <div className="flex items-center gap-3 flex-1">
-                  {item.icon}
+                  <div className="p-1 rounded bg-primary/10 text-primary">
+                    {item.icon}
+                  </div>
                   <div className="flex-1">
                     <div className="font-medium">{item.title}</div>
-                    <div className="text-xs text-muted-foreground">{item.description}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-1">{item.description}</div>
                   </div>
                   <Badge variant="outline" className="text-xs">
                     {item.category}
