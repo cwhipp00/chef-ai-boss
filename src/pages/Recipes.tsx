@@ -96,9 +96,9 @@ export default function Recipes() {
   );
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 ml-0 sm:ml-4 lg:ml-6">
+    <div className="p-4 sm:p-6 space-y-6 ml-0 sm:ml-6 lg:ml-8">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="min-w-0 flex-1 pl-4 sm:pl-0">
+        <div className="min-w-0 flex-1 pl-6 sm:pl-0">
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Recipe Management</h1>
           <p className="text-muted-foreground">Manage and scale your restaurant recipes</p>
         </div>
@@ -108,7 +108,7 @@ export default function Recipes() {
       </div>
 
       <Tabs defaultValue="recipes" className="space-y-6">
-        <div className="overflow-x-auto pl-4 sm:pl-0">
+        <div className="overflow-x-auto pl-6 sm:pl-0">
           <TabsList className="inline-flex w-max min-w-full bg-muted/30 h-12 p-1 gap-1">
             <TabsTrigger value="recipes" className="flex-shrink-0 text-xs px-2 sm:px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Users className="h-3 w-3 mr-1" />
