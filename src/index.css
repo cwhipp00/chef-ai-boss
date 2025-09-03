@@ -154,6 +154,42 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-medium;
+    font-size: calc(var(--font-size-scale, 1) * 1rem);
+  }
+  
+  /* Spacing adjustments based on interface density */
+  .no-hover-effects .hover-lift:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-soft) !important;
+  }
+  
+  .no-transitions * {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .no-loading-animations .animate-spin,
+  .no-loading-animations .animate-pulse {
+    animation: none !important;
+  }
+  
+  .reduce-motion {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  /* Dynamic spacing based on density setting */
+  :root {
+    --spacing-scale: 1;
+  }
+  
+  .card-padding {
+    padding: calc(var(--spacing-scale, 1) * 1rem);
+  }
+  
+  .gap-dynamic {
+    gap: calc(var(--spacing-scale, 1) * 0.5rem);
   }
 
   /* Enhanced UI Components */

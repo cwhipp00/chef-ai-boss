@@ -1,0 +1,184 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+export type ColorTheme = 'warm-amber' | 'ocean-blue' | 'fresh-green';
+export type DisplayMode = 'light' | 'dark' | 'auto';
+export type FontSize = 'small' | 'normal' | 'large' | 'x-large';
+export type InterfaceDensity = 'compact' | 'normal' | 'comfortable';
+
+interface AppearanceSettings {
+  colorTheme: ColorTheme;
+  displayMode: DisplayMode;
+  fontSize: FontSize;
+  interfaceDensity: InterfaceDensity;
+  hoverEffects: boolean;
+  smoothTransitions: boolean;
+  loadingAnimations: boolean;
+  reducedMotion: boolean;
+}
+
+interface AppearanceContextType {
+  settings: AppearanceSettings;
+  updateColorTheme: (theme: ColorTheme) => void;
+  updateDisplayMode: (mode: DisplayMode) => void;
+  updateFontSize: (size: FontSize) => void;
+  updateInterfaceDensity: (density: InterfaceDensity) => void;
+  updateAnimationSetting: (setting: keyof Pick<AppearanceSettings, 'hoverEffects' | 'smoothTransitions' | 'loadingAnimations' | 'reducedMotion'>, value: boolean) => void;
+}
+
+const defaultSettings: AppearanceSettings = {
+  colorTheme: 'warm-amber',
+  displayMode: 'auto',
+  fontSize: 'normal',
+  interfaceDensity: 'normal',
+  hoverEffects: true,
+  smoothTransitions: true,
+  loadingAnimations: true,
+  reducedMotion: false,
+};
+
+const AppearanceContext = createContext<AppearanceContextType | undefined>(undefined);
+
+export function AppearanceProvider({ children }: { children: React.ReactNode }) {
+  const [settings, setSettings] = useState<AppearanceSettings>(() => {
+    try {
+      const stored = localStorage.getItem('appearance-settings');
+      return stored ? { ...defaultSettings, ...JSON.parse(stored) } : defaultSettings;
+    } catch {
+      return defaultSettings;
+    }
+  });
+
+  // Color themes configuration
+  const colorThemes = {
+    'warm-amber': {
+      primary: '25 95% 53%',
+      primaryGlow: '25 95% 70%',
+      accent: '15 85% 60%',
+      success: '142 76% 36%',
+    },
+    'ocean-blue': {
+      primary: '221 83% 53%',
+      primaryGlow: '221 83% 70%',
+      accent: '262 83% 58%',
+      success: '142 71% 45%',
+    },
+    'fresh-green': {
+      primary: '142 76% 36%',
+      primaryGlow: '142 76% 55%',
+      accent: '173 58% 39%',
+      success: '160 84% 39%',
+    }
+  };
+
+  // Font size scales
+  const fontSizeScales = {
+    small: '0.875',
+    normal: '1',
+    large: '1.125',
+    'x-large': '1.25'
+  };
+
+  // Interface density spacing
+  const densitySpacing = {
+    compact: '0.75',
+    normal: '1',
+    comfortable: '1.25'
+  };
+
+  // Apply settings to CSS custom properties
+  useEffect(() => {
+    const root = document.documentElement;
+    
+    // Apply color theme
+    const theme = colorThemes[settings.colorTheme];
+    root.style.setProperty('--primary', theme.primary);
+    root.style.setProperty('--primary-glow', theme.primaryGlow);
+    root.style.setProperty('--accent', theme.accent);
+    root.style.setProperty('--success', theme.success);
+    
+    // Apply font size
+    const fontSize = fontSizeScales[settings.fontSize];
+    root.style.setProperty('--font-size-scale', fontSize);
+    root.style.fontSize = `${parseFloat(fontSize) * 16}px`;
+    
+    // Apply interface density
+    const density = densitySpacing[settings.interfaceDensity];
+    root.style.setProperty('--spacing-scale', density);
+    
+    // Apply display mode (dark/light)
+    if (settings.displayMode === 'auto') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.toggle('dark', prefersDark);
+    } else {
+      root.classList.toggle('dark', settings.displayMode === 'dark');
+    }
+    
+    // Apply animation settings
+    root.classList.toggle('reduce-motion', settings.reducedMotion);
+    root.classList.toggle('no-hover-effects', !settings.hoverEffects);
+    root.classList.toggle('no-transitions', !settings.smoothTransitions);
+    root.classList.toggle('no-loading-animations', !settings.loadingAnimations);
+    
+    // Store in localStorage
+    localStorage.setItem('appearance-settings', JSON.stringify(settings));
+  }, [settings]);
+
+  // Listen for system theme changes when in auto mode
+  useEffect(() => {
+    if (settings.displayMode === 'auto') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => {
+        document.documentElement.classList.toggle('dark', mediaQuery.matches);
+      };
+      
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [settings.displayMode]);
+
+  const updateColorTheme = (theme: ColorTheme) => {
+    setSettings(prev => ({ ...prev, colorTheme: theme }));
+  };
+
+  const updateDisplayMode = (mode: DisplayMode) => {
+    setSettings(prev => ({ ...prev, displayMode: mode }));
+  };
+
+  const updateFontSize = (size: FontSize) => {
+    setSettings(prev => ({ ...prev, fontSize: size }));
+  };
+
+  const updateInterfaceDensity = (density: InterfaceDensity) => {
+    setSettings(prev => ({ ...prev, interfaceDensity: density }));
+  };
+
+  const updateAnimationSetting = (
+    setting: keyof Pick<AppearanceSettings, 'hoverEffects' | 'smoothTransitions' | 'loadingAnimations' | 'reducedMotion'>, 
+    value: boolean
+  ) => {
+    setSettings(prev => ({ ...prev, [setting]: value }));
+  };
+
+  const value: AppearanceContextType = {
+    settings,
+    updateColorTheme,
+    updateDisplayMode,
+    updateFontSize,
+    updateInterfaceDensity,
+    updateAnimationSetting,
+  };
+
+  return (
+    <AppearanceContext.Provider value={value}>
+      {children}
+    </AppearanceContext.Provider>
+  );
+}
+
+export function useAppearance() {
+  const context = useContext(AppearanceContext);
+  if (context === undefined) {
+    throw new Error('useAppearance must be used within an AppearanceProvider');
+  }
+  return context;
+}
