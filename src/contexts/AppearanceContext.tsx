@@ -108,15 +108,24 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
     const density = densitySpacing[settings.interfaceDensity];
     root.style.setProperty('--spacing-scale', density);
     
-    // Apply display mode (dark/light)
+    // Apply display mode (dark/light) - force override any existing classes
     console.log('🌙 Applying display mode:', settings.displayMode);
+    
+    // Remove existing dark class first
+    root.classList.remove('dark');
+    
     if (settings.displayMode === 'auto') {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       console.log('🌙 Auto mode - system prefers dark:', prefersDark);
-      root.classList.toggle('dark', prefersDark);
+      if (prefersDark) {
+        root.classList.add('dark');
+      }
+    } else if (settings.displayMode === 'dark') {
+      console.log('🌙 Manual mode - setting dark: true');
+      root.classList.add('dark');
     } else {
-      console.log('🌙 Manual mode - setting dark:', settings.displayMode === 'dark');
-      root.classList.toggle('dark', settings.displayMode === 'dark');
+      console.log('🌙 Manual mode - setting light: true');
+      // Light mode - dark class already removed above
     }
     
     // Apply animation settings
@@ -134,8 +143,13 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (settings.displayMode === 'auto') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = () => {
-        document.documentElement.classList.toggle('dark', mediaQuery.matches);
+      const handleChange = (e: MediaQueryListEvent) => {
+        console.log('🌙 System theme changed - prefers dark:', e.matches);
+        const root = document.documentElement;
+        root.classList.remove('dark');
+        if (e.matches) {
+          root.classList.add('dark');
+        }
       };
       
       mediaQuery.addEventListener('change', handleChange);
