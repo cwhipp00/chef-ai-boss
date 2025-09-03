@@ -71,10 +71,10 @@ export default function Settings() {
         return;
       }
 
-      if (data?.notification_settings) {
+      if (data && (data as any).notification_settings) {
         setNotificationSettings(prev => ({
           ...prev,
-          ...data.notification_settings
+          ...(data as any).notification_settings
         }));
       }
     } catch (error) {
@@ -159,7 +159,7 @@ export default function Settings() {
         .from('profiles')
         .update({
           notification_settings: notificationSettings
-        })
+        } as any)
         .eq('id', user?.id);
 
       if (error) {
