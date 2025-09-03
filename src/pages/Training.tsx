@@ -69,7 +69,7 @@ const Training = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedPOSSystem, setSelectedPOSSystem] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'selector' | 'browse'>('browse');
+  const [viewMode, setViewMode] = useState<'selector' | 'browse'>('selector');
   const [lessonCounts, setLessonCounts] = useState<{ [courseId: string]: number }>({});
   const { user } = useAuth();
 
@@ -296,31 +296,25 @@ const Training = () => {
       </section>
 
       <div className="px-6 py-8 mx-auto max-w-7xl">
-        {/* View Mode Toggle */}
+        {/* POS System Selection Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold">Training Courses</h2>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === 'browse' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('browse')}
-                className="flex items-center gap-2"
-              >
-                <List className="w-4 h-4" />
-                Browse All
-              </Button>
-              <Button
-                variant={viewMode === 'selector' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('selector')}
-                className="flex items-center gap-2"
-              >
-                <Grid3X3 className="w-4 h-4" />
-                POS Systems
-              </Button>
-            </div>
+            <h2 className="text-2xl font-bold">Choose Your POS System</h2>
+            <Badge variant="secondary" className="text-xs">
+              System-Specific Training
+            </Badge>
           </div>
+          {viewMode === 'selector' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setViewMode('browse')}
+              className="flex items-center gap-2"
+            >
+              <List className="w-4 h-4" />
+              Browse All Courses
+            </Button>
+          )}
         </div>
 
         {viewMode === 'selector' ? (
