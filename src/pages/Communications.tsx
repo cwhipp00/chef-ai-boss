@@ -223,85 +223,102 @@ export default function Communications() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/10 flex flex-col">
-      {/* Streamlined Header */}
-      <div className="border-b bg-card/90 backdrop-blur-md p-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Communications Hub</h1>
-              <p className="text-sm text-muted-foreground">Team collaboration • 8 online</p>
-            </div>
-            <div className="hidden lg:flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-              <span className="text-xs font-medium text-success">System Healthy</span>
-            </div>
-          </div>
-          
-          {/* Quick Actions */}
-          <div className="flex items-center gap-2">
-            <Button 
-              size="sm" 
-              variant="ghost"
-              onClick={() => handleStartCall('2', 'audio')}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Phone className="h-4 w-4" />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="ghost"
-              onClick={() => handleStartCall('2', 'video')}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Video className="h-4 w-4" />
-            </Button>
-            <Dialog open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="bg-gradient-primary">
-                  <Plus className="h-4 w-4 mr-1" />
-                  Broadcast
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-xl">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Radio className="h-5 w-5 text-primary" />
-                    Team Broadcast
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <Select value={broadcastType} onValueChange={setBroadcastType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-background border border-border shadow-lg">
-                      <SelectItem value="general">💬 General Update</SelectItem>
-                      <SelectItem value="urgent">⚠️ Urgent Notice</SelectItem>
-                      <SelectItem value="celebration">🎉 Celebration</SelectItem>
-                      <SelectItem value="policy">📋 Policy Update</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Textarea
-                    placeholder="Type your team-wide message..."
-                    value={broadcastMessage}
-                    onChange={(e) => setBroadcastMessage(e.target.value)}
-                    className="min-h-[100px]"
-                  />
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    <span>Sending to 12 team members</span>
+    <div className="h-screen bg-gradient-to-br from-background via-background/95 to-muted/5 flex flex-col">
+      {/* Enhanced Header */}
+      <div className="border-b bg-card/95 backdrop-blur-md shadow-soft">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div className="space-y-1">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  Communications Hub
+                </h1>
+                <div className="flex items-center gap-3">
+                  <p className="text-sm text-muted-foreground">Team collaboration</p>
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground/50"></div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+                    <span className="text-sm font-medium text-success">8 online</span>
                   </div>
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsAnnouncementOpen(false)}>Cancel</Button>
-                  <Button onClick={handleSendBroadcast}>
-                    <Send className="h-4 w-4 mr-2" />
-                    Send
+              </div>
+              <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20">
+                <div className="w-2.5 h-2.5 rounded-full bg-success"></div>
+                <span className="text-xs font-medium text-success">System Healthy</span>
+              </div>
+            </div>
+            
+            {/* Quick Actions */}
+            <div className="flex items-center gap-2">
+              <Button 
+                size="sm" 
+                variant="ghost"
+                onClick={() => handleStartCall('2', 'audio')}
+                className="hover:bg-accent/10 hover:text-accent-foreground transition-colors"
+              >
+                <Phone className="h-4 w-4" />
+                <span className="sr-only">Start audio call</span>
+              </Button>
+              <Button 
+                size="sm" 
+                variant="ghost"
+                onClick={() => handleStartCall('2', 'video')}
+                className="hover:bg-accent/10 hover:text-accent-foreground transition-colors"
+              >
+                <Video className="h-4 w-4" />
+                <span className="sr-only">Start video call</span>
+              </Button>
+              <Dialog open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="bg-gradient-primary hover:shadow-medium transition-all">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Broadcast
                   </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent className="max-w-xl bg-card border-border shadow-strong">
+                  <DialogHeader className="space-y-2">
+                    <DialogTitle className="flex items-center gap-3 text-xl">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Radio className="h-5 w-5 text-primary" />
+                      </div>
+                      Team Broadcast
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-6 py-4">
+                    <Select value={broadcastType} onValueChange={setBroadcastType}>
+                      <SelectTrigger className="bg-muted/30 border-border/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="z-50 bg-card border border-border shadow-strong">
+                        <SelectItem value="general">💬 General Update</SelectItem>
+                        <SelectItem value="urgent">⚠️ Urgent Notice</SelectItem>
+                        <SelectItem value="celebration">🎉 Celebration</SelectItem>
+                        <SelectItem value="policy">📋 Policy Update</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Textarea
+                      placeholder="Type your team-wide message..."
+                      value={broadcastMessage}
+                      onChange={(e) => setBroadcastMessage(e.target.value)}
+                      className="min-h-[120px] bg-muted/30 border-border/50 focus:border-primary/50 transition-colors resize-none"
+                    />
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/30 text-sm text-muted-foreground">
+                      <Users className="h-4 w-4 text-primary" />
+                      <span>Sending to <strong className="text-foreground">12 team members</strong></span>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
+                    <Button variant="outline" onClick={() => setIsAnnouncementOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSendBroadcast} className="bg-gradient-primary hover:shadow-medium">
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Broadcast
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       </div>
@@ -309,50 +326,54 @@ export default function Communications() {
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="flex-1 flex flex-col">
-          {/* Clean Tab Navigation */}
-          <div className="border-b bg-background/95 backdrop-blur-sm">
-            <TabsList className="h-12 bg-transparent p-1 mx-4 mt-2">
-              <TabsTrigger 
-                value="messages" 
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Messages
-              </TabsTrigger>
-              <TabsTrigger 
-                value="team" 
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
-              >
-                <Radio className="h-4 w-4 mr-2" />
-                Broadcast
-              </TabsTrigger>
-              <TabsTrigger 
-                value="video-meeting" 
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
-              >
-                <Video className="h-4 w-4 mr-2" />
-                Video
-              </TabsTrigger>
-              <TabsTrigger 
-                value="announcements" 
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
-              >
-                <Megaphone className="h-4 w-4 mr-2" />
-                News
-              </TabsTrigger>
-            </TabsList>
+          {/* Enhanced Tab Navigation */}
+          <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm">
+            <div className="px-6 py-2">
+              <TabsList className="h-11 bg-muted/30 p-1 rounded-lg shadow-soft border border-border/30">
+                <TabsTrigger 
+                  value="messages" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-soft transition-all font-medium px-4"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Messages
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="meetings" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-soft transition-all font-medium px-4"
+                >
+                  <Radio className="h-4 w-4 mr-2" />
+                  Meetings
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="video-meeting" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-soft transition-all font-medium px-4"
+                >
+                  <Video className="h-4 w-4 mr-2" />
+                  Video
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="announcements" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-soft transition-all font-medium px-4"
+                >
+                  <Megaphone className="h-4 w-4 mr-2" />
+                  News
+                </TabsTrigger>
+              </TabsList>
+            </div>
           </div>
 
-          {/* Messages Tab - Improved Layout */}
-          <TabsContent value="messages" className="flex-1 p-4 pt-2">
-            <div className="grid grid-cols-12 gap-4 h-full">
+          {/* Messages Tab - Enhanced Layout */}
+          <TabsContent value="messages" className="flex-1 p-6 pt-4">
+            <div className="grid grid-cols-12 gap-6 h-full">
               {/* Sidebar - Channels & Team */}
               <div className="col-span-3 space-y-4">
                 {/* Channels */}
-                <Card className="shadow-sm border-border/50">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Hash className="h-4 w-4 text-primary" />
+                <Card className="shadow-soft border-border/50 bg-card/50 backdrop-blur-sm">
+                  <CardHeader className="pb-3 px-4 pt-4">
+                    <CardTitle className="text-sm flex items-center gap-2 font-semibold">
+                      <div className="p-1.5 rounded-md bg-primary/10">
+                        <Hash className="h-3.5 w-3.5 text-primary" />
+                      </div>
                       Channels
                     </CardTitle>
                   </CardHeader>
@@ -360,32 +381,43 @@ export default function Communications() {
                     {channels.map((channel) => (
                       <div
                         key={channel.id}
-                        className={`p-3 cursor-pointer border-b last:border-b-0 hover:bg-muted/50 transition-colors ${
-                          selectedChannel === channel.name.toLowerCase() ? 'bg-primary/5 border-r-2 border-r-primary' : ''
+                        className={`p-3 cursor-pointer border-b border-border/30 last:border-b-0 hover:bg-accent/5 transition-colors ${
+                          selectedChannel === channel.name.toLowerCase() 
+                            ? 'bg-primary/10 border-r-2 border-r-primary shadow-sm' 
+                            : ''
                         }`}
                         onClick={() => setSelectedChannel(channel.name.toLowerCase())}
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${channel.active ? 'bg-success' : 'bg-muted-foreground'}`} />
-                            <span className="text-sm font-medium">{channel.name}</span>
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-2.5 h-2.5 rounded-full ${
+                              channel.active ? 'bg-success shadow-sm' : 'bg-muted-foreground/60'
+                            }`} />
+                            <span className="text-sm font-medium text-foreground">{channel.name}</span>
                           </div>
                           {channel.unread > 0 && (
-                            <Badge variant="destructive" className="h-5 text-xs px-1.5">{channel.unread}</Badge>
+                            <Badge variant="destructive" className="h-5 text-xs px-2 font-medium">
+                              {channel.unread}
+                            </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 ml-4">{channel.members} members</p>
+                        <p className="text-xs text-muted-foreground mt-1.5 ml-5">
+                          {channel.members} members
+                        </p>
                       </div>
                     ))}
                   </CardContent>
                 </Card>
 
                 {/* Team Members */}
-                <Card className="shadow-sm border-border/50">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Users className="h-4 w-4 text-primary" />
-                      Team (8 online)
+                <Card className="shadow-soft border-border/50 bg-card/50 backdrop-blur-sm">
+                  <CardHeader className="pb-3 px-4 pt-4">
+                    <CardTitle className="text-sm flex items-center gap-2 font-semibold">
+                      <div className="p-1.5 rounded-md bg-success/10">
+                        <Users className="h-3.5 w-3.5 text-success" />
+                      </div>
+                      Team
+                      <Badge variant="secondary" className="ml-auto text-xs">8 online</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0 max-h-48 overflow-y-auto">
@@ -396,16 +428,18 @@ export default function Communications() {
                       { name: 'David Park', role: 'Line Cook', status: 'active' },
                       { name: 'Lisa Wong', role: 'Host', status: 'away' }
                     ].map((member, index) => (
-                      <div key={index} className="p-2 flex items-center gap-2 hover:bg-muted/30 cursor-pointer">
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="text-xs">{getInitials(member.name)}</AvatarFallback>
+                      <div key={index} className="p-3 flex items-center gap-3 hover:bg-accent/5 cursor-pointer transition-colors border-b border-border/20 last:border-b-0">
+                        <Avatar className="w-7 h-7 shadow-sm">
+                          <AvatarFallback className="text-xs font-medium bg-gradient-primary text-primary-foreground">
+                            {getInitials(member.name)}
+                          </AvatarFallback>
                         </Avatar>
-                        <div className={`w-2 h-2 rounded-full ${
+                        <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${
                           member.status === 'active' ? 'bg-success' :
-                          member.status === 'busy' ? 'bg-warning' : 'bg-muted-foreground'
+                          member.status === 'busy' ? 'bg-warning' : 'bg-muted-foreground/60'
                         }`} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium truncate">{member.name}</p>
+                          <p className="text-sm font-medium truncate text-foreground">{member.name}</p>
                           <p className="text-xs text-muted-foreground">{member.role}</p>
                         </div>
                       </div>
@@ -416,77 +450,74 @@ export default function Communications() {
 
               {/* Chat Area */}
               <div className="col-span-6">
-                <RealTimeChat 
-                  selectedChannel={selectedChannel}
-                  currentUserId={currentUserId}
-                  onChannelChange={setSelectedChannel}
-                />
+                <div className="h-full rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm shadow-soft overflow-hidden">
+                  <RealTimeChat 
+                    selectedChannel={selectedChannel}
+                    currentUserId={currentUserId}
+                    onChannelChange={setSelectedChannel}
+                  />
+                </div>
               </div>
 
               {/* Right Panel - User Presence & Quick Info */}
               <div className="col-span-3 space-y-4">
-                <UserPresence 
-                  currentUserId={currentUserId}
-                  onStartCall={handleStartCall}
-                  onStartChat={handleStartChat}
-                />
+                <div className="rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm shadow-soft overflow-hidden">
+                  <UserPresence 
+                    currentUserId={currentUserId}
+                    onStartCall={handleStartCall}
+                    onStartChat={handleStartChat}
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>
 
           {/* Enhanced Video Meeting Tab */}
-          <TabsContent value="video-meeting" className="flex-1 p-4 pt-2">
+          <TabsContent value="video-meeting" className="flex-1 p-6 pt-4">
             <div className="grid grid-cols-12 gap-6 h-full">
               <div className="col-span-8">
-                <EnhancedVideoCall 
-                  roomName="restaurant-team-meeting"
-                  userName={`User_${currentUserId.slice(-3)}`}
-                  onCallEnd={() => toast({ title: "Call Ended", description: "Thanks for joining!" })}
-                />
+                <div className="h-full rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm shadow-soft overflow-hidden">
+                  <EnhancedVideoCall 
+                    roomName="restaurant-team-meeting"
+                    userName={`User_${currentUserId.slice(-3)}`}
+                    onCallEnd={() => toast({ title: "Call Ended", description: "Thanks for joining!" })}
+                  />
+                </div>
               </div>
               <div className="col-span-4">
-                <RealtimeCollaboration 
-                  organizationId="demo-org-123"
-                  currentPage="communications"
-                />
+                <div className="h-full rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm shadow-soft overflow-hidden">
+                  <RealtimeCollaboration 
+                    organizationId="demo-org-123"
+                    currentPage="communications"
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>
 
-          {/* Other tabs content remains similar but more compact */}
-          <TabsContent value="team" className="flex-1 p-4 pt-2">
-            <div className="text-center py-12">
-              <Radio className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">Team Broadcast Center</h3>
-              <p className="text-muted-foreground mb-4">Send messages to all team members</p>
-              <Button>Send Broadcast</Button>
+          {/* AI Meeting Recorder Tab */}
+          <TabsContent value="meetings" className="flex-1 p-6 pt-4">
+            <div className="h-full rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm shadow-soft overflow-hidden">
+              <AIRecorder />
             </div>
           </TabsContent>
 
-          <TabsContent value="channels" className="flex-1 p-4 pt-2">
-            <div className="text-center py-12">
-              <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">Channel Management</h3>
-              <p className="text-muted-foreground mb-4">Create and manage team channels</p>
-              <Button>Create Channel</Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="announcements" className="flex-1 p-4 pt-2">
-            <div className="text-center py-12">
-              <Megaphone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">Announcements</h3>
-              <p className="text-muted-foreground mb-4">Company-wide announcements</p>
-              <Button>New Announcement</Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="notifications" className="flex-1 p-4 pt-2">
-            <div className="text-center py-12">
-              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">Notification Center</h3>
-              <p className="text-muted-foreground mb-4">Manage your notification preferences</p>
-              <Button>Configure Notifications</Button>
+          {/* Enhanced Empty State Tabs */}
+          <TabsContent value="announcements" className="flex-1 p-6 pt-4">
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center max-w-md mx-auto space-y-4">
+                <div className="p-4 rounded-full bg-primary/10 w-fit mx-auto">
+                  <Megaphone className="h-12 w-12 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold text-foreground">Company Announcements</h3>
+                  <p className="text-muted-foreground">Important updates and news for the entire team</p>
+                </div>
+                <Button className="bg-gradient-primary hover:shadow-medium transition-all">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Announcement
+                </Button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
