@@ -37,6 +37,7 @@ import { POSSystemHub } from '@/components/training/POSSystemHub';
 import PersonalizedLearningPath from '@/components/training/PersonalizedLearningPath';
 import { AICourseCreator } from '@/components/training/AICourseCreator';
 import { OptimizedCourseCard } from '@/components/training/OptimizedCourseCard';
+import { ToastCourseGenerator } from '@/components/training/ToastCourseGenerator';
 
 interface Course {
   id: string;
@@ -440,7 +441,7 @@ const Training = () => {
                 </TabsTrigger>
                 <TabsTrigger value="ai-creator" className="flex items-center gap-2">
                   <Flame className="w-4 h-4" />
-                  AI Creator
+                  Toast Generator
                 </TabsTrigger>
                 <TabsTrigger value="my-courses" className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
@@ -466,12 +467,7 @@ const Training = () => {
               </TabsContent>
 
               <TabsContent value="ai-creator">
-                <AICourseCreator 
-                  onCourseCreated={(course) => {
-                    toast.success('Course created successfully!');
-                    fetchCoursesOptimized(); // Refresh course list
-                  }}
-                />
+                <ToastCourseGenerator />
               </TabsContent>
 
               <TabsContent value="discover" className="space-y-8">
