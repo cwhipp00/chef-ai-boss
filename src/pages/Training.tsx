@@ -659,7 +659,36 @@ const Training = () => {
               </TabsContent>
 
               <TabsContent value="achievements" className="space-y-8">
-                <AchievementsSection completedCourses={completedCourses.length} totalProgress={enrolledCourses.length} />
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-3xl font-bold">Your Achievements</h2>
+                    <p className="text-muted-foreground">Track your learning milestones</p>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {[
+                      { id: 1, title: "First Steps", description: "Complete your first course", icon: "🎯", unlocked: completedCourses.length >= 1 },
+                      { id: 2, title: "Knowledge Seeker", description: "Complete 3 courses", icon: "📚", unlocked: completedCourses.length >= 3 },
+                      { id: 3, title: "Culinary Scholar", description: "Complete 5 courses", icon: "🎓", unlocked: completedCourses.length >= 5 },
+                      { id: 4, title: "Master Chef", description: "Complete 10 courses", icon: "👨‍🍳", unlocked: completedCourses.length >= 10 },
+                      { id: 5, title: "Dedicated Student", description: "Enroll in 5 courses", icon: "⭐", unlocked: enrolledCourses.length >= 5 },
+                    ].map((achievement) => (
+                      <Card key={achievement.id} className={`transition-all duration-200 ${achievement.unlocked ? 'border-primary/20 bg-primary/5' : 'opacity-50'}`}>
+                        <CardContent className="p-6 text-center space-y-2">
+                          <div className="text-4xl mb-2">{achievement.icon}</div>
+                          <h3 className="font-semibold">{achievement.title}</h3>
+                          <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                          {achievement.unlocked && (
+                            <Badge variant="default" className="mt-2">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Unlocked
+                            </Badge>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
               </TabsContent>
             </Tabs>
           </>
