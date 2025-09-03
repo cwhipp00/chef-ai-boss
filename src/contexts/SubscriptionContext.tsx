@@ -24,7 +24,7 @@ interface CurrentUsage {
 interface SubscriptionContextType {
   isLoading: boolean;
   isPremium: boolean;
-  subscriptionTier: 'free' | 'basic' | 'premium';
+  subscriptionTier: 'free' | 'pro' | 'business';
   currentUsage: CurrentUsage;
   usageLimits: UsageLimits;
   canUseFeature: (feature: keyof UsageLimits) => boolean;
@@ -41,16 +41,16 @@ const FREE_LIMITS: UsageLimits = {
   team_members: 2,
 };
 
-const BASIC_LIMITS: UsageLimits = {
-  ai_requests: 500,
-  calendar_events: 200,
+const PRO_LIMITS: UsageLimits = {
+  ai_requests: Infinity,
+  calendar_events: Infinity,
   document_uploads: Infinity,
-  video_call_minutes: 500,
-  forms_created: 25,
-  team_members: 10,
+  video_call_minutes: Infinity,
+  forms_created: Infinity,
+  team_members: Infinity,
 };
 
-const PREMIUM_LIMITS: UsageLimits = {
+const BUSINESS_LIMITS: UsageLimits = {
   ai_requests: Infinity,
   calendar_events: Infinity,
   document_uploads: Infinity,
@@ -72,7 +72,7 @@ export const useSubscription = () => {
 export const SubscriptionProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'basic' | 'premium'>('free');
+  const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'pro' | 'business'>('free');
   const [currentUsage, setCurrentUsage] = useState<CurrentUsage>({
     ai_requests: 0,
     calendar_events: 0,
@@ -82,9 +82,9 @@ export const SubscriptionProvider = ({ children }: { children: React.ReactNode }
     team_members: 0,
   });
 
-  const isPremium = subscriptionTier === 'premium';
-  const usageLimits = subscriptionTier === 'premium' ? PREMIUM_LIMITS :
-                     subscriptionTier === 'basic' ? BASIC_LIMITS : FREE_LIMITS;
+  const isPremium = subscriptionTier === 'pro' || subscriptionTier === 'business';
+  const usageLimits = subscriptionTier === 'business' ? BUSINESS_LIMITS :
+                     subscriptionTier === 'pro' ? PRO_LIMITS : FREE_LIMITS;
 
   const refreshSubscription = async () => {
     if (!user) return;
@@ -107,7 +107,17 @@ export const SubscriptionProvider = ({ children }: { children: React.ReactNode }
         .single();
 
       if (subscriptionData) {
-        setSubscriptionTier(subscriptionData.subscription_tier);
+        // Map database tier to frontend tier
+        const dbTier = subscriptionData.subscription_tier as string;
+        let frontendTier: 'free' | 'pro' | 'business' = 'free';
+        
+        if (dbTier === 'basic' || dbTier === 'premium' || dbTier === 'pro') {
+          frontendTier = 'pro';
+        } else if (dbTier === 'business') {
+          frontendTier = 'business';
+        }
+        
+        setSubscriptionTier(frontendTier);
       }
 
       if (usageData) {

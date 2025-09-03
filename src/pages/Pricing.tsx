@@ -66,45 +66,21 @@ const pricingTiers: PricingTier[] = [
     icon: FileText
   },
   {
-    id: 'basic',
-    name: 'Basic',
-    price: 29,
+    id: 'pro',
+    name: 'Pro',
+    price: 299,
     period: 'month',
-    description: 'Great for small restaurants',
+    description: 'Unlimited power for serious restaurants',
     popular: true,
     features: [
       'Everything in Free',
-      'Advanced AI assistance',
+      'Unlimited AI assistance & generations',
       'Unlimited document uploads',
-      'Video calling',
+      'Unlimited video calling',
       'Priority support',
-      'Advanced analytics'
-    ],
-    limits: {
-      ai_requests: '500',
-      calendar_events: '200',
-      document_uploads: 'Unlimited',
-      video_call_minutes: '500',
-      forms_created: '25',
-      team_members: '10'
-    },
-    cta: 'Upgrade to Basic',
-    icon: Zap
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: 99,
-    period: 'month',
-    description: 'For growing restaurant chains',
-    features: [
-      'Everything in Basic',
-      'Unlimited AI requests',
-      'Advanced automation',
-      'Custom integrations',
-      'Dedicated support',
-      'White-label options',
-      'Advanced reporting'
+      'Advanced analytics',
+      'API access',
+      'Custom integrations'
     ],
     limits: {
       ai_requests: 'Unlimited',
@@ -114,7 +90,36 @@ const pricingTiers: PricingTier[] = [
       forms_created: 'Unlimited',
       team_members: 'Unlimited'
     },
-    cta: 'Upgrade to Premium',
+    cta: 'Upgrade to Pro',
+    icon: Zap
+  },
+  {
+    id: 'business',
+    name: 'Business',
+    price: 799,
+    period: 'month',
+    description: 'Enterprise-grade solution for restaurant groups',
+    features: [
+      'Everything in Pro',
+      'Unlimited everything',
+      'Multi-location management',
+      'Advanced automation workflows',
+      'Custom integrations & API',
+      'Dedicated account manager',
+      'White-label options',
+      'Advanced reporting & analytics',
+      'SLA guarantees',
+      'Custom training & onboarding'
+    ],
+    limits: {
+      ai_requests: 'Unlimited',
+      calendar_events: 'Unlimited',
+      document_uploads: 'Unlimited',
+      video_call_minutes: 'Unlimited',
+      forms_created: 'Unlimited',
+      team_members: 'Unlimited'
+    },
+    cta: 'Upgrade to Business',
     icon: Crown
   }
 ];
@@ -221,8 +226,8 @@ const Pricing = () => {
                 <CardHeader className="text-center pb-2">
                   <div className="mb-4">
                     <Icon className={`w-12 h-12 mx-auto ${
-                      tier.id === 'premium' ? 'text-amber-500' : 
-                      tier.id === 'basic' ? 'text-primary' : 
+                      tier.id === 'business' ? 'text-amber-500' : 
+                      tier.id === 'pro' ? 'text-primary' : 
                       'text-muted-foreground'
                     }`} />
                   </div>
