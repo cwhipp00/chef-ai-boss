@@ -152,7 +152,7 @@ export const ToastCourseGenerator: React.FC = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Toast Training Courses ({toastCourses.length})</CardTitle>
+            <CardTitle>Toast Training Courses Without Content ({toastCourses.length})</CardTitle>
             <Button 
               onClick={generateAllCourses}
               disabled={isGenerating}
@@ -171,6 +171,9 @@ export const ToastCourseGenerator: React.FC = () => {
               )}
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            This will generate comprehensive lessons with videos, tutorials, quizzes, and hands-on exercises for all Toast courses that currently have no content.
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
           {toastCourses.map((course) => {
