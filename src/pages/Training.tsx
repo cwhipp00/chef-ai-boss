@@ -37,7 +37,7 @@ import { POSSystemHub } from '@/components/training/POSSystemHub';
 import PersonalizedLearningPath from '@/components/training/PersonalizedLearningPath';
 import { AICourseCreator } from '@/components/training/AICourseCreator';
 import { OptimizedCourseCard } from '@/components/training/OptimizedCourseCard';
-import { ToastCourseGenerator } from '@/components/training/ToastCourseGenerator';
+import { ComprehensiveToastGenerator } from '@/components/training/ComprehensiveToastGenerator';
 
 interface Course {
   id: string;
@@ -441,7 +441,7 @@ const Training = () => {
                 </TabsTrigger>
                 <TabsTrigger value="ai-creator" className="flex items-center gap-2">
                   <Flame className="w-4 h-4" />
-                  Toast Generator
+                  Complete Toast Training
                 </TabsTrigger>
                 <TabsTrigger value="my-courses" className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
@@ -467,7 +467,7 @@ const Training = () => {
               </TabsContent>
 
               <TabsContent value="ai-creator">
-                <ToastCourseGenerator />
+                <ComprehensiveToastGenerator />
               </TabsContent>
 
               <TabsContent value="discover" className="space-y-8">
