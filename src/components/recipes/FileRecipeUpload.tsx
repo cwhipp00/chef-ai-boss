@@ -61,11 +61,16 @@ export function FileRecipeUpload({ onRecipesExtracted }: { onRecipesExtracted: (
   const { toast } = useToast();
 
   const parseFileContent = async (file: File): Promise<ParsedRecipe[]> => {
+    console.log(`Starting to parse file: ${file.name} (${file.type})`);
+    
     try {
       // Read file content
+      console.log('Reading file content...');
       const content = await readFileAsText(file);
+      console.log('File content read, length:', content.length);
       
       // Call AI recipe parser edge function
+      console.log('Calling AI recipe parser...');
       const response = await fetch('https://lfpnnlkjqpphstpcmcsi.supabase.co/functions/v1/ai-recipe-parser', {
         method: 'POST',
         headers: {
@@ -78,17 +83,38 @@ export function FileRecipeUpload({ onRecipesExtracted }: { onRecipesExtracted: (
         })
       });
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to parse file');
+        const errorText = await response.text();
+        console.error('API response error:', errorText);
+        throw new Error(`Failed to parse file: ${response.status} - ${errorText}`);
       }
 
       const responseData = await response.json();
       console.log('AI Parser Response:', responseData);
-      const { recipes } = responseData;
-      console.log('Extracted recipes from response:', recipes);
-      return recipes || [];
+      
+      if (responseData.success && responseData.recipes) {
+        const { recipes } = responseData;
+        console.log('Successfully extracted recipes:', recipes);
+        return recipes;
+      } else if (responseData.error) {
+        console.error('AI Parser returned error:', responseData.error);
+        throw new Error(responseData.error);
+      } else {
+        console.warn('Unexpected response format:', responseData);
+        return [];
+      }
     } catch (error) {
       console.error('File parsing error:', error);
+      
+      // Show toast with error
+      toast({
+        title: "Parsing Failed",
+        description: `Failed to parse ${file.name}. Using fallback recipe.`,
+        variant: "destructive",
+      });
+      
       // Fallback to basic recipe
       return [{
         name: `Recipe from ${file.name}`,
