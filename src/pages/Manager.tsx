@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, TrendingUp, DollarSign, Clock, Target, AlertCircle, CheckCircle, GraduationCap, AlertTriangle, Trophy, User, BookOpen, Star, Award } from 'lucide-react';
+import { Users, TrendingUp, DollarSign, Clock, Target, AlertCircle, CheckCircle, GraduationCap, AlertTriangle, Trophy, User, BookOpen, Star, Award, CreditCard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import CashDrawer from '@/components/manager/CashDrawer';
+import DailyCashSheet from '@/components/manager/DailyCashSheet';
 
 interface Course {
   id: string;
@@ -223,12 +225,13 @@ export default function Manager() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="staff">Staff Management</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="issues">Issues & Alerts</TabsTrigger>
           <TabsTrigger value="training-results">Training Results</TabsTrigger>
+          <TabsTrigger value="cash-management">Cash Management</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -586,6 +589,29 @@ export default function Manager() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="cash-management" className="space-y-6">
+          <Tabs defaultValue="cash-drawer" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="cash-drawer" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                Cash Drawer
+              </TabsTrigger>
+              <TabsTrigger value="daily-sheet" className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Daily Cash Sheet
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="cash-drawer">
+              <CashDrawer />
+            </TabsContent>
+            
+            <TabsContent value="daily-sheet">
+              <DailyCashSheet />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>
