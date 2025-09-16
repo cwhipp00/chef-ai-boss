@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      automation_logs: {
+        Row: {
+          error_message: string | null
+          execution_result: Json | null
+          execution_status: string
+          execution_time: number | null
+          id: string
+          rule_id: string
+          triggered_at: string
+        }
+        Insert: {
+          error_message?: string | null
+          execution_result?: Json | null
+          execution_status?: string
+          execution_time?: number | null
+          id?: string
+          rule_id: string
+          triggered_at?: string
+        }
+        Update: {
+          error_message?: string | null
+          execution_result?: Json | null
+          execution_status?: string
+          execution_time?: number | null
+          id?: string
+          rule_id?: string
+          triggered_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_rules: {
+        Row: {
+          action_config: Json
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          execution_count: number | null
+          id: string
+          is_active: boolean | null
+          last_execution: string | null
+          name: string
+          organization_id: string
+          trigger_config: Json
+          updated_at: string
+        }
+        Insert: {
+          action_config?: Json
+          category: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          execution_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_execution?: string | null
+          name: string
+          organization_id: string
+          trigger_config?: Json
+          updated_at?: string
+        }
+        Update: {
+          action_config?: Json
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          execution_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_execution?: string | null
+          name?: string
+          organization_id?: string
+          trigger_config?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           category: string | null
@@ -319,6 +405,68 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          actual_delivery: string | null
+          created_at: string
+          created_by: string
+          expected_delivery: string | null
+          id: string
+          items: Json
+          notes: string | null
+          order_date: string
+          order_number: string
+          order_type: string
+          organization_id: string
+          status: string
+          total_amount: number
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          actual_delivery?: string | null
+          created_at?: string
+          created_by: string
+          expected_delivery?: string | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_date?: string
+          order_number: string
+          order_type?: string
+          organization_id: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          actual_delivery?: string | null
+          created_at?: string
+          created_by?: string
+          expected_delivery?: string | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_date?: string
+          order_number?: string
+          order_type?: string
+          organization_id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -474,6 +622,60 @@ export type Database = {
           id?: string
           notification_settings?: Json | null
           role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reservations: {
+        Row: {
+          created_at: string
+          created_by: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          party_size: number
+          reservation_date: string
+          reservation_time: string
+          special_requests: string | null
+          status: string
+          table_number: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          party_size?: number
+          reservation_date: string
+          reservation_time: string
+          special_requests?: string | null
+          status?: string
+          table_number?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          party_size?: number
+          reservation_date?: string
+          reservation_time?: string
+          special_requests?: string | null
+          status?: string
+          table_number?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -660,6 +862,57 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           video_call_minutes?: number | null
+        }
+        Relationships: []
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          category: string
+          created_at: string
+          delivery_schedule: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          notes: string | null
+          organization_id: string
+          payment_terms: string | null
+          phone: string | null
+          rating: number | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          category: string
+          created_at?: string
+          delivery_schedule?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          notes?: string | null
+          organization_id: string
+          payment_terms?: string | null
+          phone?: string | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          created_at?: string
+          delivery_schedule?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          payment_terms?: string | null
+          phone?: string | null
+          rating?: number | null
+          updated_at?: string
         }
         Relationships: []
       }

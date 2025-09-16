@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { OrderAnalyzer } from '@/components/ai/OrderAnalyzer';
 import { AutomationHub } from '@/components/automation/AutomationHub';
+import { useOrders } from '@/hooks/useOrders';
 import { 
   ShoppingCart, 
   Plus, 
@@ -22,59 +23,9 @@ import {
   Users,
   Package,
   Upload,
-  DollarSign
+  DollarSign,
+  Loader2
 } from 'lucide-react';
-
-const orders = [
-  {
-    id: "ORD-001",
-    vendor: "Fresh Farm Supplies",
-    items: [
-      { name: "Organic Tomatoes", quantity: 50, unit: "lbs", price: 125.00 },
-      { name: "Fresh Basil", quantity: 10, unit: "bunches", price: 35.00 },
-      { name: "Mozzarella Cheese", quantity: 20, unit: "lbs", price: 80.00 }
-    ],
-    total: 240.00,
-    status: "pending",
-    orderDate: "2024-01-15",
-    expectedDelivery: "2024-01-17",
-    type: "produce"
-  },
-  {
-    id: "ORD-002",
-    vendor: "Premium Meats Co.",
-    items: [
-      { name: "Ribeye Steaks", quantity: 30, unit: "pieces", price: 450.00 },
-      { name: "Ground Beef", quantity: 25, unit: "lbs", price: 125.00 },
-      { name: "Chicken Breast", quantity: 40, unit: "lbs", price: 160.00 }
-    ],
-    total: 735.00,
-    status: "delivered",
-    orderDate: "2024-01-14",
-    expectedDelivery: "2024-01-16",
-    type: "meat"
-  },
-  {
-    id: "ORD-003",
-    vendor: "Ocean Fresh Seafood",
-    items: [
-      { name: "Atlantic Salmon", quantity: 15, unit: "lbs", price: 225.00 },
-      { name: "Shrimp (Large)", quantity: 10, unit: "lbs", price: 120.00 }
-    ],
-    total: 345.00,
-    status: "shipped",
-    orderDate: "2024-01-13",
-    expectedDelivery: "2024-01-16",
-    type: "seafood"
-  }
-];
-
-const vendors = [
-  { id: 1, name: "Fresh Farm Supplies", category: "Produce", rating: 4.8, orders: 45 },
-  { id: 2, name: "Premium Meats Co.", category: "Meat & Poultry", rating: 4.9, orders: 32 },
-  { id: 3, name: "Ocean Fresh Seafood", category: "Seafood", rating: 4.7, orders: 28 },
-  { id: 4, name: "Dairy Direct", category: "Dairy Products", rating: 4.6, orders: 38 }
-];
 
 export default function Orders() {
   const [selectedTab, setSelectedTab] = useState('orders');
@@ -82,6 +33,7 @@ export default function Orders() {
   const [selectedVendor, setSelectedVendor] = useState('all');
   const [uploadingDocument, setUploadingDocument] = useState(false);
   const { toast } = useToast();
+  const { orders, vendors, loading, createOrder, updateOrderStatus } = useOrders();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -120,9 +72,9 @@ export default function Orders() {
   };
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesVendor = selectedVendor === 'all' || order.vendor === selectedVendor;
+    const matchesSearch = order.vendor_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.order_number.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesVendor = selectedVendor === 'all' || order.vendor_name === selectedVendor;
     return matchesSearch && matchesVendor;
   });
 
@@ -188,23 +140,23 @@ export default function Orders() {
 
           <div className="space-y-4">
             {filteredOrders.map((order) => (
-              <Card key={order.id} className="hover-lift transition-all cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        {order.id}
-                        {getStatusBadge(order.status)}
-                        {getTypeBadge(order.type)}
-                      </CardTitle>
-                      <p className="text-muted-foreground">{order.vendor}</p>
+                <Card key={order.id} className="hover-lift transition-all cursor-pointer">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {order.order_number}
+                          {getStatusBadge(order.status)}
+                          {getTypeBadge(order.order_type)}
+                        </CardTitle>
+                        <p className="text-muted-foreground">{order.vendor_name}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-primary">${order.total_amount.toFixed(2)}</p>
+                        <p className="text-sm text-muted-foreground">{order.items.length} items</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-primary">${order.total.toFixed(2)}</p>
-                      <p className="text-sm text-muted-foreground">{order.items.length} items</p>
-                    </div>
-                  </div>
-                </CardHeader>
+                  </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -227,12 +179,14 @@ export default function Orders() {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Order Date:</span>
-                          <span>{new Date(order.orderDate).toLocaleDateString()}</span>
+                          <span>{new Date(order.order_date).toLocaleDateString()}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Expected Delivery:</span>
-                          <span className="font-medium">{new Date(order.expectedDelivery).toLocaleDateString()}</span>
-                        </div>
+                        {order.expected_delivery && (
+                          <div className="flex justify-between text-sm">
+                            <span>Expected Delivery:</span>
+                            <span className="font-medium">{new Date(order.expected_delivery).toLocaleDateString()}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -252,12 +206,29 @@ export default function Orders() {
                     <div className="flex gap-2 pt-2">
                       <Button variant="outline" size="sm">View Details</Button>
                       <Button variant="outline" size="sm">Track Order</Button>
-                      <Button size="sm" className="bg-gradient-primary">Reorder</Button>
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-primary"
+                        onClick={() => updateOrderStatus(order.id, order.status === 'pending' ? 'confirmed' : 'delivered')}
+                      >
+                        {order.status === 'pending' ? 'Confirm' : 'Mark Delivered'}
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
+            {filteredOrders.length === 0 && !loading && (
+              <div className="text-center py-12">
+                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium">No orders found</h3>
+                <p className="text-muted-foreground mb-4">Start by creating your first order</p>
+                <Button className="bg-gradient-primary">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Order
+                </Button>
+              </div>
+            )}
           </div>
         </TabsContent>
 

@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAutomation } from '@/hooks/useAutomation';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Zap, 
@@ -19,138 +20,34 @@ import {
   Settings,
   Play,
   Pause,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
 
-interface AutomationRule {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  isActive: boolean;
-  trigger: string;
-  action: string;
-  lastRun?: string;
-  icon: React.ReactNode;
-}
-
-const automationRules: AutomationRule[] = [
-  {
-    id: '1',
-    name: 'Auto Staff Scheduling',
-    description: 'Automatically adjust staff schedules based on demand forecasts',
-    category: 'Staff Management',
-    isActive: true,
-    trigger: 'Daily at 6 AM',
-    action: 'Optimize staff schedule',
-    lastRun: '2 hours ago',
-    icon: <Users className="h-4 w-4" />
-  },
-  {
-    id: '2',
-    name: 'Inventory Reorder',
-    description: 'Automatically reorder supplies when stock levels are low',
-    category: 'Inventory',
-    isActive: true,
-    trigger: 'Stock level < 20%',
-    action: 'Create purchase order',
-    lastRun: '4 hours ago',
-    icon: <ShoppingCart className="h-4 w-4" />
-  },
-  {
-    id: '3',
-    name: 'Customer Feedback Alerts',
-    description: 'Send notifications for negative reviews requiring immediate attention',
-    category: 'Customer Service',
-    isActive: false,
-    trigger: 'Review rating < 3 stars',
-    action: 'Alert management team',
-    icon: <Bell className="h-4 w-4" />
-  },
-  {
-    id: '4',
-    name: 'Menu Price Optimization',
-    description: 'Adjust menu prices based on demand and cost fluctuations',
-    category: 'Revenue',
-    isActive: true,
-    trigger: 'Weekly analysis',
-    action: 'Update menu prices',
-    lastRun: '1 day ago',
-    icon: <FileText className="h-4 w-4" />
-  },
-  {
-    id: '5',
-    name: 'Team Communication',
-    description: 'Send daily briefings and updates to staff',
-    category: 'Communication',
-    isActive: true,
-    trigger: 'Daily at 8 AM',
-    action: 'Send team updates',
-    lastRun: '6 hours ago',
-    icon: <MessageSquare className="h-4 w-4" />
-  },
-  {
-    id: '6',
-    name: 'Equipment Maintenance Reminders',
-    description: 'Schedule and remind staff about equipment maintenance',
-    category: 'Maintenance',
-    isActive: true,
-    trigger: 'Based on usage hours',
-    action: 'Create maintenance task',
-    lastRun: '12 hours ago',
-    icon: <Settings className="h-4 w-4" />
-  }
-];
-
 export function AutomationHub() {
-  const [rules, setRules] = useState<AutomationRule[]>(automationRules);
+  const { rules, loading, createRule, toggleRule, executeRule } = useAutomation();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newRule, setNewRule] = useState({
     name: '',
     description: '',
     category: '',
-    trigger: '',
-    action: ''
+    trigger_config: {},
+    action_config: {}
   });
   const { toast } = useToast();
 
-  const toggleRule = (ruleId: string) => {
-    setRules(prev => prev.map(rule => 
-      rule.id === ruleId 
-        ? { ...rule, isActive: !rule.isActive }
-        : rule
-    ));
-
+  const handleToggleRule = async (ruleId: string) => {
     const rule = rules.find(r => r.id === ruleId);
-    toast({
-      title: `Automation ${rule?.isActive ? 'Disabled' : 'Enabled'}`,
-      description: `${rule?.name} has been ${rule?.isActive ? 'disabled' : 'enabled'}`,
-    });
+    if (rule) {
+      await toggleRule(ruleId, !rule.is_active);
+    }
   };
 
-  const runRule = (ruleId: string) => {
-    const rule = rules.find(r => r.id === ruleId);
-    toast({
-      title: "Automation Running",
-      description: `${rule?.name} is now executing...`,
-    });
-
-    // Update last run time
-    setTimeout(() => {
-      setRules(prev => prev.map(r => 
-        r.id === ruleId 
-          ? { ...r, lastRun: 'Just now' }
-          : r
-      ));
-      
-      toast({
-        title: "Automation Complete",
-        description: `${rule?.name} executed successfully`,
-      });
-    }, 2000);
+  const handleRunRule = async (ruleId: string) => {
+    await executeRule(ruleId);
   };
 
-  const createNewRule = () => {
+  const handleCreateNewRule = async () => {
     if (!newRule.name || !newRule.description) {
       toast({
         title: "Missing Information",
@@ -160,32 +57,27 @@ export function AutomationHub() {
       return;
     }
 
-    const rule: AutomationRule = {
-      id: Date.now().toString(),
-      ...newRule,
-      isActive: false,
-      icon: <Zap className="h-4 w-4" />
-    };
+    await createRule({
+      name: newRule.name,
+      description: newRule.description,
+      category: newRule.category || 'General',
+      trigger_config: newRule.trigger_config,
+      action_config: newRule.action_config,
+      is_active: false
+    });
 
-    setRules(prev => [...prev, rule]);
     setNewRule({
       name: '',
       description: '',
       category: '',
-      trigger: '',
-      action: ''
+      trigger_config: {},
+      action_config: {}
     });
     setShowCreateForm(false);
-
-    toast({
-      title: "Automation Created",
-      description: `${rule.name} has been added to your automation rules`,
-    });
   };
 
   const categories = ['Staff Management', 'Inventory', 'Customer Service', 'Revenue', 'Communication', 'Maintenance'];
-
-  const activeRules = rules.filter(rule => rule.isActive).length;
+  const activeRules = rules.filter(rule => rule.is_active).length;
   const totalRules = rules.length;
 
   return (
@@ -298,8 +190,8 @@ export function AutomationHub() {
                     <Input
                       id="trigger"
                       placeholder="When should this run?"
-                      value={newRule.trigger}
-                      onChange={(e) => setNewRule({...newRule, trigger: e.target.value})}
+                      value={(newRule.trigger_config as any)?.trigger || ''}
+                      onChange={(e) => setNewRule({...newRule, trigger_config: { trigger: e.target.value }})}
                     />
                   </div>
                   <div className="space-y-2">
@@ -307,13 +199,13 @@ export function AutomationHub() {
                     <Input
                       id="action"
                       placeholder="What should happen?"
-                      value={newRule.action}
-                      onChange={(e) => setNewRule({...newRule, action: e.target.value})}
+                      value={(newRule.action_config as any)?.action || ''}
+                      onChange={(e) => setNewRule({...newRule, action_config: { action: e.target.value }})}
                     />
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={createNewRule} className="bg-gradient-primary">
+                  <Button onClick={handleCreateNewRule} className="bg-gradient-primary">
                     Create Rule
                   </Button>
                   <Button variant="outline" onClick={() => setShowCreateForm(false)}>
@@ -324,64 +216,82 @@ export function AutomationHub() {
             </Card>
           )}
 
-          <div className="grid gap-4">
-            {rules.map((rule) => (
-              <Card key={rule.id} className={`transition-all ${rule.isActive ? 'border-green-200 bg-green-50/50 dark:bg-green-950/10' : 'border-gray-200'}`}>
-                <CardContent className="pt-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="flex-shrink-0 mt-1">
-                        {rule.icon}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Loading automation rules...</span>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {rules.map((rule) => (
+                <Card key={rule.id} className={`transition-all ${rule.is_active ? 'border-green-200 bg-green-50/50 dark:bg-green-950/10' : 'border-gray-200'}`}>
+                  <CardContent className="pt-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="flex-shrink-0 mt-1">
+                          <Zap className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium">{rule.name}</h4>
+                            <Badge variant="outline">{rule.category}</Badge>
+                            <Badge className={rule.is_active ? 'bg-green-500' : 'bg-gray-500'}>
+                              {rule.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">{rule.description}</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-muted-foreground">
+                            <div>
+                              <span className="font-medium">Executions:</span> {rule.execution_count || 0}
+                            </div>
+                            <div>
+                              <span className="font-medium">Category:</span> {rule.category}
+                            </div>
+                          </div>
+                          {rule.last_execution && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Last run: {new Date(rule.last_execution).toLocaleString()}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium">{rule.name}</h4>
-                          <Badge variant="outline">{rule.category}</Badge>
-                          <Badge className={rule.isActive ? 'bg-green-500' : 'bg-gray-500'}>
-                            {rule.isActive ? 'Active' : 'Inactive'}
-                          </Badge>
+                      <div className="flex items-center gap-2 ml-4">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={rule.is_active}
+                            onCheckedChange={() => handleToggleRule(rule.id)}
+                          />
+                          <Label className="text-xs">
+                            {rule.is_active ? 'On' : 'Off'}
+                          </Label>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">{rule.description}</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-muted-foreground">
-                          <div>
-                            <span className="font-medium">Trigger:</span> {rule.trigger}
-                          </div>
-                          <div>
-                            <span className="font-medium">Action:</span> {rule.action}
-                          </div>
-                        </div>
-                        {rule.lastRun && (
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Last run: {rule.lastRun}
-                          </p>
-                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRunRule(rule.id)}
+                          disabled={!rule.is_active}
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          Run Now
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={rule.isActive}
-                          onCheckedChange={() => toggleRule(rule.id)}
-                        />
-                        <Label className="text-xs">
-                          {rule.isActive ? 'On' : 'Off'}
-                        </Label>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => runRule(rule.id)}
-                        disabled={!rule.isActive}
-                      >
-                        <Play className="h-3 w-3 mr-1" />
-                        Run Now
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {rules.length === 0 && !loading && (
+                <div className="text-center py-12">
+                  <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium">No automation rules</h3>
+                  <p className="text-muted-foreground mb-4">Create your first automation rule to get started</p>
+                  <Button onClick={() => setShowCreateForm(true)} className="bg-gradient-primary">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Rule
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

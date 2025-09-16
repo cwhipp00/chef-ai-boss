@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.ai-cash-analyzer]
 verify_jwt = false
+
+[functions.automation-executor]
+verify_jwt = false
