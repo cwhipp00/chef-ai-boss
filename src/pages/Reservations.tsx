@@ -8,58 +8,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FloorPlanEditor from '@/components/table-management/FloorPlanEditor';
 import ReservationManager from '@/components/table-management/ReservationManager';
-
-const reservations = [
-  {
-    id: 1,
-    customerName: "John Smith",
-    email: "john.smith@email.com",
-    phone: "(555) 123-4567",
-    partySize: 4,
-    date: "2024-01-15",
-    time: "7:00 PM",
-    status: "confirmed",
-    specialRequests: "Anniversary dinner, quiet table",
-    tableNumber: 12
-  },
-  {
-    id: 2,
-    customerName: "Sarah Johnson",
-    email: "sarah.j@email.com",
-    phone: "(555) 987-6543",
-    partySize: 2,
-    date: "2024-01-15",
-    time: "6:30 PM",
-    status: "pending",
-    specialRequests: "Vegetarian options",
-    tableNumber: null
-  },
-  {
-    id: 3,
-    customerName: "Mike Rodriguez",
-    email: "mike.r@email.com",
-    phone: "(555) 456-7890",
-    partySize: 8,
-    date: "2024-01-16",
-    time: "8:00 PM",
-    status: "confirmed",
-    specialRequests: "Business dinner, need receipt",
-    tableNumber: 5
-  }
-];
-
-const tables = [
-  { id: 1, number: 1, capacity: 2, status: "available", location: "window" },
-  { id: 2, number: 2, capacity: 2, status: "occupied", location: "center" },
-  { id: 3, number: 5, capacity: 8, status: "reserved", location: "private" },
-  { id: 4, number: 12, capacity: 4, status: "occupied", location: "patio" },
-  { id: 5, number: 15, capacity: 6, status: "available", location: "center" }
-];
+import { useReservations } from '@/hooks/useReservations';
 
 export default function Reservations() {
   const [selectedTab, setSelectedTab] = useState('reservations');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'floor' | 'list'>('floor');
+  const { reservations, loading } = useReservations();
+
+  // Mock tables data for UI demonstration
+  const tables = [
+    { id: 1, number: 1, capacity: 2, status: "available", location: "window" },
+    { id: 2, number: 2, capacity: 2, status: "occupied", location: "center" },
+    { id: 3, number: 5, capacity: 8, status: "reserved", location: "private" },
+    { id: 4, number: 12, capacity: 4, status: "occupied", location: "patio" },
+    { id: 5, number: 15, capacity: 6, status: "available", location: "center" }
+  ];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -82,9 +46,9 @@ export default function Reservations() {
   };
 
   const filteredReservations = reservations.filter(reservation =>
-    reservation.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reservation.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reservation.phone.includes(searchTerm)
+    reservation.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    reservation.customer_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    reservation.customer_phone?.includes(searchTerm)
   );
 
   return (

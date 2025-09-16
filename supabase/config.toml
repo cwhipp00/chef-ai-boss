@@ -83,3 +83,9 @@ verify_jwt = false
 
 [functions.automation-executor]
 verify_jwt = false
+
+[functions.voice-transcription]
+verify_jwt = false
+
+[functions.video-call-signaling]
+verify_jwt = false
