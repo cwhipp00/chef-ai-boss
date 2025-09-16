@@ -7,8 +7,18 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign, Plus, Minus, Users, Clock } from 'lucide-react';
+import { DollarSign, Plus, Minus, Users, Clock, Brain, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface CashAnalysis {
+  status: 'positive' | 'negative' | 'balanced';
+  netAmount: number;
+  summary: string;
+  patterns: string[];
+  recommendations: string[];
+  alerts: string[];
+}
 
 interface CashTransaction {
   id: string;
@@ -23,6 +33,8 @@ interface CashTransaction {
 export default function CashDrawer() {
   const [transactions, setTransactions] = useState<CashTransaction[]>([]);
   const [currentBalance, setCurrentBalance] = useState(500); // Starting cash
+  const [analysis, setAnalysis] = useState<CashAnalysis | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [newTransaction, setNewTransaction] = useState({
     type: 'out' as 'in' | 'out',
     amount: '',
@@ -105,6 +117,47 @@ export default function CashDrawer() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const runAIAnalysis = async () => {
+    if (transactions.length === 0) {
+      toast({
+        title: "No Data",
+        description: "Add some transactions first to analyze",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-cash-analyzer', {
+        body: {
+          transactions: transactions.map(t => ({
+            ...t,
+            timestamp: t.timestamp.toISOString()
+          })), 
+          currentBalance
+        }
+      });
+
+      if (error) throw error;
+
+      setAnalysis(data);
+      toast({
+        title: "Analysis Complete",
+        description: "Cash flow analysis generated successfully"
+      });
+    } catch (error) {
+      console.error('Analysis error:', error);
+      toast({
+        title: "Analysis Failed",
+        description: "Unable to analyze transactions. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (
@@ -253,6 +306,89 @@ export default function CashDrawer() {
           </CardContent>
         </Card>
       </div>
+
+      {/* AI Analysis */}
+      {transactions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5" />
+              AI Cash Flow Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={runAIAnalysis} 
+              disabled={isAnalyzing}
+              className="w-full"
+            >
+              {isAnalyzing ? 'Analyzing...' : 'Analyze Cash Flow'}
+            </Button>
+
+            {analysis && (
+              <div className="space-y-4">
+                {/* Status */}
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+                  {analysis.status === 'positive' ? (
+                    <TrendingUp className="h-5 w-5 text-success" />
+                  ) : analysis.status === 'negative' ? (
+                    <TrendingDown className="h-5 w-5 text-destructive" />
+                  ) : (
+                    <DollarSign className="h-5 w-5 text-muted-foreground" />
+                  )}
+                  <div>
+                    <h4 className="font-semibold">
+                      Cash Flow: {formatCurrency(analysis.netAmount)}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">{analysis.summary}</p>
+                  </div>
+                </div>
+
+                {/* Alerts */}
+                {analysis.alerts.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      Alerts
+                    </h4>
+                    <ul className="space-y-1">
+                      {analysis.alerts.map((alert, index) => (
+                        <li key={index} className="text-sm text-destructive bg-destructive/10 p-2 rounded">
+                          {alert}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Patterns */}
+                <div className="space-y-2">
+                  <h4 className="font-medium">Key Patterns</h4>
+                  <ul className="space-y-1">
+                    {analysis.patterns.map((pattern, index) => (
+                      <li key={index} className="text-sm text-muted-foreground">
+                        • {pattern}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Recommendations */}
+                <div className="space-y-2">
+                  <h4 className="font-medium">Recommendations</h4>
+                  <ul className="space-y-1">
+                    {analysis.recommendations.map((rec, index) => (
+                      <li key={index} className="text-sm text-muted-foreground">
+                        • {rec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
