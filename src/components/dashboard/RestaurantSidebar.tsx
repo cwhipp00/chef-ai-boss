@@ -24,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SearchTrigger } from "@/components/search/GlobalSearch";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { HelpChatDropdown } from "@/components/ai/HelpChatDropdown";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -57,13 +58,13 @@ const navigationSections = [
       { titleKey: "nav.customers", url: "/customers", icon: BarChart3 },
       { titleKey: "nav.finance", url: "/finance", icon: DollarSign, managerOnly: true },
       { titleKey: "nav.documents", url: "/documents", icon: FileText },
-      { titleKey: "nav.analytics", url: "/analytics", icon: BarChart3, managerOnly: true },
     ]
   },
   {
     title: "section.system",
     items: [
       { titleKey: "nav.settings", url: "/settings", icon: Settings },
+      { titleKey: "nav.analytics", url: "/analytics", icon: BarChart3, managerOnly: true },
     ]
   },
 ];

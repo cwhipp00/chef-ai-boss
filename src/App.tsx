@@ -9,6 +9,7 @@ import { FloatingAIChat } from "@/components/ai/FloatingAIChat";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { NotificationProvider } from "@/components/notifications/NotificationProvider";
 import Auth from "./pages/Auth";
 import AuthResetPassword from "./pages/AuthResetPassword";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -45,6 +46,7 @@ function App() {
           <LanguageProvider>
             <AuthProvider>
               <SubscriptionProvider>
+                <NotificationProvider>
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/auth/reset-password" element={<AuthResetPassword />} />
@@ -83,6 +85,7 @@ function App() {
                     </ProtectedRoute>
                   } />
                 </Routes>
+                </NotificationProvider>
               </SubscriptionProvider>
             </AuthProvider>
           </LanguageProvider>
