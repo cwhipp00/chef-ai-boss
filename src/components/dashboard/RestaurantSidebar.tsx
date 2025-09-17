@@ -172,22 +172,12 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                   <div className="h-px w-4 bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
                 </div>
                 
-                {/* Compact status */}
-                <div className="flex items-center justify-center gap-1 pt-1">
-                  <div className="flex gap-0.5">
-                    <div className="w-1 h-1 bg-primary rounded-full animate-pulse"></div>
-                    <div className="w-1 h-1 bg-accent rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
-                    <div className="w-1 h-1 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
-                  </div>
-                  <span className="text-xs text-muted-foreground/60 font-medium ml-1">AI ACTIVE</span>
-                </div>
               </div>
             </div>
           )}
           
           {/* Controls */}
           <div className={`${!isCollapsed ? 'absolute top-3 right-3' : ''} flex items-center gap-2`}>
-            {!isCollapsed && <LanguageSwitcher />}
             {!isCollapsed && <HelpChatDropdown />}
             <Button
               variant="ghost"
@@ -264,6 +254,11 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                 <p className="text-xs text-muted-foreground/80 truncate">
                   {isManager ? t('common.manager') : 'Staff'}
                 </p>
+              </div>
+            )}
+            {!isCollapsed && (
+              <div className="flex items-center">
+                <LanguageSwitcher />
               </div>
             )}
           </div>
