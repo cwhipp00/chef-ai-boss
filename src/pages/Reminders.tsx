@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import AddReminderModal from '@/components/reminders/AddReminderModal';
 
 const reminders = [
   {
@@ -93,9 +94,15 @@ export default function Reminders() {
   const [selectedTab, setSelectedTab] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [completedTasks, setCompletedTasks] = useState(new Set(reminders.filter(r => r.completed).map(r => r.id)));
+  const [allReminders, setAllReminders] = useState(reminders);
+  const [isAddReminderOpen, setIsAddReminderOpen] = useState(false);
+
+  const handleReminderAdded = (newReminder: any) => {
+    setAllReminders(prev => [...prev, newReminder]);
+  };
 
   const filterReminders = () => {
-    let filtered = reminders;
+    let filtered = allReminders;
     
     if (selectedTab !== 'all') {
       filtered = filtered.filter(reminder => {
@@ -174,7 +181,11 @@ export default function Reminders() {
                 </div>
               </div>
             </div>
-            <Button size="sm" className="bg-gradient-primary hover:shadow-glow transition-all hover:scale-105 w-full sm:w-auto lg:px-8 lg:py-6 lg:text-base touch-target">
+            <Button 
+              size="sm" 
+              className="bg-gradient-primary hover:shadow-glow transition-all hover:scale-105 w-full sm:w-auto lg:px-8 lg:py-6 lg:text-base touch-target"
+              onClick={() => setIsAddReminderOpen(true)}
+            >
               <Plus className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
               Add Reminder
             </Button>
