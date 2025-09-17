@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import CashDrawer from '@/components/manager/CashDrawer';
 import DailyCashSheet from '@/components/manager/DailyCashSheet';
+import { AIMeetingNotes } from '@/components/manager/AIMeetingNotes';
 
 interface Course {
   id: string;
@@ -225,13 +226,14 @@ export default function Manager() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="staff">Staff Management</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="issues">Issues & Alerts</TabsTrigger>
           <TabsTrigger value="training-results">Training Results</TabsTrigger>
           <TabsTrigger value="cash-management">Cash Management</TabsTrigger>
+          <TabsTrigger value="ai-meeting-notes">AI Meeting Notes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
