@@ -363,12 +363,12 @@ export function EnhancedVideoCallManager({
                       <Users className="h-3 w-3 mr-1" />
                       {participants.length + 1}
                     </Badge>
-                    {isRecording && (
-                      <Badge variant="destructive" className="text-xs animate-pulse">
-                      <Circle className="h-3 w-3 mr-1" />
-                      REC
-                      </Badge>
-                    )}
+                     {isRecording && (
+                       <Badge variant="destructive" className="text-xs animate-pulse">
+                         <Circle className="h-3 w-3 mr-1 fill-current" />
+                         REC
+                       </Badge>
+                     )}
                   </div>
                 </div>
               </div>

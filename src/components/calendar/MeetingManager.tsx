@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, addDays } from 'date-fns';
-import { EnhancedVideoCallManager } from '@/components/video/EnhancedVideoCallManager';
+// import { EnhancedVideoCallManager } from '@/components/video/EnhancedVideoCallManager';
 
 interface MeetingParticipant {
   id: string;
@@ -68,7 +68,7 @@ export function MeetingManager({ selectedDate, onMeetingCreated, existingMeeting
   const { toast } = useToast();
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
+  // const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   
   // Meeting form state
@@ -217,10 +217,10 @@ export function MeetingManager({ selectedDate, onMeetingCreated, existingMeeting
   };
 
   // Start video call
-  const startVideoCall = (meeting: Meeting) => {
-    setSelectedMeeting(meeting);
-    setIsVideoCallOpen(true);
-  };
+  // const startVideoCall = (meeting: Meeting) => {
+  //   setSelectedMeeting(meeting);
+  //   setIsVideoCallOpen(true);
+  // };
 
   // Reset form
   const resetForm = () => {
@@ -298,7 +298,12 @@ export function MeetingManager({ selectedDate, onMeetingCreated, existingMeeting
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => startVideoCall(meeting)}
+                      onClick={() => {
+                        toast({
+                          title: "Video Call",
+                          description: "Video call feature coming soon!",
+                        });
+                      }}
                     >
                       <Video className="h-4 w-4 mr-2" />
                       Join Call
@@ -579,7 +584,8 @@ export function MeetingManager({ selectedDate, onMeetingCreated, existingMeeting
         </DialogContent>
       </Dialog>
 
-      {/* Video Call Manager */}
+      {/* Video Call Manager - Coming Soon */}
+      {/* 
       {selectedMeeting && (
         <EnhancedVideoCallManager
           isOpen={isVideoCallOpen}
@@ -590,6 +596,7 @@ export function MeetingManager({ selectedDate, onMeetingCreated, existingMeeting
           scheduledParticipants={selectedMeeting.participants.map(p => p.email)}
         />
       )}
+      */}
     </div>
   );
 }
