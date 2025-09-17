@@ -34,13 +34,18 @@ import {
   HelpCircle,
   Shield,
   UserCheck,
-  Clipboard,
+  ClipboardList,
   BookOpen,
   Award,
   PhoneCall,
   Search,
   Wrench
 } from 'lucide-react';
+import { AIAppAssistant } from '@/components/ai/AIAppAssistant';
+import { AIFormCreator } from '@/components/ai/AIFormCreator';
+import { HelpChatDropdown } from '@/components/ai/HelpChatDropdown';
+import { OrderAnalyzer } from '@/components/ai/OrderAnalyzer';
+import { EnhancedAIAgentDashboard } from '@/components/ai/EnhancedAIAgentDashboard';
 
 interface AITool {
   id: string;
@@ -158,7 +163,7 @@ const managerAssistants: AITool[] = [
     name: 'Procedure Builder',
     description: 'Create and optimize standard operating procedures and workflows',
     category: 'Operations',
-    icon: <Clipboard className="h-5 w-5" />,
+    icon: <ClipboardList className="h-5 w-5" />,
     status: 'available',
     type: 'assistant'
   },
@@ -413,14 +418,19 @@ export default function AIAgents() {
         </div>
       </div>
 
-      <Tabs defaultValue="tools" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+      <Tabs defaultValue="dashboard" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="tools">AI Tools</TabsTrigger>
-          <TabsTrigger value="assistants">Manager Assistants</TabsTrigger>
+          <TabsTrigger value="assistants">Assistants</TabsTrigger>
           <TabsTrigger value="insights">Insights</TabsTrigger>
           <TabsTrigger value="automation">Automation</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dashboard" className="space-y-6">
+          <EnhancedAIAgentDashboard />
+        </TabsContent>
 
         <TabsContent value="tools" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

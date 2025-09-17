@@ -17,14 +17,14 @@ serve(async (req) => {
   }
 
   try {
-    const { action, category, posSystem } = await req.json();
+    const { action = 'generate_comprehensive_training', category, posSystem, selectedCategories } = await req.json();
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
     if (!GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY not configured');
     }
 
-    console.log(`Generating comprehensive training content for ${category || 'all categories'}, POS: ${posSystem || 'all'}`);
+    console.log(`Generating comprehensive training content for ${selectedCategories?.join(', ') || category || 'all categories'}, POS: ${posSystem || 'all'}`);
 
     if (action === 'generate_comprehensive_training') {
       const trainingCategories = [
