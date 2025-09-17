@@ -75,11 +75,11 @@ export function DayAgendaView({
               <p className="text-sm text-muted-foreground mb-4">
                 Add your first event for this day
               </p>
-              <Button 
-                variant="outline" 
-                onClick={() => onAddEvent(selectedDate)}
-                className="gap-2"
-              >
+               <Button 
+                 variant="outline" 
+                 onClick={() => onAddEvent(selectedDate)}
+                 className="gap-2 hover:bg-primary/10 transition-colors"
+               >
                 <Plus className="h-4 w-4" />
                 Add Event
               </Button>

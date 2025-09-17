@@ -326,10 +326,11 @@ export const DayView: React.FC<DayViewProps> = ({
                 return (
                   <div 
                     key={hour} 
-                    className={`grid grid-cols-12 gap-4 min-h-[48px] border-b border-border/50 hover:bg-muted/30 transition-colors cursor-pointer ${
+                    className={`grid grid-cols-12 gap-4 min-h-[48px] border-b border-border/50 hover:bg-muted/30 transition-colors cursor-pointer group ${
                       isCurrentHour ? 'bg-primary/10 border-primary/30' : ''
                     }`}
                     onClick={() => handleTimeSlotClick(hour)}
+                    title={`Click to add event at ${formatHour(hour)}`}
                   >
                     {/* Time Column */}
                     <div className="col-span-2 p-4 flex items-start justify-end">
@@ -348,8 +349,8 @@ export const DayView: React.FC<DayViewProps> = ({
                     {/* Events Column */}
                     <div className="col-span-10 p-2 space-y-2">
                       {hourEvents.length === 0 ? (
-                        <div className="flex items-center justify-center h-10 text-muted-foreground hover:text-foreground transition-colors">
-                          <div className="flex items-center gap-2 text-sm">
+                        <div className="flex items-center justify-center h-10 text-muted-foreground group-hover:text-foreground transition-colors">
+                          <div className="flex items-center gap-2 text-sm opacity-60 group-hover:opacity-100 transition-opacity">
                             <Plus className="w-4 h-4" />
                             Click to add event
                           </div>

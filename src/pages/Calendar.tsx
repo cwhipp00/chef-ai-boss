@@ -998,20 +998,25 @@ export default function CalendarPage() {
                 Event Conflicts & Pending Items
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Resolve scheduling conflicts and manage pending events
+                Resolve scheduling conflicts and manage pending events. Click on any event card to edit.
               </p>
             </CardHeader>
             <CardContent className="p-6">
               {conflictingEvents.length === 0 ? (
-                <div className="text-center py-12">
+                <div className="text-center py-12 cursor-pointer hover:bg-muted/30 rounded-lg transition-colors" onClick={() => openEventDialog()}>
                   <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">All Clear!</h3>
-                  <p className="text-muted-foreground">No conflicts or pending events to resolve</p>
+                  <p className="text-muted-foreground mb-4">No conflicts or pending events to resolve</p>
+                  <p className="text-xs text-muted-foreground">Click here to add a new event</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {conflictingEvents.map((event) => (
-                    <Card key={event.id} className="border-yellow-200 bg-yellow-50/50 dark:border-yellow-800 dark:bg-yellow-900/20">
+                    <Card 
+                      key={event.id} 
+                      className="border-yellow-200 bg-yellow-50/50 dark:border-yellow-800 dark:bg-yellow-900/20 cursor-pointer hover:shadow-md transition-all"
+                      onClick={() => openEventDialog(selectedDate, event)}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -1035,13 +1040,28 @@ export default function CalendarPage() {
                                 {event.location}
                               </div>
                             </div>
-                            <p className="text-sm text-muted-foreground">{event.description}</p>
+                            <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
+                            <p className="text-xs text-muted-foreground italic">Click anywhere on this card to edit event</p>
                           </div>
                           <div className="flex gap-2 ml-4">
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEventDialog(selectedDate, event);
+                              }}
+                            >
                               Reschedule
                             </Button>
-                            <Button variant="default" size="sm">
+                            <Button 
+                              variant="default" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUpdateEvent(event.id, { status: 'confirmed' });
+                              }}
+                            >
                               Confirm
                             </Button>
                           </div>

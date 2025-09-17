@@ -129,12 +129,14 @@ export function WeekView({ selectedDate, events, onEventClick, onAddEvent, onEdi
                           key={`${day.toISOString()}-${hour}`}
                           className="border-l min-h-[60px] relative group hover:bg-muted/30 cursor-pointer"
                           onClick={() => onAddEvent(day)}
+                          title={`Click to add event on ${format(day, 'MMM d')} at ${formatHour(hour)}`}
                         >
                           {dayEvents.length === 0 ? (
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                              <div className="text-xs text-muted-foreground flex items-center gap-1 bg-background/80 px-2 py-1 rounded border">
                                 <Plus className="h-3 w-3" />
-                              </Button>
+                                Add event
+                              </div>
                             </div>
                           ) : (
                             <div className="p-1 space-y-1">

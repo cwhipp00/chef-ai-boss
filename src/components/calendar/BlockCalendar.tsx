@@ -188,7 +188,7 @@ export function BlockCalendar({
                 <div
                   key={index}
                   className={cn(
-                    "min-h-[120px] p-2 border border-border rounded-lg cursor-pointer transition-all duration-200",
+                    "min-h-[120px] p-2 border border-border rounded-lg cursor-pointer transition-all duration-200 group",
                     "hover:border-primary/50 hover:shadow-md hover:scale-[1.02]",
                     "bg-gradient-to-br from-card to-card/80 backdrop-blur-sm",
                     {
@@ -198,7 +198,12 @@ export function BlockCalendar({
                       "border-2 border-primary": isTodayDate && isSelected
                     }
                   )}
-                  onClick={() => handleDateClick(date)}
+                  onClick={() => {
+                    handleDateClick(date);
+                    if (dayEvents.length === 0) {
+                      onAddEvent?.(date);
+                    }
+                  }}
                 >
                   {/* Date Number */}
                   <div className="flex items-center justify-between mb-2">
@@ -286,20 +291,13 @@ export function BlockCalendar({
                     )}
                   </div>
 
-                  {/* Add Event Button for Empty Days */}
+                  {/* Add Event Hint for Empty Days */}
                   {dayEvents.length === 0 && isCurrentMonth && (
-                    <div className="flex items-center justify-center h-full">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-0 hover:opacity-100 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAddEvent?.(date);
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                    <div className="flex items-center justify-center h-full opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Plus className="h-3 w-3" />
+                        Click to add event
+                      </div>
                     </div>
                   )}
                 </div>
