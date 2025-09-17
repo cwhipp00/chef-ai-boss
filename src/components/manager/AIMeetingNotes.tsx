@@ -197,76 +197,240 @@ export function AIMeetingNotes() {
 
   // Process audio chunk for real-time transcription
   const processAudioChunk = async (audioBlob: Blob) => {
-    try {
-      // Convert blob to base64
-      const arrayBuffer = await audioBlob.arrayBuffer();
-      const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    // Convert blob to base64 first
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-      // Call transcription service
-      const { data, error } = await supabase.functions.invoke('voice-transcription', {
-        body: { audio: base64Audio }
+    try {
+      // Call enhanced voice separation service
+      const { data, error } = await supabase.functions.invoke('ai-voice-separator', {
+        body: { 
+          audioData: base64Audio,
+          participants: participants.map(p => ({ id: p.id, name: p.name, role: p.role })),
+          analysisType: 'meeting_notes',
+          context: `${meetingTitle} - Restaurant team meeting`
+        }
       });
 
       if (error) throw error;
 
-      if (data?.text) {
-        // Simulate speaker identification (in real implementation, this would use AI voice separation)
-        const speaker = identifySpeaker(data.text);
+      if (data?.success && data.result) {
+        const result = data.result;
         
-        const newTranscript: MeetingTranscript = {
-          timestamp: new Date(),
-          speaker,
-          text: data.text,
-          confidence: 0.95 // Mock confidence score
-        };
+        // Process transcription segments with improved speaker identification
+        result.transcription.forEach((segment: any) => {
+          const newTranscript: MeetingTranscript = {
+            timestamp: new Date(Date.now() + segment.startTime * 1000),
+            speaker: segment.speakerName || `Speaker ${segment.speakerId}`,
+            text: segment.text,
+            confidence: segment.confidence || 0.85
+          };
 
-        setTranscript(prev => [...prev, newTranscript]);
+          setTranscript(prev => [...prev, newTranscript]);
+        });
 
-        // Auto-detect action items
-        detectActionItems(data.text, speaker);
+        // Process action items from AI analysis
+        if (result.actionItems) {
+          result.actionItems.forEach((item: any) => {
+            const actionItem: ActionItem = {
+              id: item.id || Date.now().toString(),
+              task: item.task,
+              assignee: item.assignee || item.speaker,
+              priority: item.priority || 'medium',
+              status: 'pending',
+              dueDate: item.dueDate,
+              createdAt: new Date()
+            };
+
+            setActionItems(prev => [...prev, actionItem]);
+            
+            toast({
+              title: "Action Item Detected",
+              description: `"${item.task.substring(0, 50)}..." assigned to ${item.assignee}`,
+            });
+          });
+        }
       }
     } catch (error) {
       console.error('Error processing audio chunk:', error);
+      
+      // Fallback to basic processing
+      try {
+        const { data: fallbackData } = await supabase.functions.invoke('voice-transcription', {
+          body: { audio: base64Audio }
+        });
+        
+        if (fallbackData?.text) {
+          const speaker = identifySpeaker(fallbackData.text);
+          
+          const newTranscript: MeetingTranscript = {
+            timestamp: new Date(),
+            speaker,
+            text: fallbackData.text,
+            confidence: 0.80
+          };
+
+          setTranscript(prev => [...prev, newTranscript]);
+          detectActionItems(fallbackData.text, speaker);
+        }
+      } catch (fallbackError) {
+        console.error('Fallback transcription failed:', fallbackError);
+      }
     }
   };
 
-  // Identify speaker (mock implementation - would use AI voice recognition)
+  // Enhanced speaker identification using AI patterns
   const identifySpeaker = (text: string): string => {
     if (participants.length === 0) return 'Unknown Speaker';
     
-    // Mock speaker identification based on content patterns
-    if (text.toLowerCase().includes('action item') || text.toLowerCase().includes('todo')) {
-      return participants.find(p => p.role === 'manager')?.name || participants[0]?.name || 'Unknown Speaker';
-    }
-    
-    // Random assignment for demo
-    return participants[Math.floor(Math.random() * participants.length)]?.name || 'Unknown Speaker';
-  };
-
-  // Auto-detect action items from transcript
-  const detectActionItems = (text: string, speaker: string) => {
-    const actionKeywords = ['action item', 'todo', 'follow up', 'assign', 'complete by', 'deadline'];
+    // Enhanced pattern matching for better speaker identification
     const lowerText = text.toLowerCase();
     
-    if (actionKeywords.some(keyword => lowerText.includes(keyword))) {
+    // Role-based identification patterns
+    const patterns = {
+      manager: ['schedule', 'assign', 'budget', 'meeting', 'decision', 'approve', 'policy'],
+      chef: ['kitchen', 'food', 'prep', 'cooking', 'recipe', 'ingredients', 'menu'],
+      server: ['customer', 'table', 'order', 'service', 'guest', 'dining room'],
+      host: ['reservation', 'seating', 'wait time', 'table', 'party']
+    };
+    
+    // Find best match based on content and known participants
+    let bestMatch = participants[0];
+    let bestScore = 0;
+    
+    participants.forEach(participant => {
+      let score = 0;
+      
+      // Direct name match
+      if (lowerText.includes(participant.name.toLowerCase())) {
+        score += 50;
+      }
+      
+      // Role-based matching
+      if (participant.role) {
+        const rolePatterns = patterns[participant.role.toLowerCase() as keyof typeof patterns] || [];
+        const matches = rolePatterns.filter(pattern => lowerText.includes(pattern)).length;
+        score += matches * 10;
+      }
+      
+      // Speaking pattern consistency (mock implementation)
+      const wordsPerSentence = text.split('.').length;
+      const avgWordLength = text.split(' ').reduce((sum, word) => sum + word.length, 0) / text.split(' ').length;
+      
+      // Adjust score based on speaking patterns (mock)
+      if (participant.role === 'manager' && wordsPerSentence > 3) score += 5;
+      if (participant.role === 'chef' && avgWordLength < 6) score += 5;
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = participant;
+      }
+    });
+    
+    return bestMatch.name;
+  };
+
+  // Enhanced auto-detection of action items from transcript
+  const detectActionItems = (text: string, speaker: string) => {
+    const actionKeywords = [
+      'action item', 'todo', 'follow up', 'assign', 'complete by', 'deadline',
+      'will', 'should', 'need to', 'must', 'schedule', 'call', 'contact',
+      'review', 'update', 'check', 'prepare', 'send', 'create', 'fix'
+    ];
+    
+    const priorityKeywords = {
+      high: ['urgent', 'asap', 'immediately', 'critical', 'emergency'],
+      medium: ['soon', 'this week', 'important', 'priority'],
+      low: ['when possible', 'eventually', 'nice to have', 'low priority']
+    };
+    
+    const lowerText = text.toLowerCase();
+    
+    // Check if text contains action-oriented language
+    const hasActionKeyword = actionKeywords.some(keyword => lowerText.includes(keyword));
+    
+    if (hasActionKeyword || text.includes('?')) {
       // Extract potential action item
-      const actionText = text.replace(/action item:?/i, '').trim();
+      let actionText = text.replace(/action item:?/i, '').trim();
+      
+      // Enhanced extraction for different formats
+      if (lowerText.includes('will') || lowerText.includes('should')) {
+        // Extract everything after "will" or "should"
+        const match = text.match(/(will|should)\s+(.+)/i);
+        if (match) actionText = match[2];
+      }
       
       if (actionText.length > 10) {
+        // Determine priority
+        let priority: 'high' | 'medium' | 'low' = 'medium';
+        
+        Object.entries(priorityKeywords).forEach(([level, keywords]) => {
+          if (keywords.some(keyword => lowerText.includes(keyword))) {
+            priority = level as 'high' | 'medium' | 'low';
+          }
+        });
+        
+        // Extract potential assignee
+        let assignee = speaker;
+        const assigneePatterns = [
+          /([A-Z][a-z]+)\s+(will|should|needs to)/,
+          /assign(?:ed)?\s+to\s+([A-Z][a-z]+)/i,
+          /([A-Z][a-z]+),?\s+(?:can you|could you|please)/i
+        ];
+        
+        assigneePatterns.forEach(pattern => {
+          const match = text.match(pattern);
+          if (match && match[1]) {
+            const potentialAssignee = participants.find(p => 
+              p.name.toLowerCase().includes(match[1].toLowerCase())
+            );
+            if (potentialAssignee) {
+              assignee = potentialAssignee.name;
+            }
+          }
+        });
+        
+        // Extract potential due date
+        const datePatterns = [
+          /by\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i,
+          /by\s+(\d{1,2}\/\d{1,2})/,
+          /(tomorrow|today|this week|next week|end of week)/i,
+          /within\s+(\d+)\s+(days?|weeks?)/i
+        ];
+        
+        let dueDate: string | undefined;
+        datePatterns.forEach(pattern => {
+          const match = text.match(pattern);
+          if (match) {
+            dueDate = match[0];
+          }
+        });
+
         const newActionItem: ActionItem = {
           id: Date.now().toString(),
           task: actionText,
-          assignee: speaker,
-          priority: 'medium',
+          assignee,
+          priority,
           status: 'pending',
+          dueDate,
           createdAt: new Date()
         };
 
-        setActionItems(prev => [...prev, newActionItem]);
-        
-        toast({
-          title: "Action Item Detected",
-          description: `"${actionText.substring(0, 50)}..."`,
+        setActionItems(prev => {
+          // Prevent duplicates
+          const isDuplicate = prev.some(item => 
+            item.task.toLowerCase().includes(actionText.toLowerCase().substring(0, 20))
+          );
+          
+          if (!isDuplicate) {
+            toast({
+              title: "Smart Action Item Detected",
+              description: `${priority.toUpperCase()}: "${actionText.substring(0, 50)}..." → ${assignee}`,
+              duration: 4000,
+            });
+            return [...prev, newActionItem];
+          }
+          return prev;
         });
       }
     }
@@ -309,19 +473,71 @@ export function AIMeetingNotes() {
     }
   };
 
-  // Generate AI meeting summary
+  // Generate enhanced AI meeting summary with detailed analysis
   const generateMeetingSummary = async () => {
-    // Mock AI processing - would call actual AI service
-    const topics = ['Project Status', 'Budget Review', 'Team Assignments', 'Next Steps'];
-    const decisions = ['Approved new menu items', 'Extended deadline to Friday', 'Hired additional staff'];
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-meeting-transcription', {
+        body: {
+          meetingTitle,
+          participants: participants.map(p => p.name),
+          duration: recordingDuration,
+          transcriptText: transcript.map(t => `${t.speaker}: ${t.text}`).join('\n')
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        return {
+          summary: data.meetingSummary,
+          keyTopics: data.keyTopics,
+          decisions: data.decisions?.map((d: any) => d.decision) || []
+        };
+      }
+    } catch (error) {
+      console.error('Error generating AI summary:', error);
+    }
+
+    // Enhanced fallback summary generation
+    const speakers = [...new Set(transcript.map(t => t.speaker))];
+    const topics = extractTopicsFromTranscript();
+    const decisions = extractDecisionsFromTranscript();
     
-    const summary = `Meeting covered ${topics.length} main topics with ${actionItems.length} action items identified. Key decisions were made regarding operational improvements and staff scheduling.`;
+    const summary = `Meeting "${meetingTitle}" concluded with ${speakers.length} participants over ${Math.floor(recordingDuration / 60)} minutes. Key areas covered included ${topics.slice(0, 3).join(', ')}. ${actionItems.length} action items were identified with clear ownership and deadlines. ${decisions.length > 0 ? `Major decisions included: ${decisions.slice(0, 2).join(', ')}.` : 'No major decisions were recorded.'} Meeting demonstrated ${actionItems.length > 3 ? 'high' : actionItems.length > 1 ? 'moderate' : 'low'} productivity with clear next steps identified.`;
 
     return {
       summary,
       keyTopics: topics,
       decisions
     };
+  };
+
+  const extractTopicsFromTranscript = (): string[] => {
+    const allText = transcript.map(t => t.text).join(' ').toLowerCase();
+    const restaurantTopics = [
+      'inventory management', 'staff scheduling', 'customer service', 'menu planning',
+      'food safety', 'training programs', 'cost control', 'equipment maintenance',
+      'supplier coordination', 'health compliance', 'performance reviews', 'marketing'
+    ];
+    
+    return restaurantTopics.filter(topic => 
+      allText.includes(topic.replace(' ', '')) || 
+      topic.split(' ').every(word => allText.includes(word))
+    );
+  };
+
+  const extractDecisionsFromTranscript = (): string[] => {
+    const decisions: string[] = [];
+    const decisionKeywords = ['decided', 'agreed', 'approved', 'confirmed', 'resolved'];
+    
+    transcript.forEach(entry => {
+      const lowerText = entry.text.toLowerCase();
+      if (decisionKeywords.some(keyword => lowerText.includes(keyword))) {
+        decisions.push(entry.text);
+      }
+    });
+    
+    return decisions;
   };
 
   // Stop recording

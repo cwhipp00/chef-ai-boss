@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import CashDrawer from '@/components/manager/CashDrawer';
 import DailyCashSheet from '@/components/manager/DailyCashSheet';
-import { AIMeetingNotes } from '@/components/manager/AIMeetingNotes';
+
 import InjuryReportForm from '@/components/manager/InjuryReportForm';
 import IncidentReportForm from '@/components/manager/IncidentReportForm';
 import OnlineReviewTracker from '@/components/reviews/OnlineReviewTracker';
@@ -231,14 +231,13 @@ export default function Manager() {
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
         {/* Desktop tabs */}
-        <TabsList className="hidden lg:grid w-full grid-cols-10">
+        <TabsList className="hidden lg:grid w-full grid-cols-9">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="staff">Staff</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="issues">Issues</TabsTrigger>
           <TabsTrigger value="training-results">Training</TabsTrigger>
           <TabsTrigger value="cash-management">Cash</TabsTrigger>
-          <TabsTrigger value="ai-meeting-notes">Meetings</TabsTrigger>
           <TabsTrigger value="injury-reports">Injuries</TabsTrigger>
           <TabsTrigger value="incident-reports">Incidents</TabsTrigger>
           <TabsTrigger value="review-tracker">Reviews</TabsTrigger>
@@ -247,21 +246,67 @@ export default function Manager() {
         {/* Mobile dropdown */}
         <div className="lg:hidden">
           <Select value={selectedTab} onValueChange={setSelectedTab}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select section" />
-              <ChevronDown className="h-4 w-4 opacity-50" />
+            <SelectTrigger className="w-full bg-card border-2 border-border hover:border-primary/50 focus:border-primary transition-colors">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-gradient-primary rounded-full"></div>
+                <SelectValue placeholder="Select section" />
+              </div>
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="overview">Overview</SelectItem>
-              <SelectItem value="staff">Staff Management</SelectItem>
-              <SelectItem value="performance">Performance</SelectItem>
-              <SelectItem value="issues">Issues & Alerts</SelectItem>
-              <SelectItem value="training-results">Training Results</SelectItem>
-              <SelectItem value="cash-management">Cash Management</SelectItem>
-              <SelectItem value="ai-meeting-notes">AI Meeting Notes</SelectItem>
-              <SelectItem value="injury-reports">Injury Reports</SelectItem>
-              <SelectItem value="incident-reports">Incident Reports</SelectItem>
-              <SelectItem value="review-tracker">Review Tracker</SelectItem>
+            <SelectContent className="bg-card border-2 border-border shadow-lg min-w-[280px]">
+              <SelectItem value="overview" className="focus:bg-primary/10">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span>Dashboard Overview</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="staff" className="focus:bg-primary/10">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Staff Management</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="performance" className="focus:bg-primary/10">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <span>Performance Metrics</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="issues" className="focus:bg-primary/10">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span>Issues & Alerts</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="training-results" className="focus:bg-primary/10">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span>Training Results</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="cash-management" className="focus:bg-primary/10">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <span>Cash Management</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="injury-reports" className="focus:bg-primary/10">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                  <span>Injury Reports</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="incident-reports" className="focus:bg-primary/10">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                  <span>Incident Reports</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="review-tracker" className="focus:bg-primary/10">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                  <span>Review Tracker</span>
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -644,10 +689,6 @@ export default function Manager() {
               <DailyCashSheet />
             </TabsContent>
           </Tabs>
-        </TabsContent>
-
-        <TabsContent value="ai-meeting-notes">
-          <AIMeetingNotes />
         </TabsContent>
 
         <TabsContent value="injury-reports">

@@ -48,6 +48,7 @@ import { HelpChatDropdown } from '@/components/ai/HelpChatDropdown';
 import { OrderAnalyzer } from '@/components/ai/OrderAnalyzer';
 import { EnhancedAIAgentDashboard } from '@/components/ai/EnhancedAIAgentDashboard';
 import AIDrinkPairingRecommendations from '@/components/bar/AIDrinkPairingRecommendations';
+import { AIMeetingNotes } from '@/components/manager/AIMeetingNotes';
 
 interface AITool {
   id: string;
@@ -938,6 +939,10 @@ export default function AIAgents() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="meetings" className="space-y-6">
+          <AIMeetingNotes />
         </TabsContent>
       </Tabs>
     </div>

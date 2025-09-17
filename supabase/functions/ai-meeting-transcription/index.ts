@@ -121,7 +121,7 @@ async function generateMeetingTranscript(
   duration: number,
   apiKey: string
 ): Promise<string> {
-  const systemPrompt = `You are a professional meeting transcriber. Generate a realistic, detailed meeting transcript for a restaurant team meeting.
+  const systemPrompt = `You are a professional meeting transcriber with advanced speaker identification capabilities. Generate a realistic, detailed meeting transcript for a restaurant team meeting with clear speaker separation.
 
 Meeting Details:
 - Title: ${title}
@@ -129,16 +129,50 @@ Meeting Details:
 - Duration: ${Math.floor(duration / 60)} minutes
 - Type: Restaurant operations meeting
 
-Create a natural conversation that includes:
-1. Professional meeting opening and introductions
-2. Agenda discussion covering restaurant operations topics
-3. Specific tasks, assignments, and deadlines mentioned
-4. Decision-making moments with clear outcomes  
-5. Action items and follow-up commitments
-6. Natural dialogue with realistic restaurant industry challenges
-7. Proper meeting conclusion with next steps
+Create a natural conversation with CLEAR SPEAKER IDENTIFICATION that includes:
 
-Format with timestamps every 30-60 seconds and speaker names. Make it feel like a real restaurant team meeting discussing daily operations, staff scheduling, inventory, customer service, etc.`;
+1. **Speaker Patterns**: Each participant should have distinct:
+   - Speaking style and vocabulary
+   - Areas of expertise they focus on
+   - Characteristic phrases they use
+   - Different sentence structures and tones
+
+2. **Meeting Structure**:
+   - Professional opening with clear introductions and roles
+   - Agenda discussion covering restaurant operations topics
+   - Multiple specific tasks, assignments, and deadlines mentioned
+   - Decision-making moments with clear outcomes and ownership
+   - Action items with explicit assignments and due dates
+   - Natural dialogue with realistic restaurant industry challenges
+   - Proper meeting conclusion with next steps and follow-up commitments
+
+3. **Content Focus Areas**:
+   - Staff scheduling and coverage issues
+   - Inventory management and ordering
+   - Customer service improvements  
+   - Health department compliance
+   - Food safety protocols
+   - Cost control and budget discussions
+   - Menu changes and specials
+   - Equipment maintenance
+   - Training needs and development
+
+4. **Action Item Generation**: Include various types of assignable tasks:
+   - Follow-up calls or meetings
+   - Report preparation and deadlines
+   - Training assignments
+   - Equipment repairs or maintenance
+   - Policy updates and implementation
+   - Customer feedback reviews
+
+Format Requirements:
+- Use timestamps every 30-60 seconds: [MM:SS] 
+- Clear speaker identification: "**[Speaker Name]**: [Their statement]"
+- Include natural interruptions, agreements, and back-and-forth discussion
+- Show different speaking patterns for each participant
+- Include specific dates, times, and measurable commitments
+
+Make it feel like a real restaurant management team meeting with authentic operational discussions, clear accountability, and actionable outcomes.`;
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
@@ -171,47 +205,70 @@ Format with timestamps every 30-60 seconds and speaker names. Make it feel like 
 }
 
 async function analyzeMeetingTranscript(transcript: string, apiKey: string) {
-  const analysisPrompt = `Analyze this meeting transcript and provide detailed insights in JSON format:
+  const analysisPrompt = `Analyze this meeting transcript and provide detailed insights in JSON format. 
+
+CRITICAL: Focus on accurate speaker separation and comprehensive action item extraction.
 
 ${transcript}
 
 Provide analysis in this EXACT JSON structure:
 {
-  "summary": "Brief 2-3 sentence meeting summary",
-  "keyTopics": ["topic1", "topic2", "topic3"],
+  "summary": "Brief 2-3 sentence meeting summary with key outcomes",
+  "keyTopics": ["specific topic 1", "specific topic 2", "specific topic 3"],
   "actionItems": [
     {
-      "task": "specific task description",
-      "assignee": "person name or null",
-      "dueDate": "date mentioned or null",
-      "priority": "low|medium|high",
-      "context": "context from meeting",
-      "completed": false
+      "task": "specific detailed task description",
+      "assignee": "exact person name from transcript or null",
+      "dueDate": "specific date mentioned or null", 
+      "priority": "low|medium|high based on urgency indicators",
+      "context": "surrounding conversation context",
+      "completed": false,
+      "speaker": "person who mentioned/assigned this task"
     }
   ],
   "decisions": [
     {
-      "decision": "what was decided",
-      "context": "supporting context",
-      "participants": ["involved people"]
+      "decision": "what was specifically decided",
+      "context": "supporting context and rationale",
+      "participants": ["names of people involved in decision"],
+      "speaker": "person who made or announced the decision"
     }
   ],
   "participantAnalysis": [
     {
-      "name": "participant name",
-      "speakingTime": 30,
-      "contributions": ["key points they made"],
-      "sentiment": "positive|neutral|negative"
+      "name": "participant name exactly as mentioned",
+      "speakingTime": estimated_seconds_spoke,
+      "contributions": ["specific key points they made"],
+      "sentiment": "positive|neutral|negative based on tone",
+      "role": "inferred role (manager, server, cook, etc.)",
+      "actionItemsAssigned": number_of_tasks_assigned_to_them
     }
   ],
   "sentiment": {
     "overall": "positive|neutral|negative",
-    "confidence": 0.85,
-    "trends": []
+    "confidence": confidence_score_0_to_1,
+    "trends": [{"timestamp": "time", "sentiment": score_-1_to_1}]
+  },
+  "speakerSeparation": {
+    "totalSpeakers": number_of_unique_speakers,
+    "speakerPatterns": [
+      {
+        "name": "speaker name",
+        "speechPatterns": ["characteristic phrases they use"],
+        "topicsDiscussed": ["main topics they contributed to"],
+        "interactionStyle": "descriptive assessment"
+      }
+    ]
   }
 }
 
-Extract real, specific information from the transcript. Be accurate and detailed.`;
+INSTRUCTIONS:
+- Extract EVERY possible action item, even small tasks
+- Identify speaker patterns to improve separation accuracy  
+- Look for phrases like "I'll", "you should", "we need to", "by [date]", "follow up on"
+- Categorize priority based on deadline urgency and impact words
+- Track who assigns tasks vs who receives them
+- Note speaker roles and communication styles for better identification`;
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
