@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { WeeklyScheduleView } from '@/components/schedule/WeeklyScheduleView';
+import { CompactWeeklyScheduleView } from '@/components/schedule/CompactWeeklyScheduleView';
 import { DailyScheduleView } from '@/components/schedule/DailyScheduleView';
 import { 
   TimeOffRequestModal, 
@@ -214,6 +215,14 @@ export default function StaffSchedule() {
     }
   };
 
+  const handleDeleteShift = (shiftId: string) => {
+    setShifts(prev => prev.filter(shift => shift.id !== shiftId));
+    toast({
+      title: "Shift Deleted",
+      description: "The shift has been successfully removed from the schedule.",
+    });
+  };
+
   const handleEditShift = (shiftId: string) => {
     toast({
       title: "Edit Shift",
@@ -361,14 +370,15 @@ export default function StaffSchedule() {
             </div>
           </div>
 
-          <WeeklyScheduleView
+          <CompactWeeklyScheduleView
             shifts={shifts}
             onShiftMove={handleShiftMove}
+            onDeleteShift={handleDeleteShift}
+            onEditShift={handleEditShift}
             onOfferCoverage={handleOfferCoverage}
             onTakeCoverage={handleTakeCoverage}
             onRequestTimeOff={handleRequestTimeOff}
             onSwapRequest={handleSwapRequest}
-            onEditShift={handleEditShift}
             currentUserId={1}
           />
         </TabsContent>
