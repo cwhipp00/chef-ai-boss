@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import AITrainingCoach from './AITrainingCoach';
 import AIAssessment from './AIAssessment';
+import { AutoGenerateTrainingButton } from './AutoGenerateTrainingButton';
 
 interface Lesson {
   id: string;
@@ -191,13 +192,37 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ courseId, courseTitl
   }
 
   if (lessons.length === 0) {
+    const courseForGeneration = {
+      id: courseId,
+      title: courseTitle,
+      category: 'pos-toast' // Default category for Toast courses
+    };
+
     return (
-      <Card className="p-12 text-center">
-        <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-        <h3 className="text-xl font-semibold mb-2">No lessons available</h3>
-        <p className="text-muted-foreground mb-4">This course doesn't have any lessons yet.</p>
-        <Button onClick={onBack}>Back to Courses</Button>
-      </Card>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Courses
+              </Button>
+              <Separator orientation="vertical" className="h-6" />
+              <div>
+                <h1 className="text-2xl font-bold">{courseTitle}</h1>
+                <p className="text-sm text-muted-foreground">No lessons available yet</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Generate Training Content */}
+          <AutoGenerateTrainingButton 
+            course={courseForGeneration} 
+            onLessonsGenerated={fetchLessons}
+          />
+        </div>
+      </div>
     );
   }
 
