@@ -19,7 +19,8 @@ import {
   Clock,
   BarChart3,
   GraduationCap,
-  LogOut
+  LogOut,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ const navigationSections = [
     title: "section.management",
     items: [
       { titleKey: "nav.ai-agents", url: "/ai-agents", icon: Brain, managerOnly: true },
+      { titleKey: "nav.ai-features", url: "/ai-features", icon: Sparkles, managerOnly: true },
       { titleKey: "nav.manager", url: "/manager", icon: Users, managerOnly: true },
       { titleKey: "nav.staff-schedule", url: "/staff-schedule", icon: Clock },
       { titleKey: "nav.training", url: "/training", icon: GraduationCap },

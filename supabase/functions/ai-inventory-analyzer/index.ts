@@ -217,11 +217,19 @@ serve(async (req) => {
   }
 
   try {
-    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY') || Deno.env.get('GEMINI_API_KEY');
     if (!geminiApiKey) {
-      throw new Error('GOOGLE_GEMINI_API_KEY not configured');
+      throw new Error('Gemini API key not configured');
     }
 
+    const requestBody = await req.json();
+
+    // Check if this is a photo-based inventory request
+    if (requestBody.image && requestBody.imageType) {
+      return await handlePhotoInventoryAnalysis(requestBody, geminiApiKey);
+    }
+
+    // Handle traditional inventory analysis
     const { 
       currentInventory, 
       salesData, 
@@ -229,7 +237,7 @@ serve(async (req) => {
       events = [], 
       analysisType, 
       timeHorizon 
-    }: InventoryAnalysisRequest = await req.json();
+    }: InventoryAnalysisRequest = requestBody;
 
     console.log('Processing inventory analysis:', { analysisType, timeHorizon, itemCount: currentInventory.length });
 
@@ -724,7 +732,161 @@ function generateAlerts(inventory: InventoryItem[], forecast: DemandForecast): A
         deadline: '48 hours'
       });
     }
+});
+
+// Handle photo-based inventory analysis
+async function handlePhotoInventoryAnalysis(requestBody: any, geminiApiKey: string) {
+  const { image, imageType } = requestBody;
+
+  console.log('Processing photo-based inventory analysis');
+
+  const prompt = `Analyze this inventory photo and identify all food and beverage items visible. For each item you can identify, provide:
+
+1. Item name (be specific - e.g., "Roma Tomatoes" not just "Tomatoes")
+2. Category (produce, dairy, meat, pantry, beverages, etc.)
+3. Estimated quantity (count, weight, or volume)
+4. Unit of measurement (pieces, lbs, kg, liters, etc.)
+5. Visible condition (fresh, good, fair, poor based on appearance)
+6. Confidence level (0.0 to 1.0) in your identification
+7. Estimated expiry/best-by timeframe if applicable
+8. Suggested storage location (refrigerator, freezer, pantry, etc.)
+
+Look for:
+- Fresh produce (fruits, vegetables, herbs)
+- Packaged goods with visible labels
+- Dairy products
+- Meat and seafood
+- Beverages
+- Condiments and sauces
+- Dry goods and pantry items
+- Prepared foods
+
+Consider factors like:
+- Item freshness and quality based on visual appearance
+- Packaging condition
+- Expiration dates if visible
+- Proper storage requirements
+- Quantity estimation based on size and packaging
+
+Respond in valid JSON format:
+{
+  "items": [
+    {
+      "name": "string",
+      "category": "string", 
+      "quantity": number,
+      "unit": "string",
+      "condition": "fresh|good|fair|poor",
+      "confidence": number,
+      "expiryEstimate": "string (optional)",
+      "location": "string (optional)"
+    }
+  ],
+  "summary": {
+    "totalItems": number,
+    "categoriesFound": ["string"],
+    "averageConfidence": number
+  }
+}`;
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [
+          {
+            text: prompt
+          },
+          {
+            inline_data: {
+              mime_type: imageType,
+              data: image
+            }
+          }
+        ]
+      }],
+      generationConfig: {
+        temperature: 0.4,
+        topK: 32,
+        topP: 1,
+        maxOutputTokens: 2048,
+      }
+    }),
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Gemini API error:', errorText);
+    throw new Error(`Gemini API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log('Gemini photo analysis response received');
+
+  if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+    throw new Error('Invalid response from Gemini API');
+  }
+
+  let generatedText = data.candidates[0].content.parts[0].text;
+  
+  // Clean up the response - remove markdown formatting
+  generatedText = generatedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  
+  let analysisResult;
+  
+  try {
+    analysisResult = JSON.parse(generatedText);
+  } catch (parseError) {
+    console.error('Failed to parse AI response:', generatedText);
+    
+    // Fallback result
+    analysisResult = {
+      items: [
+        {
+          name: "Unidentified Items",
+          category: "mixed",
+          quantity: 1,
+          unit: "batch",
+          condition: "good",
+          confidence: 0.5,
+          expiryEstimate: "Review manually",
+          location: "Storage area"
+        }
+      ],
+      summary: {
+        totalItems: 1,
+        categoriesFound: ["mixed"],
+        averageConfidence: 0.5
+      }
+    };
+  }
+
+  // Validate and ensure proper structure
+  if (!analysisResult.items || !Array.isArray(analysisResult.items)) {
+    analysisResult.items = [];
+  }
+
+  // Calculate summary if missing
+  if (!analysisResult.summary) {
+    const categories = [...new Set(analysisResult.items.map((item: any) => item.category))];
+    const avgConfidence = analysisResult.items.length > 0 
+      ? analysisResult.items.reduce((sum: number, item: any) => sum + (item.confidence || 0), 0) / analysisResult.items.length
+      : 0;
+
+    analysisResult.summary = {
+      totalItems: analysisResult.items.length,
+      categoriesFound: categories,
+      averageConfidence: avgConfidence
+    };
+  }
+
+  return new Response(JSON.stringify(analysisResult), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
 
   return alerts;
 }
@@ -741,4 +903,158 @@ function calculatePerformanceMetrics(inventory: InventoryItem[], salesData: Sale
     costEfficiency: 87.2, // Mock efficiency score
     wastagePercentage: inventory.reduce((sum, item) => sum + item.perishability.spoilageRate, 0) / inventory.length
   };
+}
+
+// Handle photo-based inventory analysis
+async function handlePhotoInventoryAnalysis(requestBody: any, geminiApiKey: string) {
+  const { image, imageType } = requestBody;
+
+  console.log('Processing photo-based inventory analysis');
+
+  const prompt = `Analyze this inventory photo and identify all food and beverage items visible. For each item you can identify, provide:
+
+1. Item name (be specific - e.g., "Roma Tomatoes" not just "Tomatoes")
+2. Category (produce, dairy, meat, pantry, beverages, etc.)
+3. Estimated quantity (count, weight, or volume)
+4. Unit of measurement (pieces, lbs, kg, liters, etc.)
+5. Visible condition (fresh, good, fair, poor based on appearance)
+6. Confidence level (0.0 to 1.0) in your identification
+7. Estimated expiry/best-by timeframe if applicable
+8. Suggested storage location (refrigerator, freezer, pantry, etc.)
+
+Look for:
+- Fresh produce (fruits, vegetables, herbs)
+- Packaged goods with visible labels
+- Dairy products
+- Meat and seafood
+- Beverages
+- Condiments and sauces
+- Dry goods and pantry items
+- Prepared foods
+
+Consider factors like:
+- Item freshness and quality based on visual appearance
+- Packaging condition
+- Expiration dates if visible
+- Proper storage requirements
+- Quantity estimation based on size and packaging
+
+Respond in valid JSON format:
+{
+  "items": [
+    {
+      "name": "string",
+      "category": "string", 
+      "quantity": number,
+      "unit": "string",
+      "condition": "fresh|good|fair|poor",
+      "confidence": number,
+      "expiryEstimate": "string (optional)",
+      "location": "string (optional)"
+    }
+  ],
+  "summary": {
+    "totalItems": number,
+    "categoriesFound": ["string"],
+    "averageConfidence": number
+  }
+}`;
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [
+          {
+            text: prompt
+          },
+          {
+            inline_data: {
+              mime_type: imageType,
+              data: image
+            }
+          }
+        ]
+      }],
+      generationConfig: {
+        temperature: 0.4,
+        topK: 32,
+        topP: 1,
+        maxOutputTokens: 2048,
+      }
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Gemini API error:', errorText);
+    throw new Error(`Gemini API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log('Gemini photo analysis response received');
+
+  if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+    throw new Error('Invalid response from Gemini API');
+  }
+
+  let generatedText = data.candidates[0].content.parts[0].text;
+  
+  // Clean up the response - remove markdown formatting
+  generatedText = generatedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  
+  let analysisResult;
+  
+  try {
+    analysisResult = JSON.parse(generatedText);
+  } catch (parseError) {
+    console.error('Failed to parse AI response:', generatedText);
+    
+    // Fallback result
+    analysisResult = {
+      items: [
+        {
+          name: "Unidentified Items",
+          category: "mixed",
+          quantity: 1,
+          unit: "batch",
+          condition: "good",
+          confidence: 0.5,
+          expiryEstimate: "Review manually",
+          location: "Storage area"
+        }
+      ],
+      summary: {
+        totalItems: 1,
+        categoriesFound: ["mixed"],
+        averageConfidence: 0.5
+      }
+    };
+  }
+
+  // Validate and ensure proper structure
+  if (!analysisResult.items || !Array.isArray(analysisResult.items)) {
+    analysisResult.items = [];
+  }
+
+  // Calculate summary if missing
+  if (!analysisResult.summary) {
+    const categories = [...new Set(analysisResult.items.map((item: any) => item.category))];
+    const avgConfidence = analysisResult.items.length > 0 
+      ? analysisResult.items.reduce((sum: number, item: any) => sum + (item.confidence || 0), 0) / analysisResult.items.length
+      : 0;
+
+    analysisResult.summary = {
+      totalItems: analysisResult.items.length,
+      categoriesFound: categories,
+      averageConfidence: avgConfidence
+    };
+  }
+
+  return new Response(JSON.stringify(analysisResult), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
 }
