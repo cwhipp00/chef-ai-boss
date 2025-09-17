@@ -57,6 +57,7 @@ const navigationSections = [
       { titleKey: "nav.customers", url: "/customers", icon: BarChart3 },
       { titleKey: "nav.finance", url: "/finance", icon: DollarSign, managerOnly: true },
       { titleKey: "nav.documents", url: "/documents", icon: FileText },
+      { titleKey: "nav.analytics", url: "/analytics", icon: BarChart3, managerOnly: true },
     ]
   },
   {
@@ -156,11 +157,11 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
               {/* Compact Typography */}
               <div className="space-y-1">
                 <div className="relative">
-                  <h1 className="text-xl lg:text-2xl font-black bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent transition-all duration-700 tracking-tight leading-none">
-                    Chef AI
+                  <h1 className="text-lg lg:text-xl font-black bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent transition-all duration-700 tracking-tight leading-none">
+                    ChefCentral.Ai
                   </h1>
-                  <div className="absolute inset-0 text-xl lg:text-2xl font-black text-primary/8 blur-sm transition-all duration-700 tracking-tight leading-none">
-                    Chef AI
+                  <div className="absolute inset-0 text-lg lg:text-xl font-black text-primary/8 blur-sm transition-all duration-700 tracking-tight leading-none">
+                    ChefCentral.Ai
                   </div>
                 </div>
                 

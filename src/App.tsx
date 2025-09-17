@@ -29,6 +29,7 @@ import CustomerManagement from "./pages/CustomerManagement";
 import AIAgents from "./pages/AIAgents";
 import Training from "./pages/Training";
 import OrganizationSetup from "./pages/OrganizationSetup";
+import Analytics from "./pages/Analytics";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ function App() {
                     <Route path="/ai-agents" element={<AIAgents />} />
                     <Route path="/training" element={<Training />} />
                     <Route path="/organization-setup" element={<OrganizationSetup />} />
+                    <Route path="/analytics" element={<Analytics />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>

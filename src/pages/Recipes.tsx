@@ -12,6 +12,7 @@ import { AIRecipeGenerator } from '@/components/recipes/AIRecipeGenerator';
 import { ImageRecipeCreator } from '@/components/recipes/ImageRecipeCreator';
 import { AddRecipeModal } from '@/components/recipes/AddRecipeModal';
 import { InventoryRecipeBuilder } from '@/components/recipes/InventoryRecipeBuilder';
+import EnhancedRecipeManagement from '@/components/recipes/EnhancedRecipeManagement';
 
 const recipes = [
   {
@@ -102,9 +103,9 @@ export default function Recipes() {
   );
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 ml-0 sm:ml-6 lg:ml-8">
+    <div className="p-4 sm:p-6 space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="min-w-0 flex-1 pl-6 sm:pl-0">
+        <div className="min-w-0 flex-1 pl-16 sm:pl-6 lg:pl-0">
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Recipe Management</h1>
           <p className="text-muted-foreground">Manage and scale your restaurant recipes</p>
         </div>
@@ -114,7 +115,7 @@ export default function Recipes() {
       </div>
 
       <Tabs defaultValue="recipes" className="space-y-6">
-        <div className="overflow-x-auto pl-6 sm:pl-0">
+        <div className="overflow-x-auto pl-16 sm:pl-6 lg:pl-0">
           <TabsList className="inline-flex w-max min-w-full bg-muted/30 h-12 p-1 gap-1">
             <TabsTrigger value="recipes" className="flex-shrink-0 text-xs px-2 sm:px-3 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
               <Users className="h-3 w-3 mr-1" />
@@ -264,59 +265,10 @@ export default function Recipes() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Most Popular</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Pasta Carbonara</span>
-                    <span className="text-sm font-medium">89%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Grilled Salmon</span>
-                    <span className="text-sm font-medium">76%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Cost Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Avg Cost per Dish</span>
-                    <span className="text-sm font-medium">$15.63</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Profit Margin</span>
-                    <span className="text-sm font-medium">68%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Recipe Performance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Total Recipes</span>
-                    <span className="text-sm font-medium">127</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Active Recipes</span>
-                    <span className="text-sm font-medium">89</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <EnhancedRecipeManagement 
+            recipes={allRecipes}
+            onRecipeUpdate={handleRecipeGenerated}
+          />
         </TabsContent>
       </Tabs>
     </div>
