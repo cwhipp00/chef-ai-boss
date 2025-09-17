@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { EnhancedCalendar } from '@/components/calendar/EnhancedCalendar';
 import { DayView } from '@/components/calendar/DayView';
 import { CalendarFeatures } from '@/components/calendar/CalendarFeatures';
+import { MeetingManager } from '@/components/calendar/MeetingManager';
 import { 
   CalendarDays, 
   Clock, 

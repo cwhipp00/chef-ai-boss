@@ -15,6 +15,7 @@ import {
 import { FileRecipeUpload } from './FileRecipeUpload';
 import { AIRecipeGenerator } from './AIRecipeGenerator';
 import { ImageRecipeCreator } from './ImageRecipeCreator';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AddRecipeModalProps {
   onRecipeCreated: (recipe: any) => void;
@@ -24,8 +25,23 @@ export function AddRecipeModal({ onRecipeCreated }: AddRecipeModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
 
-  const handleRecipeCreated = (recipe: any) => {
-    onRecipeCreated(recipe);
+  const handleRecipeCreated = async (recipe: any) => {
+    // Enhanced AI parsing for recipe optimization
+    try {
+      const { data } = await supabase.functions.invoke('ai-recipe-enhancer', {
+        body: { 
+          recipeText: JSON.stringify(recipe), 
+          enhancementType: 'parse'
+        }
+      });
+      
+      const enhancedRecipe = data?.success ? data.recipe : recipe;
+      onRecipeCreated(enhancedRecipe);
+    } catch (error) {
+      console.error('Recipe enhancement failed:', error);
+      onRecipeCreated(recipe); // Fallback to original
+    }
+    
     setIsOpen(false);
     setSelectedMethod(null);
   };
