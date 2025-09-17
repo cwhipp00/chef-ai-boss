@@ -31,6 +31,14 @@ interface FormField {
   options?: string[];
 }
 
+interface UploadedFile {
+  file: File;
+  id: string;
+  status: 'ready' | 'processing' | 'completed' | 'error';
+  progress: number;
+  error?: string;
+}
+
 interface GeneratedForm {
   id: string;
   title: string;
@@ -45,9 +53,7 @@ interface AIFormCreatorProps {
 }
 
 export const AIFormCreator = ({ organizationId }: AIFormCreatorProps) => {
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [generatedForms, setGeneratedForms] = useState<GeneratedForm[]>([]);
   const [previewForm, setPreviewForm] = useState<GeneratedForm | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -74,104 +80,175 @@ export const AIFormCreator = ({ organizationId }: AIFormCreatorProps) => {
     setDragActive(false);
     
     const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      handleFileSelect(files[0]);
+    handleMultipleFileSelect(files);
+  };
+
+  const handleMultipleFileSelect = (files: File[]) => {
+    const validFiles: UploadedFile[] = [];
+    
+    files.forEach(file => {
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      
+      if (!supportedFileTypes.includes(fileExtension)) {
+        toast.error(`Unsupported file type for "${file.name}". Please upload: ${supportedFileTypes.join(', ')}`);
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error(`File "${file.name}" size must be less than 10MB`);
+        return;
+      }
+
+      validFiles.push({
+        file,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        status: 'ready',
+        progress: 0
+      });
+    });
+
+    if (validFiles.length > 0) {
+      setUploadedFiles(prev => [...prev, ...validFiles]);
+      toast.success(`${validFiles.length} file(s) ready for processing`);
     }
   };
 
   const handleFileSelect = (file: File) => {
-    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-    
-    if (!supportedFileTypes.includes(fileExtension)) {
-      toast.error(`Unsupported file type. Please upload: ${supportedFileTypes.join(', ')}`);
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      toast.error('File size must be less than 10MB');
-      return;
-    }
-
-    setUploadedFile(file);
-    toast.success(`File "${file.name}" ready for processing`);
+    handleMultipleFileSelect([file]);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      handleMultipleFileSelect(files);
     }
   };
 
-  const generateFormFromFile = async () => {
-    if (!uploadedFile) {
-      toast.error('Please upload a file first');
+  const generateFormsFromFiles = async () => {
+    const readyFiles = uploadedFiles.filter(f => f.status === 'ready');
+    
+    if (readyFiles.length === 0) {
+      toast.error('Please upload files first');
       return;
     }
 
-    setIsProcessing(true);
-    setProgress(0);
+    // Update all ready files to processing status
+    setUploadedFiles(prev => 
+      prev.map(f => 
+        f.status === 'ready' ? { ...f, status: 'processing', progress: 0 } : f
+      )
+    );
 
-    try {
-      // Convert file to base64
-      const fileBase64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result.split(',')[1]); // Remove data URL prefix
-        };
-        reader.readAsDataURL(uploadedFile);
-      });
+    // Process each file in parallel
+    const processingPromises = readyFiles.map(async (uploadedFile) => {
+      try {
+        // Convert file to base64
+        const fileBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]); // Remove data URL prefix
+          };
+          reader.readAsDataURL(uploadedFile.file);
+        });
 
-      setProgress(25);
+        // Update progress
+        setUploadedFiles(prev => 
+          prev.map(f => 
+            f.id === uploadedFile.id ? { ...f, progress: 25 } : f
+          )
+        );
 
-      // Call AI form generator edge function
-      const { data, error } = await supabase.functions.invoke('ai-form-generator', {
-        body: {
-          fileName: uploadedFile.name,
-          fileType: uploadedFile.type,
-          fileContent: fileBase64,
-          organizationId
+        // Call AI form generator edge function
+        const { data, error } = await supabase.functions.invoke('ai-form-generator', {
+          body: {
+            fileName: uploadedFile.file.name,
+            fileType: uploadedFile.file.type,
+            fileContent: fileBase64,
+            organizationId
+          }
+        });
+
+        // Update progress
+        setUploadedFiles(prev => 
+          prev.map(f => 
+            f.id === uploadedFile.id ? { ...f, progress: 75 } : f
+          )
+        );
+
+        if (error) {
+          throw new Error(error.message || 'Failed to generate form');
         }
-      });
 
-      setProgress(75);
+        if (!data.success) {
+          throw new Error(data.error || 'Form generation failed');
+        }
 
-      if (error) {
-        throw new Error(error.message || 'Failed to generate form');
+        const newForm: GeneratedForm = {
+          id: uploadedFile.id + '_form',
+          title: data.form.title,
+          description: data.form.description,
+          fields: data.form.fields,
+          sourceFile: uploadedFile.file.name,
+          createdAt: new Date()
+        };
+
+        setGeneratedForms(prev => [newForm, ...prev]);
+        
+        // Mark as completed
+        setUploadedFiles(prev => 
+          prev.map(f => 
+            f.id === uploadedFile.id ? { ...f, status: 'completed', progress: 100 } : f
+          )
+        );
+
+        return { success: true, fileName: uploadedFile.file.name };
+
+      } catch (error) {
+        console.error('Error generating form:', error);
+        
+        // Mark as error
+        setUploadedFiles(prev => 
+          prev.map(f => 
+            f.id === uploadedFile.id ? { 
+              ...f, 
+              status: 'error', 
+              progress: 0,
+              error: error instanceof Error ? error.message : 'Failed to generate form'
+            } : f
+          )
+        );
+
+        return { success: false, fileName: uploadedFile.file.name, error: error instanceof Error ? error.message : 'Unknown error' };
       }
+    });
 
-      if (!data.success) {
-        throw new Error(data.error || 'Form generation failed');
-      }
+    // Wait for all files to process
+    const results = await Promise.all(processingPromises);
+    
+    const successCount = results.filter(r => r.success).length;
+    const errorCount = results.filter(r => !r.success).length;
 
-      const newForm: GeneratedForm = {
-        id: Date.now().toString(),
-        title: data.form.title,
-        description: data.form.description,
-        fields: data.form.fields,
-        sourceFile: uploadedFile.name,
-        createdAt: new Date()
-      };
-
-      setGeneratedForms(prev => [newForm, ...prev]);
-      setProgress(100);
-      
-      toast.success('Form generated successfully!');
-      setUploadedFile(null);
-      
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-
-    } catch (error) {
-      console.error('Error generating form:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to generate form');
-    } finally {
-      setIsProcessing(false);
-      setProgress(0);
+    if (successCount > 0) {
+      toast.success(`${successCount} form(s) generated successfully!`);
     }
+    
+    if (errorCount > 0) {
+      toast.error(`${errorCount} file(s) failed to process`);
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const removeFile = (fileId: string) => {
+    setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
+  };
+
+  const clearAllFiles = () => {
+    setUploadedFiles([]);
   };
 
   const previewFormInModal = (form: GeneratedForm) => {
@@ -263,10 +340,10 @@ export const AIFormCreator = ({ organizationId }: AIFormCreatorProps) => {
             <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <div className="space-y-2">
               <p className="text-lg font-medium">
-                {dragActive ? 'Drop your file here' : 'Drag and drop your file here'}
+                {dragActive ? 'Drop your files here' : 'Drag and drop your files here'}
               </p>
               <p className="text-sm text-muted-foreground">
-                or click to browse files
+                or click to browse files (multiple files supported)
               </p>
             </div>
             <Button 
@@ -283,60 +360,100 @@ export const AIFormCreator = ({ organizationId }: AIFormCreatorProps) => {
               accept={supportedFileTypes.join(',')}
               onChange={handleFileInputChange}
               className="hidden"
+              multiple
             />
           </div>
 
-          {/* Selected File */}
-          {uploadedFile && (
-            <Card className="bg-muted/50">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  {getFileIcon(uploadedFile.name)}
-                  <div className="flex-1">
-                    <p className="font-medium">{uploadedFile.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setUploadedFile(null)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+          {/* Uploaded Files */}
+          {uploadedFiles.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Uploaded Files ({uploadedFiles.length})</h4>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAllFiles}
+                >
+                  Clear All
+                </Button>
+              </div>
+              
+              <ScrollArea className="max-h-64">
+                <div className="space-y-2">
+                  {uploadedFiles.map((uploadedFile) => (
+                    <Card key={uploadedFile.id} className="bg-muted/50">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          {getFileIcon(uploadedFile.file.name)}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{uploadedFile.file.name}</p>
+                              <Badge 
+                                variant={
+                                  uploadedFile.status === 'completed' ? 'default' :
+                                  uploadedFile.status === 'error' ? 'destructive' :
+                                  uploadedFile.status === 'processing' ? 'secondary' : 'outline'
+                                }
+                                className="text-xs"
+                              >
+                                {uploadedFile.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                            {uploadedFile.status === 'processing' && (
+                              <Progress value={uploadedFile.progress} className="w-full mt-2 h-1" />
+                            )}
+                            {uploadedFile.status === 'error' && uploadedFile.error && (
+                              <p className="text-xs text-destructive mt-1">{uploadedFile.error}</p>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeFile(uploadedFile.id)}
+                            disabled={uploadedFile.status === 'processing'}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              </ScrollArea>
+            </div>
           )}
 
-          {/* Processing Progress */}
-          {isProcessing && (
+          {/* Processing Summary */}
+          {uploadedFiles.some(f => f.status === 'processing') && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 animate-spin text-primary" />
-                <span className="text-sm font-medium">Processing document with AI...</span>
+                <span className="text-sm font-medium">
+                  Processing {uploadedFiles.filter(f => f.status === 'processing').length} document(s) with AI...
+                </span>
               </div>
-              <Progress value={progress} className="w-full" />
             </div>
           )}
 
           {/* Generate Button */}
           <Button
-            onClick={generateFormFromFile}
-            disabled={!uploadedFile || isProcessing}
+            onClick={generateFormsFromFiles}
+            disabled={uploadedFiles.filter(f => f.status === 'ready').length === 0 || uploadedFiles.some(f => f.status === 'processing')}
             className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
             size="lg"
           >
-            {isProcessing ? (
+            {uploadedFiles.some(f => f.status === 'processing') ? (
               <>
                 <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                Generating Form...
+                Processing {uploadedFiles.filter(f => f.status === 'processing').length} File(s)...
               </>
             ) : (
               <>
                 <Brain className="h-4 w-4 mr-2" />
-                Generate Form with AI
+                Generate Forms from {uploadedFiles.filter(f => f.status === 'ready').length} File(s)
               </>
             )}
           </Button>
