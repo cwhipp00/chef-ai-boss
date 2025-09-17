@@ -6,9 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { WeeklyScheduleView } from '@/components/schedule/WeeklyScheduleView';
 import { CompactWeeklyScheduleView } from '@/components/schedule/CompactWeeklyScheduleView';
+import { WeeklyScheduleView } from '@/components/schedule/WeeklyScheduleView';
 import { DailyScheduleView } from '@/components/schedule/DailyScheduleView';
+import { HorizontalScheduleView } from '@/components/schedule/HorizontalScheduleView';
+import { ShiftActionsDropdown } from '@/components/schedule/ShiftActionsDropdown';
+import { EditShiftModal } from '@/components/schedule/EditShiftModal';
 import { 
   TimeOffRequestModal, 
   ShiftSwapModal, 
@@ -127,13 +130,12 @@ const timeSlots = [
 
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export default function StaffSchedule() {
-  const [selectedTab, setSelectedTab] = useState('schedule');
-  const [selectedWeek, setSelectedWeek] = useState(new Date());
-  const [shifts, setShifts] = useState<Shift[]>(enhancedShifts);
-  const [timeOffModalOpen, setTimeOffModalOpen] = useState(false);
-  const [swapModalOpen, setSwapModalOpen] = useState(false);
-  const [coverageModalOpen, setCoverageModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('horizontal');
+  const [currentWeek, setCurrentWeek] = useState(0);
+  const [showTimeOffModal, setShowTimeOffModal] = useState(false);
+  const [showSwapModal, setShowSwapModal] = useState(false);
+  const [showCoverageModal, setShowCoverageModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [coverageType, setCoverageType] = useState<'offer' | 'take'>('offer');
   const { toast } = useToast();
@@ -224,25 +226,57 @@ export default function StaffSchedule() {
   };
 
   const handleEditShift = (shiftId: string) => {
+    const shift = enhancedShifts.find(s => s.id === shiftId);
+    if (shift) {
+      setSelectedShift(shift);
+      setShowEditModal(true);
+    }
+  };
+
+  const handleSaveShift = (updatedShift: Shift) => {
+    const index = enhancedShifts.findIndex(s => s.id === updatedShift.id);
+    if (index !== -1) {
+      enhancedShifts[index] = updatedShift;
+    } else {
+      enhancedShifts.push(updatedShift);
+    }
+    setShowEditModal(false);
+    setSelectedShift(null);
     toast({
-      title: "Edit Shift",
-      description: "Shift editing functionality would open here",
+      title: "Shift Updated",
+      description: "The shift has been successfully updated.",
     });
+  };
+
+  const handleAddShift = (staffId: number, date: string, hour: string) => {
+    const newShift: Shift = {
+      id: `shift-${Date.now()}`,
+      staffId,
+      staffName: staff.find(s => s.id === staffId)?.name || '',
+      date,
+      startTime: hour,
+      endTime: `${(parseInt(hour.split(':')[0]) + 8).toString().padStart(2, '0')}:${hour.split(':')[1]}`,
+      role: staff.find(s => s.id === staffId)?.role || 'server',
+      status: 'scheduled',
+      break: 30,
+    };
+    setSelectedShift(newShift);
+    setShowEditModal(true);
   };
 
   const confirmCoverage = () => {
     if (!selectedShift) return;
 
-    setShifts(prev => prev.map(shift => {
+    const updatedShifts = enhancedShifts.map(shift => {
       if (shift.id === selectedShift.id) {
         if (coverageType === 'offer') {
-          return { ...shift, status: 'needs_coverage' };
+          return { ...shift, status: 'needs_coverage' as const };
         } else {
-          return { ...shift, status: 'covered', coverageOfferedBy: 1 }; // Current user ID
+          return { ...shift, status: 'covered' as const, coverageOfferedBy: 1 };
         }
       }
       return shift;
-    }));
+    });
 
     toast({
       title: coverageType === 'offer' ? "Coverage Offered" : "Shift Taken",
@@ -251,29 +285,30 @@ export default function StaffSchedule() {
         : "You've successfully taken this shift",
     });
 
-    setCoverageModalOpen(false);
+    setShowCoverageModal(false);
     setSelectedShift(null);
   };
 
   const submitTimeOffRequest = (reason: string) => {
     if (!selectedShift) return;
 
-    setShifts(prev => prev.map(shift => {
+    const updatedShifts = enhancedShifts.map(shift => {
       if (shift.id === selectedShift.id) {
         return { 
           ...shift, 
-          status: 'time_off_requested',
+          status: 'time_off_requested' as const,
           timeOffReason: reason 
         };
       }
       return shift;
-    }));
+    });
 
     toast({
       title: "Time Off Requested",
       description: "Your time off request has been submitted for approval",
     });
 
+    setShowTimeOffModal(false);
     setSelectedShift(null);
   };
 
@@ -282,6 +317,7 @@ export default function StaffSchedule() {
       title: "Swap Request Sent",
       description: "Your shift swap request has been sent to your colleague",
     });
+    setShowSwapModal(false);
     setSelectedShift(null);
   };
 
@@ -316,31 +352,32 @@ export default function StaffSchedule() {
         </div>
       </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-muted/30 h-12">
-          <TabsTrigger value="schedule" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Calendar className="h-4 w-4 mr-1" />
-            Interactive Schedule
-          </TabsTrigger>
-          <TabsTrigger value="daily" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Clock className="h-4 w-4 mr-1" />
-            Daily View
-          </TabsTrigger>
-          <TabsTrigger value="staff" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Users className="h-4 w-4 mr-1" />
-            Staff Management
-          </TabsTrigger>
-          <TabsTrigger value="requests" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Plus className="h-4 w-4 mr-1" />
-            Coverage & Requests
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="text-xs data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground hover-scale">
-            <Filter className="h-4 w-4 mr-1" />
-            Labor Analytics
-          </TabsTrigger>
-        </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="horizontal">Schedule Grid</TabsTrigger>
+            <TabsTrigger value="interactive">Interactive</TabsTrigger>
+            <TabsTrigger value="daily">Daily View</TabsTrigger>
+            <TabsTrigger value="staff">Staff</TabsTrigger>
+            <TabsTrigger value="requests">Coverage</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="schedule" className="space-y-6">
+          <TabsContent value="horizontal" className="space-y-6">
+            <HorizontalScheduleView
+              shifts={enhancedShifts}
+              staff={staff}
+              currentUserId={1}
+              onDeleteShift={handleDeleteShift}
+              onEditShift={handleEditShift}
+              onOfferCoverage={handleOfferCoverage}
+              onTakeCoverage={handleTakeCoverage}
+              onRequestTimeOff={handleRequestTimeOff}
+              onSwapRequest={handleSwapRequest}
+              onAddShift={handleAddShift}
+            />
+          </TabsContent>
+
+          <TabsContent value="interactive" className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="outline" size="icon">
@@ -647,15 +684,38 @@ export default function StaffSchedule() {
         availableShifts={shifts.filter(s => s.status === 'scheduled' && s.id !== selectedShift?.id)}
       />
 
+      <TimeOffRequestModal
+        isOpen={showTimeOffModal}
+        onClose={() => setShowTimeOffModal(false)}
+        onSubmit={submitTimeOffRequest}
+        shift={selectedShift}
+      />
+
+      <ShiftSwapModal
+        isOpen={showSwapModal}
+        onClose={() => setShowSwapModal(false)}
+        onSubmit={submitSwapRequest}
+        shift={selectedShift}
+        availableShifts={enhancedShifts.filter(s => s.status === 'scheduled' && s.id !== selectedShift?.id)}
+      />
+
       <CoverageModal
-        isOpen={coverageModalOpen}
-        onClose={() => {
-          setCoverageModalOpen(false);
-          setSelectedShift(null);
-        }}
+        isOpen={showCoverageModal}
+        onClose={() => setShowCoverageModal(false)}
         onConfirm={confirmCoverage}
         shift={selectedShift}
         type={coverageType}
+      />
+
+      <EditShiftModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedShift(null);
+        }}
+        onSave={handleSaveShift}
+        shift={selectedShift}
+        staff={staff}
       />
     </div>
   );
