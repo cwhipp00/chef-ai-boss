@@ -1,20 +1,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 interface SignalingMessage {
-  type: 'offer' | 'answer' | 'ice-candidate' | 'call-ended' | 'call-started';
-  callId: string;
-  fromUserId: string;
-  toUserId: string;
-  payload?: any;
+  type: 'join' | 'leave' | 'offer' | 'answer' | 'ice-candidate' | 'user-joined' | 'user-left';
+  roomId: string;
+  userId: string;
+  data?: any;
+  targetUserId?: string;
 }
 
+interface Room {
+  id: string;
+  participants: Map<string, WebSocket>;
+  createdAt: Date;
+}
+
+// Store rooms in memory (in production, use Redis or similar)
+const rooms = new Map<string, Room>();
+
 serve(async (req) => {
+  console.log('Video call signaling request received');
+  
   const { headers } = req;
   const upgradeHeader = headers.get("upgrade") || "";
 
@@ -23,87 +28,56 @@ serve(async (req) => {
   }
 
   const { socket, response } = Deno.upgradeWebSocket(req);
-  
-  const supabaseClient = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-  );
-
-  let userId: string | null = null;
-  let activeCallId: string | null = null;
+  let currentRoom: string | null = null;
+  let currentUserId: string | null = null;
 
   socket.onopen = () => {
-    console.log("WebSocket connection opened for video call signaling");
+    console.log('WebSocket connection opened');
   };
 
-  socket.onmessage = async (event) => {
+  socket.onmessage = (event) => {
     try {
       const message: SignalingMessage = JSON.parse(event.data);
-      console.log('Received signaling message:', message.type, message.callId);
-
-      // Store user ID from first message
-      if (!userId) {
-        userId = message.fromUserId;
-        activeCallId = message.callId;
-      }
+      console.log('Received message:', message.type, 'from user:', message.userId, 'in room:', message.roomId);
 
       switch (message.type) {
-        case 'call-started':
-          // Notify the recipient about incoming call
-          await notifyCallRecipient(supabaseClient, message);
+        case 'join':
+          handleJoinRoom(socket, message);
+          currentRoom = message.roomId;
+          currentUserId = message.userId;
+          break;
+
+        case 'leave':
+          handleLeaveRoom(socket, message);
           break;
 
         case 'offer':
-          // Forward offer to recipient
-          await forwardSignalingMessage(supabaseClient, message);
-          break;
-
         case 'answer':
-          // Forward answer to caller
-          await forwardSignalingMessage(supabaseClient, message);
-          break;
-
         case 'ice-candidate':
-          // Forward ICE candidate to the other peer
-          await forwardSignalingMessage(supabaseClient, message);
-          break;
-
-        case 'call-ended':
-          // Notify both parties that call ended
-          await notifyCallEnded(supabaseClient, message);
-          activeCallId = null;
+          handleWebRTCMessage(socket, message);
           break;
 
         default:
-          console.log('Unknown signaling message type:', message.type);
+          console.log('Unknown message type:', message.type);
       }
-
     } catch (error) {
-      console.error('Error processing signaling message:', error);
-      socket.send(JSON.stringify({
-        type: 'error',
-        message: 'Failed to process signaling message'
+      console.error('Error processing message:', error);
+      socket.send(JSON.stringify({ 
+        type: 'error', 
+        message: 'Invalid message format' 
       }));
     }
   };
 
-  socket.onclose = async () => {
-    console.log("WebSocket connection closed");
-    
-    // If user disconnects during active call, notify the other party
-    if (activeCallId && userId) {
-      await notifyCallEnded(supabaseClient, {
-        type: 'call-ended',
-        callId: activeCallId,
-        fromUserId: userId,
-        toUserId: '', // Will be resolved in the function
-        payload: { reason: 'disconnect' }
+  socket.onclose = () => {
+    console.log('WebSocket connection closed');
+    if (currentRoom && currentUserId) {
+      handleLeaveRoom(socket, {
+        type: 'leave',
+        roomId: currentRoom,
+        userId: currentUserId
       });
     }
-  };
-
-  socket.onerror = (error) => {
-    console.error("WebSocket error:", error);
   };
 
   return response;
