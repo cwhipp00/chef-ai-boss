@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.video-call-signaling]
 verify_jwt = false
+
+[functions.ai-web-training-content]
+verify_jwt = false

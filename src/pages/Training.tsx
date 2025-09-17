@@ -40,6 +40,7 @@ import { AICourseCreator } from '@/components/training/AICourseCreator';
 import { OptimizedCourseCard } from '@/components/training/OptimizedCourseCard';
 import { AutoLessonGenerator } from '@/components/training/AutoLessonGenerator';
 import { ComprehensiveTrainingGenerator } from '@/components/training/ComprehensiveTrainingGenerator';
+import { WebTrainingContentGenerator } from '@/components/training/WebTrainingContentGenerator';
 
 interface Course {
   id: string;
@@ -522,6 +523,21 @@ const Training = () => {
 
               <TabsContent value="ai-creator" className="space-y-8">
                 <div className="space-y-8">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Flame className="h-5 w-5" />
+                        Web-Sourced Training Content Generator
+                      </CardTitle>
+                      <CardDescription>
+                        Generate comprehensive training courses with real-world content sourced from industry standards
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <WebTrainingContentGenerator />
+                    </CardContent>
+                  </Card>
+
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
