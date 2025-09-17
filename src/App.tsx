@@ -28,7 +28,6 @@ import StaffSchedule from "./pages/StaffSchedule";
 import FinanceDashboard from "./pages/FinanceDashboard";
 import CustomerManagement from "./pages/CustomerManagement";
 import AIAgents from "./pages/AIAgents";
-import AIFeatures from "./pages/AIFeatures";
 import Training from "./pages/Training";
 import OrganizationSetup from "./pages/OrganizationSetup";
 import Analytics from "./pages/Analytics";
@@ -70,7 +69,6 @@ function App() {
                             <Route path="/finance" element={<FinanceDashboard />} />
                             <Route path="/customers" element={<CustomerManagement />} />
                             <Route path="/ai-agents" element={<AIAgents />} />
-                            <Route path="/ai-features" element={<AIFeatures />} />
                             <Route path="/training" element={<Training />} />
                             <Route path="/organization-setup" element={<OrganizationSetup />} />
                             <Route path="/analytics" element={<Analytics />} />

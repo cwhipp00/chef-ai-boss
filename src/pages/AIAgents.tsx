@@ -39,13 +39,15 @@ import {
   Award,
   PhoneCall,
   Search,
-  Wrench
+  Wrench,
+  Wine
 } from 'lucide-react';
 import { AIAppAssistant } from '@/components/ai/AIAppAssistant';
 import { AIFormCreator } from '@/components/ai/AIFormCreator';
 import { HelpChatDropdown } from '@/components/ai/HelpChatDropdown';
 import { OrderAnalyzer } from '@/components/ai/OrderAnalyzer';
 import { EnhancedAIAgentDashboard } from '@/components/ai/EnhancedAIAgentDashboard';
+import AIDrinkPairingRecommendations from '@/components/bar/AIDrinkPairingRecommendations';
 
 interface AITool {
   id: string;
@@ -621,6 +623,20 @@ export default function AIAgents() {
                 </Card>
               )}
             </div>
+          </div>
+          
+          {/* AI Drink Pairing Section */}
+          <div className="mt-8 pt-6 border-t">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Wine className="h-5 w-5 text-primary" />
+                AI Drink Pairing Recommendations
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Get intelligent drink pairing suggestions for your menu items.
+              </p>
+            </div>
+            <AIDrinkPairingRecommendations />
           </div>
         </TabsContent>
 

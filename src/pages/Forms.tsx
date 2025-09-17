@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, ShoppingCart, ChefHat, Wine, Store, Settings, Brain } from 'lucide-react';
+import { ClipboardList, ShoppingCart, ChefHat, Wine, Store, Settings, Brain, Camera } from 'lucide-react';
 import { PrepLists } from '@/components/recipes/PrepLists';
 import ChecklistsContent from './Checklists';
 import OrdersContent from './Orders';
@@ -8,6 +8,7 @@ import { InventoryDashboard } from '@/components/inventory';
 import { StoreListDashboard } from '@/components/store/StoreListDashboard';
 import { DynamicFormGenerator } from '@/components/forms/DynamicFormGenerator';
 import { AIFormCreator } from '@/components/forms/AIFormCreator';
+import PhotoBasedInventoryManager from '@/components/inventory/PhotoBasedInventoryManager';
 import { useUserOrganization } from '@/hooks/useUserOrganization';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -66,7 +67,23 @@ export default function Forms() {
         </TabsContent>
 
         <TabsContent value="orders" className="mt-0">
-          <OrdersContent />
+          <div className="space-y-6">
+            <OrdersContent />
+            
+            {/* Photo-Based Inventory Management Section */}
+            <div className="border-t pt-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-primary" />
+                  Photo-Based Inventory Management
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Upload photos of your inventory and let AI automatically identify and catalog items.
+                </p>
+              </div>
+              <PhotoBasedInventoryManager />
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="store-lists" className="mt-0">
