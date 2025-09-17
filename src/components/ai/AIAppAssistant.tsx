@@ -50,26 +50,29 @@ export function AIAppAssistant() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('ai-app-modifier', {
+      const { data, error } = await supabase.functions.invoke('ai-app-knowledge', {
         body: {
-          request: userMessage.content,
-          context: messages.slice(-5).map(m => `${m.type}: ${m.content}`).join('\n')
+          message: userMessage.content,
+          conversationHistory: messages.slice(-5).map(m => ({
+            role: m.type === 'user' ? 'user' : 'assistant',
+            content: m.content
+          }))
         }
       });
 
       if (error) throw error;
 
-      if (data.success) {
+      if (data.response) {
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           type: 'assistant',
-          content: data.suggestion,
+          content: data.response,
           timestamp: new Date()
         };
 
         setMessages(prev => [...prev, assistantMessage]);
       } else {
-        throw new Error(data.error || 'Failed to get response');
+        throw new Error('Failed to get response');
       }
 
     } catch (error) {

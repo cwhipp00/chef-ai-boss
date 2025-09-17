@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Users, TrendingUp, DollarSign, Clock, Target, AlertCircle, CheckCircle, GraduationCap, AlertTriangle, Trophy, User, BookOpen, Star, Award, CreditCard } from 'lucide-react';
+import { Users, TrendingUp, DollarSign, Clock, Target, AlertCircle, CheckCircle, GraduationCap, AlertTriangle, Trophy, User, BookOpen, Star, Award, CreditCard, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import CashDrawer from '@/components/manager/CashDrawer';
 import DailyCashSheet from '@/components/manager/DailyCashSheet';
 import { AIMeetingNotes } from '@/components/manager/AIMeetingNotes';
+import InjuryReportForm from '@/components/manager/InjuryReportForm';
+import IncidentReportForm from '@/components/manager/IncidentReportForm';
+import OnlineReviewTracker from '@/components/reviews/OnlineReviewTracker';
 
 interface Course {
   id: string;
@@ -226,15 +230,41 @@ export default function Manager() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        {/* Desktop tabs */}
+        <TabsList className="hidden lg:grid w-full grid-cols-10">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="staff">Staff Management</TabsTrigger>
+          <TabsTrigger value="staff">Staff</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="issues">Issues & Alerts</TabsTrigger>
-          <TabsTrigger value="training-results">Training Results</TabsTrigger>
-          <TabsTrigger value="cash-management">Cash Management</TabsTrigger>
-          <TabsTrigger value="ai-meeting-notes">AI Meeting Notes</TabsTrigger>
+          <TabsTrigger value="issues">Issues</TabsTrigger>
+          <TabsTrigger value="training-results">Training</TabsTrigger>
+          <TabsTrigger value="cash-management">Cash</TabsTrigger>
+          <TabsTrigger value="ai-meeting-notes">Meetings</TabsTrigger>
+          <TabsTrigger value="injury-reports">Injuries</TabsTrigger>
+          <TabsTrigger value="incident-reports">Incidents</TabsTrigger>
+          <TabsTrigger value="review-tracker">Reviews</TabsTrigger>
         </TabsList>
+
+        {/* Mobile dropdown */}
+        <div className="lg:hidden">
+          <Select value={selectedTab} onValueChange={setSelectedTab}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select section" />
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="overview">Overview</SelectItem>
+              <SelectItem value="staff">Staff Management</SelectItem>
+              <SelectItem value="performance">Performance</SelectItem>
+              <SelectItem value="issues">Issues & Alerts</SelectItem>
+              <SelectItem value="training-results">Training Results</SelectItem>
+              <SelectItem value="cash-management">Cash Management</SelectItem>
+              <SelectItem value="ai-meeting-notes">AI Meeting Notes</SelectItem>
+              <SelectItem value="injury-reports">Injury Reports</SelectItem>
+              <SelectItem value="incident-reports">Incident Reports</SelectItem>
+              <SelectItem value="review-tracker">Review Tracker</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -614,6 +644,22 @@ export default function Manager() {
               <DailyCashSheet />
             </TabsContent>
           </Tabs>
+        </TabsContent>
+
+        <TabsContent value="ai-meeting-notes">
+          <AIMeetingNotes />
+        </TabsContent>
+
+        <TabsContent value="injury-reports">
+          <InjuryReportForm />
+        </TabsContent>
+
+        <TabsContent value="incident-reports">
+          <IncidentReportForm />
+        </TabsContent>
+
+        <TabsContent value="review-tracker">
+          <OnlineReviewTracker />
         </TabsContent>
       </Tabs>
     </div>

@@ -99,6 +99,13 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Viral Neon Theme Colors */
+    --viral-neon-primary: 280 100% 70%;
+    --viral-neon-glow: 300 100% 80%;
+    --viral-neon-accent: 320 100% 60%;
+    --viral-neon-bg: 240 100% 5%;
+    --viral-neon-card: 240 50% 8%;
   }
 
   .dark {

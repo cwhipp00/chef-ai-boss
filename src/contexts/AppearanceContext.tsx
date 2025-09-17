@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type ColorTheme = 'warm-amber' | 'ocean-blue' | 'fresh-green' | 'deep-dark' | 'pure-white' | 'bright-white';
+export type ColorTheme = 'warm-amber' | 'ocean-blue' | 'fresh-green' | 'deep-dark' | 'pure-white' | 'bright-white' | 'viral-neon';
 export type DisplayMode = 'light' | 'dark' | 'auto';
 export type FontSize = 'small' | 'normal' | 'large' | 'x-large';
 export type InterfaceDensity = 'compact' | 'normal' | 'comfortable';
@@ -85,6 +85,12 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
       primaryGlow: '210 40% 88%',
       accent: '220 30% 85%',
       success: '150 50% 85%',
+    },
+    'viral-neon': {
+      primary: '280 100% 70%',
+      primaryGlow: '300 100% 80%',
+      accent: '320 100% 60%',
+      success: '142 76% 36%',
     }
   };
 
