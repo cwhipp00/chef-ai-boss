@@ -101,7 +101,7 @@ export const LaborEfficiencyMetrics = () => {
       salesPerHour: 0,
       costPerSale: 3.93
     }
-  ];
+  ]);
 
   const [shiftPerformance] = useState<ShiftPerformance[]>([
     {
@@ -144,7 +144,7 @@ export const LaborEfficiencyMetrics = () => {
       efficiency: 82,
       optimal: false
     }
-  ];
+  ]);
 
   const getEfficiencyColor = (score: number) => {
     if (score >= 90) return 'text-success';

@@ -139,7 +139,7 @@ export const MenuEngineeringAnalysis = () => {
       trend: -8.5,
       competitors: ['Legal Sea Foods', 'Chart House']
     }
-  ];
+  ]);
 
   const [categories] = useState<MenuCategory[]>([
     {

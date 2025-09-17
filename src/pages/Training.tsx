@@ -755,18 +755,19 @@ const Training = () => {
                   </Card>
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                     {enrolledCourses.map((course) => (
-                       <OptimizedCourseCard 
-                         key={course.id} 
-                         course={course} 
-                         lessonCount={lessonCounts[course.id] || 0}
-                         isEnrolled={true}
-                         progress={getEnrollmentProgress(course.id)}
-                         onEnroll={handleEnroll}
-                         onViewCourse={setSelectedCourse}
-                         showProgress={true}
-                       />
-                     ))}
+                      {enrolledCourses.map((course) => (
+                        <OptimizedCourseCard 
+                          key={course.id} 
+                          course={course} 
+                          lessonCount={lessonCounts[course.id] || 0}
+                          isEnrolled={isEnrolled(course.id)}
+                          progress={getEnrollmentProgress(course.id)}
+                          onEnroll={handleEnroll}
+                          onViewCourse={setSelectedCourse}
+                          onLessonsGenerated={fetchCoursesOptimized}
+                          showProgress={true}
+                        />
+                      ))}
                   </div>
                 )}
               </TabsContent>

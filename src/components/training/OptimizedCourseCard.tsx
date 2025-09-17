@@ -10,8 +10,10 @@ import {
   PlayCircle,
   CheckCircle,
   Users,
-  Award
+  Award,
+  AlertTriangle
 } from 'lucide-react';
+import { AutoGenerateTrainingButton } from './AutoGenerateTrainingButton';
 
 interface Course {
   id: string;
@@ -33,6 +35,7 @@ interface OptimizedCourseCardProps {
   progress: number;
   onEnroll: (courseId: string) => void;
   onViewCourse: (course: Course) => void;
+  onLessonsGenerated?: () => void;
   showProgress?: boolean;
 }
 
@@ -43,6 +46,7 @@ export const OptimizedCourseCard = memo<OptimizedCourseCardProps>(({
   progress, 
   onEnroll, 
   onViewCourse,
+  onLessonsGenerated,
   showProgress = false 
 }) => {
   const getDifficultyColor = (level: string) => {
@@ -119,57 +123,74 @@ export const OptimizedCourseCard = memo<OptimizedCourseCardProps>(({
       </CardHeader>
 
       <CardContent className="pt-0">
-        {showProgress && isEnrolled && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Progress</span>
-              <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
+        {/* Show content generation when no lessons are available and enrolled */}
+        {lessonCount === 0 && isEnrolled ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-warning">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm font-medium">No lessons available - Generate content below</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <AutoGenerateTrainingButton 
+              course={course} 
+              onLessonsGenerated={onLessonsGenerated}
+            />
           </div>
-        )}
+        ) : (
+          <>
+            {showProgress && isEnrolled && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Progress</span>
+                  <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="h-2" />
+              </div>
+            )}
 
-        <div className="flex gap-2">
-          {!isEnrolled ? (
-            <Button 
-              onClick={() => onEnroll(course.id)}
-              className="flex-1 text-sm h-9"
-              variant="outline"
-            >
-              <BookOpen className="w-4 h-4 mr-2" />
-              Enroll Now
-            </Button>
-          ) : (
-            <Button 
-              onClick={() => onViewCourse(course)}
-              className="flex-1 text-sm h-9"
-              variant={isCompleted ? "default" : "outline"}
-            >
-              {isCompleted ? (
-                <>
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Completed
-                </>
+            <div className="flex gap-2">
+              {!isEnrolled ? (
+                <Button 
+                  onClick={() => onEnroll(course.id)}
+                  className="flex-1 text-sm h-9"
+                  variant="outline"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Enroll Now
+                </Button>
               ) : (
-                <>
-                  <PlayCircle className="w-4 h-4 mr-2" />
-                  Continue Learning
-                </>
+                <Button 
+                  onClick={() => onViewCourse(course)}
+                  className="flex-1 text-sm h-9"
+                  variant={isCompleted ? "default" : "outline"}
+                  disabled={lessonCount === 0}
+                >
+                  {isCompleted ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Completed
+                    </>
+                  ) : (
+                    <>
+                      <PlayCircle className="w-4 h-4 mr-2" />
+                      {lessonCount === 0 ? 'Generate Content First' : 'Continue Learning'}
+                    </>
+                  )}
+                </Button>
               )}
-            </Button>
-          )}
-          
-          {course.is_featured && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => onViewCourse(course)}
-              className="px-3"
-            >
-              <Award className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
+              
+              {course.is_featured && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => onViewCourse(course)}
+                  className="px-3"
+                >
+                  <Award className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
