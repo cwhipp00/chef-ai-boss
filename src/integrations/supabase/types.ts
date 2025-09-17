@@ -326,6 +326,71 @@ export type Database = {
           },
         ]
       }
+      generated_training_materials: {
+        Row: {
+          content: Json
+          created_at: string
+          created_by: string
+          description: string | null
+          difficulty_level: string | null
+          estimated_duration: number | null
+          generated_by_ai: boolean | null
+          id: string
+          is_active: boolean | null
+          material_type: string
+          organization_id: string
+          pos_system: string
+          source_content_id: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          created_by: string
+          description?: string | null
+          difficulty_level?: string | null
+          estimated_duration?: number | null
+          generated_by_ai?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          material_type: string
+          organization_id: string
+          pos_system?: string
+          source_content_id?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          difficulty_level?: string | null
+          estimated_duration?: number | null
+          generated_by_ai?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          material_type?: string
+          organization_id?: string
+          pos_system?: string
+          source_content_id?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_training_materials_source_content_id_fkey"
+            columns: ["source_content_id"]
+            isOneToOne: false
+            referencedRelation: "scraped_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed_at: string | null
@@ -680,6 +745,114 @@ export type Database = {
         }
         Relationships: []
       }
+      scraped_content: {
+        Row: {
+          content_html: string | null
+          content_text: string | null
+          created_at: string
+          created_by: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          processed: boolean | null
+          scraped_at: string
+          source_type: string
+          source_url: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content_html?: string | null
+          content_text?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          processed?: boolean | null
+          scraped_at?: string
+          source_type?: string
+          source_url: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content_html?: string | null
+          content_text?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          processed?: boolean | null
+          scraped_at?: string
+          source_type?: string
+          source_url?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      scraping_tasks: {
+        Row: {
+          completed_at: string | null
+          config: Json | null
+          created_at: string
+          created_by: string
+          error_message: string | null
+          id: string
+          items_found: number | null
+          items_processed: number | null
+          organization_id: string
+          pos_system: string
+          progress_percent: number | null
+          search_queries: string[]
+          started_at: string | null
+          status: string
+          target_domains: string[]
+          task_name: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          config?: Json | null
+          created_at?: string
+          created_by: string
+          error_message?: string | null
+          id?: string
+          items_found?: number | null
+          items_processed?: number | null
+          organization_id: string
+          pos_system?: string
+          progress_percent?: number | null
+          search_queries: string[]
+          started_at?: string | null
+          status?: string
+          target_domains: string[]
+          task_name: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          config?: Json | null
+          created_at?: string
+          created_by?: string
+          error_message?: string | null
+          id?: string
+          items_found?: number | null
+          items_processed?: number | null
+          organization_id?: string
+          pos_system?: string
+          progress_percent?: number | null
+          search_queries?: string[]
+          started_at?: string | null
+          status?: string
+          target_domains?: string[]
+          task_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           created_at: string
@@ -918,7 +1091,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      staff_reservations: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string | null
+          notes: string | null
+          organization_id: string | null
+          party_size: number | null
+          reservation_date: string | null
+          reservation_time: string | null
+          special_requests: string | null
+          status: string | null
+          table_number: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_email?: never
+          customer_name?: string | null
+          customer_phone?: never
+          id?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          party_size?: number | null
+          reservation_date?: string | null
+          reservation_time?: string | null
+          special_requests?: string | null
+          status?: string | null
+          table_number?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_email?: never
+          customer_name?: string | null
+          customer_phone?: never
+          id?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          party_size?: number | null
+          reservation_date?: string | null
+          reservation_time?: string | null
+          special_requests?: string | null
+          status?: string | null
+          table_number?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_usage_limit: {

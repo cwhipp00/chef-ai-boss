@@ -28,12 +28,26 @@ export function useReservations() {
     if (!organizationId) return;
 
     try {
-      const { data, error } = await supabase
+      // Try to fetch from main table first (managers/owners get full access)
+      let { data, error } = await supabase
         .from('reservations')
         .select('*')
         .eq('organization_id', organizationId)
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true });
+
+      // If access denied, try the staff view (regular members get masked data)
+      if (error && error.code === 'PGRST301') {
+        const { data: staffData, error: staffError } = await supabase
+          .from('staff_reservations')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .order('reservation_date', { ascending: true })
+          .order('reservation_time', { ascending: true });
+        
+        data = staffData;
+        error = staffError;
+      }
 
       if (error) throw error;
 
