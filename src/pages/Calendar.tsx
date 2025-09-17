@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { BlockCalendar } from "@/components/calendar/BlockCalendar";
 import { DayView } from '@/components/calendar/DayView';
-import { CalendarFeatures } from '@/components/calendar/CalendarFeatures';
+import { WeekView } from '@/components/calendar/WeekView';
+import { DayAgendaView } from '@/components/calendar/DayAgendaView';
 import { MeetingManager } from '@/components/calendar/MeetingManager';
 import { 
   CalendarDays, 
@@ -265,6 +266,175 @@ export default function CalendarPage() {
     return matchesSearch && matchesType;
   });
 
+  // Create unified event dialog
+  const EventDialog = ({ isOpen, onClose, editingEvent = null, defaultDate = selectedDate }: {
+    isOpen: boolean;
+    onClose: () => void;
+    editingEvent?: any;
+    defaultDate?: Date;
+  }) => {
+    const [eventData, setEventData] = useState({
+      title: editingEvent?.title || '',
+      startTime: editingEvent?.startTime || '09:00',
+      endTime: editingEvent?.endTime || '10:00',
+      type: editingEvent?.type || 'meeting',
+      attendees: editingEvent?.attendees || 1,
+      location: editingEvent?.location || '',
+      description: editingEvent?.description || '',
+      priority: editingEvent?.priority || 'medium',
+      assignedTo: editingEvent?.assignedTo || ''
+    });
+
+    const handleSave = () => {
+      if (!eventData.title) {
+        toast.error('Please enter an event title');
+        return;
+      }
+
+      if (editingEvent) {
+        handleUpdateEvent(editingEvent.id, eventData);
+        toast.success('Event updated successfully');
+      } else {
+        const newEvent = {
+          ...eventData,
+          id: events.length + 1,
+          date: format(defaultDate || new Date(), 'yyyy-MM-dd'),
+          created: format(new Date(), 'yyyy-MM-dd'),
+          status: 'confirmed',
+          recurrence: 'none',
+          reminders: ['15min']
+        };
+        setEvents([...events, newEvent]);
+        toast.success('Event created successfully');
+      }
+      onClose();
+    };
+
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingEvent ? 'Edit Event' : 'Create New Event'}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Event Title</Label>
+                <Input 
+                  value={eventData.title}
+                  onChange={(e) => setEventData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter event title" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Event Type</Label>
+                <Select 
+                  value={eventData.type}
+                  onValueChange={(value) => setEventData(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="meeting">Staff Meeting</SelectItem>
+                    <SelectItem value="private_event">Private Event</SelectItem>
+                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                    <SelectItem value="supplier">Supplier Visit</SelectItem>
+                    <SelectItem value="training">Training Session</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Start Time</Label>
+                <Input 
+                  type="time" 
+                  value={eventData.startTime}
+                  onChange={(e) => setEventData(prev => ({ ...prev, startTime: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>End Time</Label>
+                <Input 
+                  type="time" 
+                  value={eventData.endTime}
+                  onChange={(e) => setEventData(prev => ({ ...prev, endTime: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select 
+                  value={eventData.priority}
+                  onValueChange={(value) => setEventData(prev => ({ ...prev, priority: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Location</Label>
+                <Input 
+                  value={eventData.location}
+                  onChange={(e) => setEventData(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="Event location" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Attendees</Label>
+                <Input 
+                  type="number" 
+                  value={eventData.attendees}
+                  onChange={(e) => setEventData(prev => ({ ...prev, attendees: parseInt(e.target.value) || 1 }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Assigned To</Label>
+              <Input 
+                value={eventData.assignedTo}
+                onChange={(e) => setEventData(prev => ({ ...prev, assignedTo: e.target.value }))}
+                placeholder="Person responsible" 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea 
+                value={eventData.description}
+                onChange={(e) => setEventData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Event description" 
+              />
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button onClick={handleSave}>
+              {editingEvent ? 'Update Event' : 'Create Event'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [eventDialogDate, setEventDialogDate] = useState<Date>(new Date());
+
+  const openEventDialog = (date?: Date, event?: any) => {
+    setEventDialogDate(date || selectedDate || new Date());
+    setEditingEvent(event || null);
+    setEventDialogOpen(true);
+  };
+
   // Show day view if selected
   if (showDayView) {
     return (
@@ -284,9 +454,27 @@ export default function CalendarPage() {
             priority: event.priority,
             assignedTo: event.assignedTo
           }))}
-          onAddEvent={handleAddEvent}
+          onAddEvent={(newEvent) => {
+            const event = {
+              ...newEvent,
+              id: events.length + 1,
+              date: format(dayViewDate, 'yyyy-MM-dd'),
+              created: format(new Date(), 'yyyy-MM-dd'),
+              status: 'confirmed',
+              recurrence: 'none',
+              reminders: ['15min']
+            } as any;
+            setEvents([...events, event]);
+          }}
           onUpdateEvent={handleUpdateEvent}
           onDeleteEvent={handleDeleteEvent}
+          onEditEvent={(event) => openEventDialog(dayViewDate, event)}
+        />
+        <EventDialog 
+          isOpen={eventDialogOpen}
+          onClose={() => setEventDialogOpen(false)}
+          editingEvent={editingEvent}
+          defaultDate={eventDialogDate}
         />
       </div>
     );
@@ -344,101 +532,14 @@ export default function CalendarPage() {
             <span className="sm:hidden">Optimize</span>
           </Button>
           
-          <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-primary shadow-soft hover:shadow-medium transition-all text-sm">
-                <Plus className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Add Event</span>
-                <span className="sm:hidden">Add</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Create New Event</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Event Title</Label>
-                    <Input id="title" placeholder="Enter event title" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Event Type</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="meeting">Staff Meeting</SelectItem>
-                        <SelectItem value="private_event">Private Event</SelectItem>
-                        <SelectItem value="maintenance">Maintenance</SelectItem>
-                        <SelectItem value="supplier">Supplier Visit</SelectItem>
-                        <SelectItem value="training">Training Session</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="date">Date</Label>
-                    <Input id="date" type="date" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="startTime">Start Time</Label>
-                    <Input id="startTime" type="time" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="endTime">End Time</Label>
-                    <Input id="endTime" type="time" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input id="location" placeholder="Event location" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="attendees">Expected Attendees</Label>
-                    <Input id="attendees" type="number" placeholder="Number of attendees" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" placeholder="Event description" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="priority">Priority</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select priority" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="high">High Priority</SelectItem>
-                        <SelectItem value="medium">Medium Priority</SelectItem>
-                        <SelectItem value="low">Low Priority</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="assignedTo">Assigned To</Label>
-                    <Input id="assignedTo" placeholder="Person responsible" />
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={() => setIsCreateEventOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={() => {
-                  toast.success("Event created successfully!");
-                  setIsCreateEventOpen(false);
-                }}>
-                  Create Event
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            className="bg-gradient-primary shadow-soft hover:shadow-medium transition-all text-sm"
+            onClick={() => openEventDialog()}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Add Event</span>
+            <span className="sm:hidden">Add</span>
+          </Button>
         </div>
       </div>
 
@@ -739,13 +840,60 @@ export default function CalendarPage() {
             </CardContent>
           </Card>
 
-          {/* Calendar Features Component */}
-          <CalendarFeatures 
-            selectedDate={selectedDate || new Date()}
-            events={events}
-            onEventCreate={handleAddEvent}
-            onEventUpdate={handleUpdateEvent}
-          />
+          {/* Additional Calendar Features */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Calendar Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Show weekends</Label>
+                  <Button variant="outline" size="sm">Toggle</Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label>24-hour format</Label>
+                  <Button variant="outline" size="sm">Toggle</Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label>Event notifications</Label>
+                  <Button variant="outline" size="sm">Configure</Button>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => openEventDialog()}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New Event
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => setSelectedView('conflicts')}
+                >
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  View Conflicts
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={handleAutoReschedule}
+                >
+                  <Zap className="h-4 w-4 mr-2" />
+                  AI Optimize Schedule
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Agenda View */}

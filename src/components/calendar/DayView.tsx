@@ -44,6 +44,7 @@ interface DayViewProps {
   onAddEvent: (event: Omit<Event, 'id'>) => void;
   onUpdateEvent: (id: number, event: Partial<Event>) => void;
   onDeleteEvent: (id: number) => void;
+  onEditEvent?: (event: Event) => void;
 }
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -54,7 +55,8 @@ export const DayView: React.FC<DayViewProps> = ({
   events,
   onAddEvent,
   onUpdateEvent,
-  onDeleteEvent
+  onDeleteEvent,
+  onEditEvent
 }) => {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
@@ -404,7 +406,7 @@ export const DayView: React.FC<DayViewProps> = ({
                                     variant="ghost" 
                                     size="sm" 
                                     className="h-8 w-8 p-0"
-                                    onClick={() => toast.info('Edit functionality would open here')}
+                                    onClick={() => onEditEvent?.(event)}
                                   >
                                     <Edit className="w-3 h-3" />
                                   </Button>
