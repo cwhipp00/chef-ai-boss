@@ -21,8 +21,10 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   
-  const { signIn, signUp, signInWithGoogle, user } = useAuth();
+  const { signIn, signUp, signInWithGoogle, resetPassword, resendVerification, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,6 +69,47 @@ const Auth = () => {
       }
     } catch (error) {
       toast.error('An unexpected error occurred with Google sign-in');
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await resetPassword(resetEmail);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Password reset email sent! Check your inbox.');
+        setShowForgotPassword(false);
+        setResetEmail('');
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      toast.error('Please enter your email address first');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await resendVerification(email);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Verification email sent! Check your inbox.');
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -193,200 +236,261 @@ const Auth = () => {
                   <Users className="h-3 w-3 lg:h-4 lg:w-4 text-white" />
                 </div>
                 <CardTitle className="text-xl lg:text-2xl xl:text-3xl bg-gradient-primary bg-clip-text text-transparent">
-                  {isLogin ? 'Welcome Back!' : 'Join Chef AI'}
+                  {showForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back!' : 'Join Chef AI'}
                 </CardTitle>
               </div>
               <CardDescription className="text-xs lg:text-sm max-w-xs mx-auto">
-                {isLogin 
+                {showForgotPassword 
+                  ? 'Enter your email to receive reset instructions'
+                  : isLogin 
                   ? 'Access your dashboard and optimize operations' 
                   : 'Start your restaurant excellence journey'
                 }
               </CardDescription>
               
               {/* Live Demo Badge */}
-              <Badge variant="secondary" className="bg-success/10 text-success border-success/20 animate-pulse mx-auto mt-2 touch-target">
-                <div className="w-1.5 h-1.5 bg-success rounded-full mr-1 animate-ping"></div>
-                <span className="text-[10px] lg:text-xs">Live Demo Available</span>
-              </Badge>
+              {!showForgotPassword && (
+                <Badge variant="secondary" className="bg-success/10 text-success border-success/20 animate-pulse mx-auto mt-2 touch-target">
+                  <div className="w-1.5 h-1.5 bg-success rounded-full mr-1 animate-ping"></div>
+                  <span className="text-[10px] lg:text-xs">Live Demo Available</span>
+                </Badge>
+              )}
             </CardHeader>
             
             <CardContent className="pt-0">
-              <form onSubmit={handleSubmit} className="space-y-3 lg:space-y-4">
-                {!isLogin && (
-                  <>
-                    <div>
-                      <Label htmlFor="companyName" className="text-xs lg:text-sm font-medium">Company Name</Label>
-                      <Input
-                        id="companyName"
-                        type="text"
-                        placeholder="TBC Restaurant Group"
-                        value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                        required={!isLogin}
-                        className="h-8 lg:h-10 text-sm lg:text-base transition-all focus:scale-[1.02] touch-target"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="displayName" className="text-xs lg:text-sm font-medium">Your Name</Label>
-                      <Input
-                        id="displayName"
-                        type="text"
-                        placeholder="Chef Johnson"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        required={!isLogin}
-                        className="h-8 lg:h-10 text-sm lg:text-base transition-all focus:scale-[1.02] touch-target"
-                      />
-                    </div>
-                  </>
-                )}
-                
-                <div>
-                  <Label htmlFor="email" className="text-xs lg:text-sm font-medium">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="chef@restaurant.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="h-8 lg:h-10 text-sm lg:text-base transition-all focus:scale-[1.02] touch-target"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="password" className="text-xs lg:text-sm font-medium">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="h-8 lg:h-10 text-sm lg:text-base transition-all focus:scale-[1.02] touch-target"
-                  />
-                </div>
-
-                <Button 
-                  type="submit" 
-                  className="w-full h-9 lg:h-12 text-sm lg:text-base bg-gradient-primary hover:shadow-elegant transition-all hover:scale-[1.02] disabled:opacity-50 touch-target" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-1 lg:gap-2">
-                      <div className="w-3 h-3 lg:w-4 lg:h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                      <span className="text-xs lg:text-sm">Loading...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 lg:gap-2">
-                      {isLogin ? (
-                        <>
-                          <Shield className="h-3 w-3 lg:h-4 lg:w-4" />
-                          <span>Access Dashboard</span>
-                        </>
-                      ) : (
-                        <>
-                          <Star className="h-3 w-3 lg:h-4 lg:w-4" />
-                          <span>Start Free Trial</span>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </Button>
-              </form>
-
-              <div className="mt-4 lg:mt-6">
-                <Separator className="my-3 lg:my-4" />
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
+              {showForgotPassword ? (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div>
+                    <Label htmlFor="resetEmail" className="text-sm font-medium">Email Address</Label>
+                    <Input
+                      id="resetEmail"
+                      type="email"
+                      placeholder="chef@restaurant.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                      className="h-10 transition-all focus:scale-[1.02]"
+                    />
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full mt-4 h-9 lg:h-12 text-sm lg:text-base hover:bg-accent/10 transition-all hover:scale-[1.02] touch-target"
-                  onClick={handleGoogleSignIn}
-                >
-                  <svg className="w-4 h-4 lg:w-5 lg:h-5 mr-2" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                  </svg>
-                  Continue with Google
-                </Button>
-              </div>
-
-              <div className="mt-4 lg:mt-6">
-                <Separator className="my-3 lg:my-4" />
-                <div className="text-center text-xs lg:text-sm">
-                  <span className="text-muted-foreground">
-                    {isLogin ? "New to Chef AI?" : "Already managing with us?"}
-                  </span>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full h-10 bg-gradient-primary hover:shadow-elegant transition-all hover:scale-[1.02]" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        <span>Sending...</span>
+                      </div>
+                    ) : (
+                      'Send Reset Email'
+                    )}
+                  </Button>
+                  
                   <Button
                     type="button"
-                    variant="link"
-                    className="ml-1 p-0 h-auto text-xs lg:text-sm font-medium text-primary hover:text-primary/80 touch-target"
-                    onClick={() => setIsLogin(!isLogin)}
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setShowForgotPassword(false)}
                   >
-                    {isLogin ? 'Start free trial' : 'Sign in'}
+                    Back to Sign In
                   </Button>
-                </div>
-              </div>
+                </form>
+              ) : (
+                <>
+                  <form onSubmit={handleSubmit} className="space-y-3 lg:space-y-4">
+                    {!isLogin && (
+                      <>
+                        <div>
+                          <Label htmlFor="companyName" className="text-xs lg:text-sm font-medium">Company Name</Label>
+                          <Input
+                            id="companyName"
+                            type="text"
+                            placeholder="TBC Restaurant Group"
+                            value={companyName}
+                            onChange={(e) => setCompanyName(e.target.value)}
+                            required={!isLogin}
+                            className="h-8 lg:h-10 text-sm lg:text-base transition-all focus:scale-[1.02] touch-target"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="displayName" className="text-xs lg:text-sm font-medium">Your Name</Label>
+                          <Input
+                            id="displayName"
+                            type="text"
+                            placeholder="Chef Johnson"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            required={!isLogin}
+                            className="h-8 lg:h-10 text-sm lg:text-base transition-all focus:scale-[1.02] touch-target"
+                          />
+                        </div>
+                      </>
+                    )}
+                    
+                    <div>
+                      <Label htmlFor="email" className="text-xs lg:text-sm font-medium">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="chef@restaurant.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="h-8 lg:h-10 text-sm lg:text-base transition-all focus:scale-[1.02] touch-target"
+                      />
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor="password" className="text-xs lg:text-sm font-medium">Password</Label>
+                        {isLogin && (
+                          <Button
+                            type="button"
+                            variant="link"
+                            className="p-0 h-auto text-xs text-primary hover:text-primary/80"
+                            onClick={() => setShowForgotPassword(true)}
+                          >
+                            Forgot password?
+                          </Button>
+                        )}
+                      </div>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        className="h-8 lg:h-10 text-sm lg:text-base transition-all focus:scale-[1.02] touch-target"
+                      />
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className="w-full h-9 lg:h-12 text-sm lg:text-base bg-gradient-primary hover:shadow-elegant transition-all hover:scale-[1.02] disabled:opacity-50 touch-target" 
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center gap-1 lg:gap-2">
+                          <div className="w-3 h-3 lg:w-4 lg:h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                          <span className="text-xs lg:text-sm">Loading...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 lg:gap-2">
+                          {isLogin ? (
+                            <>
+                              <Shield className="h-3 w-3 lg:h-4 lg:w-4" />
+                              <span>Access Dashboard</span>
+                            </>
+                          ) : (
+                            <>
+                              <Star className="h-3 w-3 lg:h-4 lg:w-4" />
+                              <span>Start Free Trial</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </Button>
+                  </form>
+
+                  {!isLogin && (
+                    <div className="mt-3 text-center">
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="p-0 h-auto text-xs text-muted-foreground hover:text-primary"
+                        onClick={handleResendVerification}
+                        disabled={isLoading || !email}
+                      >
+                        Didn't receive verification email? Resend
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="mt-4 lg:mt-6">
+                    <Separator className="my-3 lg:my-4" />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full mt-4 h-9 lg:h-12 text-sm lg:text-base hover:bg-accent/10 transition-all hover:scale-[1.02] touch-target"
+                      onClick={handleGoogleSignIn}
+                    >
+                      <svg className="w-4 h-4 lg:w-5 lg:h-5 mr-2" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                      </svg>
+                      Continue with Google
+                    </Button>
+                  </div>
+
+                  <div className="mt-4 lg:mt-6">
+                    <Separator className="my-3 lg:my-4" />
+                    <div className="text-center text-xs lg:text-sm">
+                      <span className="text-muted-foreground">
+                        {isLogin ? "New to Chef AI?" : "Already managing with us?"}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="ml-1 p-0 h-auto text-xs lg:text-sm font-medium text-primary hover:text-primary/80 touch-target"
+                        onClick={() => setIsLogin(!isLogin)}
+                      >
+                        {isLogin ? 'Start free trial' : 'Sign in'}
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Trust Indicators */}
-              <div className="mt-3 lg:mt-4 pt-3 lg:pt-4 border-t border-border/50">
-                <div className="flex items-center justify-center gap-3 lg:gap-4 text-[10px] lg:text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Shield className="h-2 w-2 lg:h-3 lg:w-3 text-success" />
-                    <span>SOC 2</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-2 w-2 lg:h-3 lg:w-3 text-success" />
-                    <span>99.9%</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-2 w-2 lg:h-3 lg:w-3 text-success" />
-                    <span>10K+ Users</span>
+              {!showForgotPassword && (
+                <div className="mt-3 lg:mt-4 pt-3 lg:pt-4 border-t border-border/50">
+                  <div className="flex items-center justify-center gap-3 lg:gap-4 text-[10px] lg:text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Shield className="h-2 w-2 lg:h-3 lg:w-3" />
+                      <span>SSL Secured</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-2 w-2 lg:h-3 lg:w-3" />
+                      <span>24/7 Support</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Award className="h-2 w-2 lg:h-3 lg:w-3" />
+                      <span>Certified Platform</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Compact Demo Card */}
-          <Card className="border-accent/20 bg-gradient-card lg:p-2">
-            <CardContent className="p-3 lg:p-4 text-center">
-              <h3 className="text-xs lg:text-sm font-semibold text-foreground mb-1 lg:mb-2">Try Demo Mode</h3>
-              <p className="text-[10px] lg:text-xs text-muted-foreground mb-2 lg:mb-3">Experience all features</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-7 lg:h-10 text-xs lg:text-sm border-accent/50 hover:bg-accent/10 touch-target"
-                onClick={() => {
-                  toast.success("Demo mode activated! Exploring sample restaurant...");
-                  navigate('/');
-                }}
-              >
-                <MapPin className="h-2 w-2 lg:h-3 lg:w-3 mr-1" />
-                Explore Demo
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Footer Links */}
-          <div className="text-center">
-            <p className="text-[10px] lg:text-xs text-muted-foreground">
-              Enterprise-grade security • 
-              <Button variant="link" className="p-0 h-auto text-[10px] lg:text-xs ml-1 touch-target">Terms</Button> • 
-              <Button variant="link" className="p-0 h-auto text-[10px] lg:text-xs touch-target">Privacy</Button>
-            </p>
-          </div>
+          {/* Additional CTA Card */}
+          {!showForgotPassword && (
+            <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-primary/5 hover-lift">
+              <CardContent className="p-3 lg:p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <MapPin className="h-3 w-3 lg:h-4 lg:w-4 text-accent animate-pulse" />
+                  <span className="text-xs lg:text-sm font-medium">Multi-Location Ready</span>
+                </div>
+                <p className="text-[10px] lg:text-xs text-muted-foreground">
+                  Manage multiple restaurant locations from one central dashboard
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

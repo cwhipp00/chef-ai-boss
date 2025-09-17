@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import Auth from "./pages/Auth";
+import AuthResetPassword from "./pages/AuthResetPassword";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -41,6 +42,7 @@ function App() {
         <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/reset-password" element={<AuthResetPassword />} />
           <Route path="/*" element={
             <ProtectedRoute>
               <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/30">

@@ -9,6 +9,9 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName?: string, companyName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (password: string) => Promise<{ error: any }>;
+  resendVerification: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -104,6 +107,50 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const redirectUrl = `${window.location.origin}/auth/reset-password`;
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+      
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        password: password 
+      });
+      
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const resendVerification = async (email: string) => {
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      });
+      
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut({ scope: 'global' });
@@ -121,6 +168,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUp,
     signIn,
     signInWithGoogle,
+    resetPassword,
+    updatePassword,
+    resendVerification,
     signOut,
   };
 
