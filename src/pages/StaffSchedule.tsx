@@ -130,8 +130,11 @@ const timeSlots = [
 
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
+export default function StaffSchedule() {
   const [activeTab, setActiveTab] = useState('horizontal');
   const [currentWeek, setCurrentWeek] = useState(0);
+  const [selectedWeek, setSelectedWeek] = useState(new Date());
+  const [shifts, setShifts] = useState<Shift[]>(enhancedShifts);
   const [showTimeOffModal, setShowTimeOffModal] = useState(false);
   const [showSwapModal, setShowSwapModal] = useState(false);
   const [showCoverageModal, setShowCoverageModal] = useState(false);
@@ -188,7 +191,7 @@ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sat
     if (shift) {
       setSelectedShift(shift);
       setCoverageType('offer');
-      setCoverageModalOpen(true);
+      setShowCoverageModal(true);
     }
   };
 
@@ -197,7 +200,7 @@ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sat
     if (shift) {
       setSelectedShift(shift);
       setCoverageType('take');
-      setCoverageModalOpen(true);
+      setShowCoverageModal(true);
     }
   };
 
@@ -205,7 +208,7 @@ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sat
     const shift = shifts.find(s => s.id === shiftId);
     if (shift) {
       setSelectedShift(shift);
-      setTimeOffModalOpen(true);
+      setShowTimeOffModal(true);
     }
   };
 
@@ -213,7 +216,7 @@ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sat
     const shift = shifts.find(s => s.id === shiftId);
     if (shift) {
       setSelectedShift(shift);
-      setSwapModalOpen(true);
+      setShowSwapModal(true);
     }
   };
 
@@ -664,9 +667,9 @@ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sat
 
       {/* Modals */}
       <TimeOffRequestModal
-        isOpen={timeOffModalOpen}
+        isOpen={showTimeOffModal}
         onClose={() => {
-          setTimeOffModalOpen(false);
+          setShowTimeOffModal(false);
           setSelectedShift(null);
         }}
         onSubmit={submitTimeOffRequest}
@@ -674,14 +677,14 @@ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sat
       />
 
       <ShiftSwapModal
-        isOpen={swapModalOpen}
+        isOpen={showSwapModal}
         onClose={() => {
-          setSwapModalOpen(false);
+          setShowSwapModal(false);
           setSelectedShift(null);
         }}
         onSubmit={submitSwapRequest}
         shift={selectedShift}
-        availableShifts={shifts.filter(s => s.status === 'scheduled' && s.id !== selectedShift?.id)}
+        availableShifts={enhancedShifts.filter(s => s.status === 'scheduled' && s.id !== selectedShift?.id)}
       />
 
       <TimeOffRequestModal
