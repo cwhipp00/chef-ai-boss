@@ -146,9 +146,9 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                   
                   {/* Inner logo elements */}
                   <div className="relative z-10">
-                    <ChefHat className="h-6 w-6 text-primary drop-shadow-md group-hover:scale-105 group-hover:text-accent transition-all duration-300" />
+                    <ChefHat className="h-6 w-6 text-foreground drop-shadow-md group-hover:scale-105 group-hover:text-primary transition-all duration-300" />
                     {/* AI elements */}
-                    <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-accent rounded-full animate-pulse shadow-sm"></div>
+                    <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-sm"></div>
                     <div className="absolute -bottom-0.5 -left-0.5 w-1 h-1 bg-primary rounded-full animate-ping opacity-70" style={{ animationDelay: '0.6s' }}></div>
                   </div>
                 </div>
@@ -157,10 +157,10 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
               {/* Compact Typography */}
               <div className="space-y-1">
                 <div className="relative">
-                  <h1 className="text-lg lg:text-xl font-black bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent transition-all duration-700 tracking-tight leading-none">
+                  <h1 className="text-lg lg:text-xl font-black text-foreground drop-shadow-sm transition-all duration-700 tracking-tight leading-none">
                     ChefCentral.Ai
                   </h1>
-                  <div className="absolute inset-0 text-lg lg:text-xl font-black text-primary/8 blur-sm transition-all duration-700 tracking-tight leading-none">
+                  <div className="absolute inset-0 text-lg lg:text-xl font-black bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 bg-clip-text text-transparent blur-sm transition-all duration-700 tracking-tight leading-none">
                     ChefCentral.Ai
                   </div>
                 </div>
@@ -168,7 +168,7 @@ export function RestaurantSidebar({ onOpenSearch }: RestaurantSidebarProps) {
                 {/* Compact Pro badge */}
                 <div className="flex items-center justify-center gap-2">
                   <div className="h-px w-4 bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
-                  <span className="text-sm font-bold text-accent tracking-[0.2em] uppercase">PRO</span>
+                  <span className="text-sm font-bold text-primary tracking-[0.2em] uppercase drop-shadow-sm">PRO</span>
                   <div className="h-px w-4 bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
                 </div>
                 

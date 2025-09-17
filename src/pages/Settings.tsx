@@ -663,50 +663,6 @@ export default function Settings() {
                         <Check className="h-4 w-4 text-primary" />
                       )}
                     </button>
-                    
-                    <button 
-                      onClick={() => updateColorTheme('midnight-black')}
-                      className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-                        settings.colorTheme === 'midnight-black' 
-                          ? 'border-primary bg-primary/5 hover:bg-primary/10' 
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="flex gap-1">
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: 'hsl(240, 100%, 12%)' }}></div>
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: 'hsl(260, 90%, 15%)' }}></div>
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: 'hsl(120, 100%, 20%)' }}></div>
-                      </div>
-                      <div className="text-left flex-1">
-                        <div className="text-sm font-medium">Midnight Black</div>
-                        <div className="text-xs text-muted-foreground">Ultra dark theme</div>
-                      </div>
-                      {settings.colorTheme === 'midnight-black' && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </button>
-                    
-                    <button 
-                      onClick={() => updateColorTheme('bright-white')}
-                      className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-                        settings.colorTheme === 'bright-white' 
-                          ? 'border-primary bg-primary/5 hover:bg-primary/10' 
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="flex gap-1">
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: 'hsl(210, 40%, 92%)' }}></div>
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: 'hsl(220, 30%, 85%)' }}></div>
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: 'hsl(150, 50%, 85%)' }}></div>
-                      </div>
-                      <div className="text-left flex-1">
-                        <div className="text-sm font-medium">Bright White</div>
-                        <div className="text-xs text-muted-foreground">Ultra light theme</div>
-                      </div>
-                      {settings.colorTheme === 'bright-white' && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </button>
                   </div>
                 </div>
                 
