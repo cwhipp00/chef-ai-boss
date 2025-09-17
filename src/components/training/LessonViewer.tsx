@@ -392,7 +392,9 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ courseId, courseTitl
                       <ExternalLink className="w-4 h-4" />
                       Resources
                     </TabsTrigger>
-                    {currentLesson.content?.quiz && (
+                    {(currentLesson.content?.quiz || 
+                      (currentLesson.content?.sections && 
+                       currentLesson.content.sections.some((s: any) => s.quiz && s.quiz.length > 0))) && (
                       <TabsTrigger value="quiz" className="flex items-center gap-2">
                         <HelpCircle className="w-4 h-4" />
                         Quiz
@@ -403,67 +405,92 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ courseId, courseTitl
 
                 <CardContent>
                   <TabsContent value="overview" className="space-y-6">
-                    {/* Key Points */}
-                    {currentLesson.content?.key_points && (
-                      <div>
-                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                          <Target className="w-5 h-5 text-primary" />
-                          Key Learning Points
-                        </h3>
-                        <div className="grid gap-2">
-                          {currentLesson.content.key_points.map((point: string, index: number) => (
-                            <div key={index} className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
-                              <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span>{point}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Practical Tips */}
-                    {currentLesson.content?.practical_tips && (
-                      <div>
-                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                          <Lightbulb className="w-5 h-5 text-yellow-500" />
-                          Practical Tips
-                        </h3>
-                        <div className="grid gap-2">
-                          {currentLesson.content.practical_tips.map((tip: string, index: number) => (
-                            <div key={index} className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-l-4 border-yellow-500">
-                              {tip}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Recipes */}
-                    {currentLesson.content?.recipes && (
-                      <div>
-                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                          <ChefHat className="w-5 h-5 text-primary" />
-                          Recipes
-                        </h3>
-                        <div className="space-y-4">
-                          {currentLesson.content.recipes.map((recipe: any, index: number) => (
-                            <Card key={index} className="p-4">
-                              <h4 className="font-semibold mb-2">{recipe.name}</h4>
-                              <div className="space-y-2">
-                                <div className="font-medium">Ingredients:</div>
-                                <ul className="list-disc list-inside space-y-1 text-sm">
-                                  {recipe.ingredients.map((ingredient: string, i: number) => (
-                                    <li key={i}>{ingredient}</li>
-                                  ))}
-                                </ul>
+                    {/* Display AI-Generated Sections */}
+                    {currentLesson.content?.sections && (
+                      <div className="space-y-6">
+                        {currentLesson.content.sections.map((section: any, sectionIndex: number) => (
+                          <div key={sectionIndex} className="space-y-4">
+                            <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
+                              <Target className="w-5 h-5 text-primary" />
+                              {section.title}
+                            </h3>
+                            <div className="prose max-w-none">
+                              <div className="p-4 bg-muted/50 rounded-lg text-sm leading-relaxed whitespace-pre-wrap">
+                                {section.content}
                               </div>
-                            </Card>
-                          ))}
-                        </div>
+                            </div>
+                            
+                            {/* Display section-specific quiz if exists */}
+                            {section.quiz && section.quiz.length > 0 && (
+                              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500">
+                                <h4 className="font-semibold mb-3">Quick Check</h4>
+                                {section.quiz.map((question: any, qIndex: number) => (
+                                  <div key={qIndex} className="mb-3">
+                                    <p className="font-medium mb-2">{question.question}</p>
+                                    <div className="space-y-1 text-sm">
+                                      {question.options.map((option: string, oIndex: number) => (
+                                        <div 
+                                          key={oIndex} 
+                                          className={`p-2 rounded ${
+                                            oIndex === question.correct 
+                                              ? 'bg-green-100 dark:bg-green-900/30 border-l-2 border-green-500' 
+                                              : 'bg-gray-50 dark:bg-gray-800'
+                                          }`}
+                                        >
+                                          {option} {oIndex === question.correct && '✓'}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     )}
 
-                    {/* Practical Exercise */}
+                    {/* Fallback for legacy content structure */}
+                    {!currentLesson.content?.sections && (
+                      <>
+                        {/* Key Points */}
+                        {currentLesson.content?.key_points && (
+                          <div>
+                            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                              <Target className="w-5 h-5 text-primary" />
+                              Key Learning Points
+                            </h3>
+                            <div className="grid gap-2">
+                              {currentLesson.content.key_points.map((point: string, index: number) => (
+                                <div key={index} className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
+                                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                  <span>{point}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Practical Tips */}
+                        {currentLesson.content?.practical_tips && (
+                          <div>
+                            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                              <Lightbulb className="w-5 h-5 text-yellow-500" />
+                              Practical Tips
+                            </h3>
+                            <div className="grid gap-2">
+                              {currentLesson.content.practical_tips.map((tip: string, index: number) => (
+                                <div key={index} className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-l-4 border-yellow-500">
+                                  {tip}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Practical Exercise - works for both structures */}
                     {currentLesson.content?.practical_exercise && (
                       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500">
                         <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
@@ -512,19 +539,26 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ courseId, courseTitl
                     </div>
                   </TabsContent>
 
-                  {currentLesson.content?.quiz && (
+                  {/* Updated quiz content to handle AI-generated structure */}
+                  {(currentLesson.content?.quiz || 
+                    (currentLesson.content?.sections && 
+                     currentLesson.content.sections.some((s: any) => s.quiz && s.quiz.length > 0))) && (
                     <TabsContent value="quiz">
                       <div className="space-y-6">
                         <div className="flex items-center justify-between">
                           <h3 className="text-lg font-semibold">Knowledge Check</h3>
                           <Badge variant="outline">
-                            {currentLesson.content.quiz.length} Questions
+                            {currentLesson.content?.quiz ? 
+                              currentLesson.content.quiz.length : 
+                              currentLesson.content.sections?.reduce((acc: number, s: any) => acc + (s.quiz?.length || 0), 0)
+                            } Questions
                           </Badge>
                         </div>
                         
                         {!showQuizResults ? (
                           <div className="space-y-6">
-                            {currentLesson.content.quiz.map((question: any, questionIndex: number) => (
+                            {/* Handle root-level quiz (AI-generated) */}
+                            {currentLesson.content?.quiz && currentLesson.content.quiz.map((question: any, questionIndex: number) => (
                               <Card key={questionIndex} className="p-4">
                                 <h4 className="font-semibold mb-3">
                                   {questionIndex + 1}. {question.question}
@@ -552,9 +586,42 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ courseId, courseTitl
                               </Card>
                             ))}
                             
+                            {/* Handle section-level quizzes (AI-generated) */}
+                            {!currentLesson.content?.quiz && currentLesson.content?.sections && 
+                             currentLesson.content.sections.map((section: any, sectionIndex: number) => 
+                               section.quiz && section.quiz.map((question: any, questionIndex: number) => (
+                                 <Card key={`${sectionIndex}-${questionIndex}`} className="p-4">
+                                   <div className="text-sm text-muted-foreground mb-2">From section: {section.title}</div>
+                                   <h4 className="font-semibold mb-3">
+                                     Question {questionIndex + 1}: {question.question}
+                                   </h4>
+                                   <div className="space-y-2">
+                                     {question.options.map((option: string, optionIndex: number) => (
+                                       <label
+                                         key={optionIndex}
+                                         className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-muted/50"
+                                       >
+                                         <input
+                                           type="radio"
+                                           name={`question-${sectionIndex}-${questionIndex}`}
+                                           value={optionIndex}
+                                           onChange={() => setQuizAnswers(prev => ({
+                                             ...prev,
+                                             [`${sectionIndex}-${questionIndex}`]: optionIndex
+                                           }))}
+                                           className="text-primary"
+                                         />
+                                         <span>{option}</span>
+                                       </label>
+                                     ))}
+                                   </div>
+                                 </Card>
+                               ))
+                             )}
+                             
                             <Button 
                               onClick={handleQuizSubmit}
-                              disabled={Object.keys(quizAnswers).length !== currentLesson.content.quiz.length}
+                              disabled={Object.keys(quizAnswers).length === 0}
                               className="w-full"
                             >
                               Submit Quiz
