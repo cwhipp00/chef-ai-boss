@@ -98,11 +98,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
       
-      return { error };
-    } catch (error) {
+      if (error) {
+        if (error.message.includes('popup')) {
+          throw new Error('Please allow popups for this site to sign in with Google');
+        }
+        throw error;
+      }
+      
+      return { error: null };
+    } catch (error: any) {
       return { error };
     }
   };
