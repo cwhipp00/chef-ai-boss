@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -39,6 +39,7 @@ import PersonalizedLearningPath from '@/components/training/PersonalizedLearning
 import { AICourseCreator } from '@/components/training/AICourseCreator';
 import { OptimizedCourseCard } from '@/components/training/OptimizedCourseCard';
 import { AutoLessonGenerator } from '@/components/training/AutoLessonGenerator';
+import { ComprehensiveTrainingGenerator } from '@/components/training/ComprehensiveTrainingGenerator';
 
 interface Course {
   id: string;
@@ -519,8 +520,55 @@ const Training = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="ai-creator">
-                <AutoLessonGenerator />
+              <TabsContent value="ai-creator" className="space-y-8">
+                <div className="space-y-8">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Flame className="h-5 w-5" />
+                        Comprehensive Training Content Generator
+                      </CardTitle>
+                      <CardDescription>
+                        Generate complete industry-standard training courses with real video content, assessments, and certifications
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ComprehensiveTrainingGenerator />
+                    </CardContent>
+                  </Card>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BookOpen className="h-5 w-5" />
+                          Auto Generate Missing Lessons
+                        </CardTitle>
+                        <CardDescription>
+                          Fill in content for courses that don't have lessons yet
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <AutoLessonGenerator />
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="h-5 w-5" />
+                          AI Course Creator
+                        </CardTitle>
+                        <CardDescription>
+                          Create personalized courses based on specific needs
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <AICourseCreator />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="discover" className="space-y-8">
