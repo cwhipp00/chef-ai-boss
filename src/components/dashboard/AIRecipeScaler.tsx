@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,21 +12,31 @@ import {
   Brain, 
   Scale,
   Plus,
-  Minus 
+  Minus,
+  AlertCircle
 } from "lucide-react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from "@/hooks/use-toast";
 
 interface Recipe {
-  id: string;
+  id?: string | number;
   name: string;
   servings: number;
   prepTime: number;
+  cookTime?: number;
   difficulty: "Easy" | "Medium" | "Hard";
+  category?: string;
+  cost?: number;
   ingredients: Array<{
     name: string;
     amount: number;
     unit: string;
-  }>;
+  }> | string[];
+  instructions?: string[];
+}
+
+interface AIRecipeScalerProps {
+  selectedRecipe?: Recipe;
 }
 
 const sampleRecipe: Recipe = {
@@ -46,13 +56,61 @@ const sampleRecipe: Recipe = {
   ]
 };
 
-export function AIRecipeScaler() {
-  const [recipe, setRecipe] = useState<Recipe>(sampleRecipe);
-  const [targetServings, setTargetServings] = useState(recipe.servings);
+export function AIRecipeScaler({ selectedRecipe }: AIRecipeScalerProps) {
+  // Convert uploaded recipe to proper format
+  const convertToRecipeFormat = (recipe: any): Recipe => {
+    const convertedIngredients = recipe.ingredients?.map((ing: any, index: number) => {
+      if (typeof ing === 'string') {
+        // Parse string ingredients like "2 cups flour" or "1.5 lbs chicken"
+        const match = ing.match(/^(\d*\.?\d+)\s*([a-zA-Z]*)\s+(.+)$/);
+        if (match) {
+          return {
+            name: match[3],
+            amount: parseFloat(match[1]),
+            unit: match[2] || 'piece'
+          };
+        }
+        return {
+          name: ing,
+          amount: 1,
+          unit: 'piece'
+        };
+      }
+      return ing;
+    }) || [];
+
+    return {
+      id: recipe.id || `recipe-${Date.now()}`,
+      name: recipe.name || 'Uploaded Recipe',
+      servings: recipe.servings || 4,
+      prepTime: recipe.prepTime || 30,
+      cookTime: recipe.cookTime || 0,
+      difficulty: recipe.difficulty || "Medium",
+      category: recipe.category || 'Main Course',
+      cost: recipe.cost || 0,
+      ingredients: convertedIngredients,
+      instructions: recipe.instructions || []
+    };
+  };
+
+  const baseRecipe = selectedRecipe ? convertToRecipeFormat(selectedRecipe) : sampleRecipe;
+  const originalServings = baseRecipe.servings; // Store the original serving size
+  
+  const [recipe, setRecipe] = useState<Recipe>(baseRecipe);
+  const [targetServings, setTargetServings] = useState(originalServings); // Start from original servings
   const [isScaling, setIsScaling] = useState(false);
   const { toast } = useToast();
 
-  const scaleFactor = targetServings / recipe.servings;
+  // Update when selectedRecipe changes
+  React.useEffect(() => {
+    if (selectedRecipe) {
+      const newRecipe = convertToRecipeFormat(selectedRecipe);
+      setRecipe(newRecipe);
+      setTargetServings(newRecipe.servings); // Reset to original serving size
+    }
+  }, [selectedRecipe]);
+
+  const scaleFactor = targetServings / originalServings; // Scale from original, not current
 
   const handleScale = async () => {
     setIsScaling(true);
@@ -61,9 +119,9 @@ export function AIRecipeScaler() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     const scaledRecipe = {
-      ...recipe,
+      ...baseRecipe, // Use base recipe as reference
       servings: targetServings,
-      ingredients: recipe.ingredients.map(ingredient => ({
+      ingredients: baseRecipe.ingredients.map(ingredient => ({
         ...ingredient,
         amount: Math.round((ingredient.amount * scaleFactor) * 100) / 100
       }))
@@ -111,7 +169,7 @@ export function AIRecipeScaler() {
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
-                <span>{recipe.servings} servings</span>
+                <span>{originalServings} servings (original)</span>
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
@@ -157,7 +215,7 @@ export function AIRecipeScaler() {
             </Button>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Scale className="h-4 w-4" />
-              <span>Scale factor: {scaleFactor.toFixed(2)}x</span>
+              <span>Scale factor: {scaleFactor.toFixed(2)}x from original ({originalServings} servings)</span>
             </div>
           </div>
         </div>
@@ -166,19 +224,26 @@ export function AIRecipeScaler() {
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-foreground">Ingredients</h4>
           <div className="grid gap-2">
-            {recipe.ingredients.map((ingredient, index) => (
+            {baseRecipe.ingredients.map((ingredient, index) => (
               <div key={index} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
                 <span className="text-sm text-foreground">{ingredient.name}</span>
-                <span className="text-sm font-medium text-primary">
-                  {Math.round((ingredient.amount * scaleFactor) * 100) / 100} {ingredient.unit}
-                </span>
+                <div className="text-sm">
+                  <span className="font-medium text-primary">
+                    {Math.round((ingredient.amount * scaleFactor) * 100) / 100} {ingredient.unit}
+                  </span>
+                  {scaleFactor !== 1 && (
+                    <span className="text-muted-foreground ml-2">
+                      (was {ingredient.amount} {ingredient.unit})
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Action Button */}
-        {targetServings !== recipe.servings && (
+        {targetServings !== originalServings && (
           <Button
             onClick={handleScale}
             disabled={isScaling}

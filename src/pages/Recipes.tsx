@@ -261,7 +261,7 @@ export default function Recipes() {
         </TabsContent>
 
         <TabsContent value="scaler">
-          <AIRecipeScaler />
+          <AIRecipeScaler selectedRecipe={allRecipes[allRecipes.length - 1]} />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
