@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { EnhancedCalendar } from '@/components/calendar/EnhancedCalendar';
+import { BlockCalendar } from "@/components/calendar/BlockCalendar";
 import { DayView } from '@/components/calendar/DayView';
 import { CalendarFeatures } from '@/components/calendar/CalendarFeatures';
 import { MeetingManager } from '@/components/calendar/MeetingManager';
@@ -508,22 +508,12 @@ export default function CalendarPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-2">
-                <EnhancedCalendar
-                  selected={selectedDate}
-                  onSelect={handleDateSelect}
-                  month={currentMonth}
-                  onMonthChange={setCurrentMonth}
-                  numberOfMonths={1}
-                  onDayClick={handleDayClick}
-                  className="w-full h-full"
-                  modifiers={{
-                    hasEvents: (date) => getEventsForDate(date).length > 0
-                  }}
-                  modifiersStyles={{
-                    hasEvents: {
-                      fontWeight: 'bold',
-                      position: 'relative'
-                    }
+                <BlockCalendar 
+                  onDateSelect={(date) => handleDateSelect(date)}
+                  onEventClick={(event) => console.log('Event clicked:', event)}
+                  onAddEvent={(date) => {
+                    setDayViewDate(date);
+                    setShowDayView(true);
                   }}
                 />
               </CardContent>
