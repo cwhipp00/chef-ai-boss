@@ -86,35 +86,52 @@ serve(async (req) => {
 });
 
 async function generateTrainingModulesWithAI(courseName: string): Promise<ToastTrainingModule[]> {
-  const prompt = `Create comprehensive training content for a restaurant course: "${courseName}". 
+  const prompt = `Create an EXTENSIVE and COMPREHENSIVE training course for: "${courseName}". 
 
-  Generate exactly 4-6 detailed training modules with the following structure:
-  - Each module should be 15-25 minutes long
-  - Include interactive content with sections, quizzes, and practical examples
-  - Focus on real-world Toast POS system features and restaurant operations
-  - Include specific steps, best practices, and common scenarios
-  - Make content actionable and practical for restaurant staff
+  Generate exactly 8-12 detailed training modules with the following enhanced structure:
+  - Each module should be 35-50 minutes long with substantial content
+  - Include 4-8 sections per module with extensive detail
+  - Each section should have 8-15 bullet points of actionable information
+  - Include multiple quizzes per module (2-4 questions per section)
+  - Focus on real-world Toast POS system features with deep technical detail
+  - Include specific workflows, troubleshooting, and advanced scenarios
+  - Provide step-by-step procedures with extensive explanations
+  - Add practical exercises and real-world case studies
+
+  CRITICAL REQUIREMENTS:
+  - Each section must contain AT LEAST 10-20 detailed bullet points
+  - Include advanced topics, edge cases, and troubleshooting scenarios
+  - Add detailed workflows with numbered steps
+  - Include best practices, common mistakes, and expert tips
+  - Provide comprehensive coverage of all Toast POS features
+  - Add integration scenarios with third-party systems
+  - Include compliance, security, and operational excellence topics
 
   Return JSON format:
   {
     "modules": [
       {
-        "title": "Module Title",
-        "description": "Brief description of what this module covers",
-        "duration": 20,
+        "title": "Comprehensive Module Title",
+        "description": "Detailed description covering multiple aspects and learning outcomes",
+        "duration": 45,
         "order": 1,
         "content": {
           "type": "interactive_lesson",
           "sections": [
             {
-              "title": "Section Title",
-              "content": "Detailed content with bullet points, steps, and practical information",
+              "title": "Detailed Section Title",
+              "content": "EXTENSIVE content with:\n\n• Comprehensive overview paragraph\n\n**Key Concepts:**\n• Bullet point 1 with detailed explanation\n• Bullet point 2 with specific procedures\n• Bullet point 3 with troubleshooting steps\n• [Continue with 10-20 detailed bullet points]\n\n**Advanced Workflows:**\n• Step-by-step procedure 1\n• Step-by-step procedure 2\n• [Multiple detailed workflows]\n\n**Best Practices:**\n• Expert tip 1 with reasoning\n• Expert tip 2 with examples\n• [Multiple best practices]\n\n**Common Issues & Solutions:**\n• Problem 1 and detailed solution\n• Problem 2 and troubleshooting steps\n• [Multiple scenarios]\n\n**Integration Points:**\n• Third-party system integration details\n• API considerations\n• Data flow explanations",
               "media": [],
               "quiz": [
                 {
-                  "question": "Quiz question?",
-                  "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+                  "question": "Detailed technical question about the topic?",
+                  "options": ["Comprehensive option 1", "Detailed option 2", "Technical option 3", "Advanced option 4"],
                   "correct": 1
+                },
+                {
+                  "question": "Scenario-based question with real-world application?",
+                  "options": ["Practical solution 1", "Alternative approach 2", "Best practice 3", "Troubleshooting step 4"],
+                  "correct": 2
                 }
               ]
             }
@@ -124,19 +141,44 @@ async function generateTrainingModulesWithAI(courseName: string): Promise<ToastT
     ]
   }
 
-  Focus on these Toast POS topics based on the course name:
-  - Toast POS system navigation and features
-  - Order management and payment processing  
-  - Kitchen display system and order workflow
-  - Menu management and item setup
-  - Customer service best practices
-  - Analytics and reporting features
-  - Staff management and permissions
-  - Integration with delivery platforms
-  - Inventory tracking and management
-  - Security and compliance
+  COMPREHENSIVE TOAST POS TOPICS TO COVER:
+  
+  **Core System Mastery:**
+  - Complete Toast POS interface navigation and customization
+  - Advanced menu engineering and pricing strategies
+  - Complex order management and modification workflows
+  - Multi-location management and synchronization
+  - Advanced user permissions and role-based access control
+  
+  **Operational Excellence:**
+  - Kitchen Display System optimization and workflow management
+  - Advanced inventory management and cost control
+  - Labor management and scheduling optimization
+  - Customer relationship management and loyalty programs
+  - Advanced reporting and business intelligence
+  
+  **Technical Integration:**
+  - Third-party delivery platform integrations (DoorDash, Uber Eats, Grubhub)
+  - Payment processing and PCI compliance
+  - API integrations and data export/import
+  - Hardware troubleshooting and maintenance
+  - Network configuration and security protocols
+  
+  **Advanced Features:**
+  - Toast Capital and financial services integration
+  - Advanced analytics and predictive insights
+  - Marketing automation and customer engagement
+  - Franchise and multi-location management
+  - Custom reporting and dashboard creation
+  
+  **Compliance & Security:**
+  - Food safety compliance tracking
+  - Financial reporting and tax management
+  - Data security and privacy protection
+  - Audit trail management and compliance reporting
+  - Staff training and certification tracking
 
-  Make the content comprehensive, practical, and specific to Toast POS system functionality.`;
+  Make this the most comprehensive, detailed, and practical Toast POS training course available with extensive bullet points, detailed procedures, and real-world applications.`;
 
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
