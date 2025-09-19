@@ -4,19 +4,28 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+export default defineConfig(({ mode }) => {
+  const isReplit = process.env.REPL_ID !== undefined;
+  
+  return {
+    server: {
+      host: isReplit ? "0.0.0.0" : "::",
+      port: isReplit ? 3000 : 8080,
     },
-  },
-}));
+    plugins: [
+      react(),
+      // Only use componentTagger in Lovable environment
+      mode === 'development' && !isReplit &&
+      componentTagger(),
+    ].filter(Boolean),
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
+    define: {
+      // Ensure environment variables work in both environments
+      'process.env.NODE_ENV': JSON.stringify(mode),
+    },
+  };
+});
